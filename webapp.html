@@ -70,7 +70,7 @@
 <body>
   <div class="overlay">
     <div class="container">
-      <!-- Крок 1 -->
+      <!-- Крок 1: Основні дані -->
       <div id="page1">
         <h2>Крок 1: Основні дані</h2>
         <label for="fghName">Назва ФГ (не обов’язково):</label>
@@ -91,7 +91,7 @@
         <button id="nextBtn">Далі</button>
       </div>
       
-      <!-- Крок 2 -->
+      <!-- Крок 2: Деталі заявки -->
       <div id="page2" class="hidden">
         <h2>Крок 2: Деталі заявки</h2>
         <label for="culture">Культура:</label>
@@ -133,7 +133,7 @@
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
 
-    // Перехід з Кроку 1 до Кроку 2
+    // Перехід від Кроку 1 до Кроку 2
     document.getElementById('nextBtn').addEventListener('click', () => {
       const region = document.getElementById('region').value.trim();
       const district = document.getElementById('district').value.trim();
@@ -146,7 +146,7 @@
       document.getElementById('page2').classList.remove('hidden');
     });
     
-    // Фінальна відправка даних
+    // Фінальна відправка заявки
     document.getElementById('submitBtn').addEventListener('click', () => {
       // Збираємо дані з обох кроків
       const fghName = document.getElementById('fghName').value.trim();
@@ -161,16 +161,14 @@
       const paytype = document.getElementById('paytype').value;
       const comment = document.getElementById('comment').value.trim();
       
-      // Перевірка обов'язкових полів Кроку 2
       if (!culture || !quantity || !price || !paytype) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
       
-      // Отримуємо user_id з даних Telegram WebApp (якщо доступно)
+      // Отримуємо user_id з Telegram WebApp (якщо доступно)
       const userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
       
-      // Формуємо об'єкт заявки
       const payload = {
         user_id: userId,
         fgh_name: fghName,
@@ -187,7 +185,6 @@
       
       console.log("Заявка заповнена. Payload:", payload);
       
-      // Відправка даних через fetch на API_URL
       fetch("https://agro-api-url.onrender.com/endpoint", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -197,7 +194,6 @@
       .then(data => {
         console.log("Отримано відповідь від API:", data);
         if (data.status === "ok") {
-          // Закриваємо WebApp через 1 секунду після успішного відправлення
           setTimeout(() => {
             Telegram.WebApp.close();
           }, 1000);
