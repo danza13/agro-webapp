@@ -176,8 +176,10 @@
     // Відправляємо дані до бота через Telegram WebApp SDK
     Telegram.WebApp.sendData(JSON.stringify(payload));
 
-    // Закриваємо WebApp
-    Telegram.WebApp.close();
+    // Закриваємо WebApp із затримкою 500 мс, щоб дані встигли надіслатися
+    setTimeout(() => {
+      Telegram.WebApp.close();
+    }, 500);
   });
 </script>
 </body>
