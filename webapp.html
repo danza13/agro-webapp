@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <!-- Адаптивність для мобільних пристроїв -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Заповнення заявки</title>
+  <title>Заповнення заявки – кроки</title>
   <style>
     body, html {
       margin: 0;
       padding: 0;
-      height: 100%;
+      min-height: 100vh;
       font-family: sans-serif;
       background: url('https://images.pexels.com/photos/730897/pexels-photo-730897.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940') no-repeat center center fixed;
       background-size: cover;
@@ -17,10 +17,8 @@
       text-align: center;
     }
     .overlay {
-      backdrop-filter: blur(8px);
-      background-color: rgba(0, 0, 0, 0.4);
-      width: 100%;
-      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -31,8 +29,8 @@
       background: rgba(255,255,255,0.1);
       padding: 20px;
       border-radius: 10px;
-      max-width: 500px;
       width: 100%;
+      max-width: 500px;
       box-sizing: border-box;
     }
     h2 {
@@ -62,6 +60,9 @@
     button:hover {
       background: #0056b3;
     }
+    .hidden {
+      display: none;
+    }
   </style>
   <!-- Підключення Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
@@ -69,61 +70,62 @@
 <body>
   <div class="overlay">
     <div class="container">
-      <h2>Заповніть заявку</h2>
+      <!-- Етап 1 -->
+      <div id="page1">
+        <h2>Крок 1: Основні дані</h2>
+        <label for="fghName">Назва ФГ (не обов’язково):</label>
+        <input type="text" id="fghName" placeholder="Введіть назву ФГ">
+        
+        <label for="edrpou">Код ЄДРПОУ (8 цифр, не обов’язково):</label>
+        <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ">
+        
+        <label for="region">Область:</label>
+        <input type="text" id="region" placeholder="Введіть область" required>
+        
+        <label for="district">Район:</label>
+        <input type="text" id="district" placeholder="Введіть район" required>
+        
+        <label for="city">Населений пункт:</label>
+        <input type="text" id="city" placeholder="Введіть населений пункт" required>
+        
+        <button id="nextBtn">Далі</button>
+      </div>
       
-      <!-- Поля, що більше не є обов'язковими -->
-      <label for="fghName">Назва ФГ (не обов'язково):</label>
-      <input type="text" id="fghName" placeholder="Введіть назву ФГ">
-      
-      <label for="edrpou">Код ЄДРПОУ (8 цифр, не обов'язково):</label>
-      <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ">
-      
-      <!-- Обов'язкові дані -->
-      <label for="quantity">Кількість:</label>
-      <input type="number" id="quantity" placeholder="Введіть кількість" required>
-      
-      <label for="comment">Коментар:</label>
-      <textarea id="comment" placeholder="Введіть коментар (опціонально)"></textarea>
-      
-      <label for="culture">Культура:</label>
-      <input type="text" id="culture" placeholder="Введіть культуру" list="cultureList" required>
-      <datalist id="cultureList">
-        <option value="Пшениця">
-        <option value="Ячмінь">
-        <option value="Кукурудза">
-        <option value="Соя">
-        <option value="Соняшник">
-      </datalist>
-      
-      <label for="region">Область:</label>
-      <input type="text" id="region" placeholder="Введіть область" list="regionList" required>
-      <datalist id="regionList">
-        <option value="Київська">
-        <option value="Львівська">
-        <option value="Одеська">
-      </datalist>
-      
-      <label for="district">Район:</label>
-      <input type="text" id="district" placeholder="Введіть район" required>
-      
-      <label for="city">Населений пункт:</label>
-      <input type="text" id="city" placeholder="Введіть населений пункт" required>
-      
-      <label for="price">Бажана ціна (цифри):</label>
-      <input type="text" id="price" placeholder="Введіть бажану ціну" required>
-      
-      <label for="paytype">Тип оплати:</label>
-      <select id="paytype" required>
-        <option value="">Оберіть тип оплати</option>
-        <option value="Гривня: БН з ПДВ">Гривня: БН з ПДВ</option>
-        <option value="Гривня: БН без ПДВ">Гривня: БН без ПДВ</option>
-        <option value="Гривня: Готівка">Гривня: Готівка</option>
-        <option value="Долар: БН">Долар: БН</option>
-        <option value="Долар: Готівка">Долар: Готівка</option>
-        <option value="Євро: БН">Євро: БН</option>
-      </select>
-      
-      <button id="submitBtn">Підтвердити заявку</button>
+      <!-- Етап 2 -->
+      <div id="page2" class="hidden">
+        <h2>Крок 2: Деталі заявки</h2>
+        <label for="culture">Культура:</label>
+        <input type="text" id="culture" placeholder="Введіть культуру" list="cultureList" required>
+        <datalist id="cultureList">
+          <option value="Пшениця">
+          <option value="Ячмінь">
+          <option value="Кукурудза">
+          <option value="Соя">
+          <option value="Соняшник">
+        </datalist>
+        
+        <label for="quantity">Кількість:</label>
+        <input type="number" id="quantity" placeholder="Введіть кількість" required>
+        
+        <label for="price">Бажана ціна (цифри):</label>
+        <input type="text" id="price" placeholder="Введіть бажану ціну" required>
+        
+        <label for="paytype">Тип оплати:</label>
+        <select id="paytype" required>
+          <option value="">Оберіть тип оплати</option>
+          <option value="Гривня: БН з ПДВ">Гривня: БН з ПДВ</option>
+          <option value="Гривня: БН без ПДВ">Гривня: БН без ПДВ</option>
+          <option value="Гривня: Готівка">Гривня: Готівка</option>
+          <option value="Долар: БН">Долар: БН</option>
+          <option value="Долар: Готівка">Долар: Готівка</option>
+          <option value="Євро: БН">Євро: БН</option>
+        </select>
+        
+        <label for="comment">Коментар:</label>
+        <textarea id="comment" placeholder="Введіть коментар (опціонально)"></textarea>
+        
+        <button id="submitBtn">Підтвердити заявку</button>
+      </div>
     </div>
   </div>
   
@@ -131,23 +133,40 @@
     // Ініціалізація WebApp
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
-
-    document.getElementById('submitBtn').addEventListener('click', () => {
-      // Збираємо всі дані з форми
-      const fghName = document.getElementById('fghName').value.trim();
-      const edrpou = document.getElementById('edrpou').value.trim();
-      const quantity = document.getElementById('quantity').value.trim();
-      const comment = document.getElementById('comment').value.trim();
-      const culture = document.getElementById('culture').value.trim();
+    
+    // Перехід від сторінки 1 до сторінки 2
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      // Перевірка обов'язкових полів сторінки 1: region, district, city
       const region = document.getElementById('region').value.trim();
       const district = document.getElementById('district').value.trim();
       const city = document.getElementById('city').value.trim();
+      if (!region || !district || !city) {
+        alert("Будь ласка, заповніть усі обов’язкові поля на цьому кроці!");
+        return;
+      }
+      // Приховуємо сторінку 1 та показуємо сторінку 2
+      document.getElementById('page1').classList.add('hidden');
+      document.getElementById('page2').classList.remove('hidden');
+    });
+    
+    // Обробка фінального надсилання форми
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      // Збираємо дані з обох сторінок
+      const fghName = document.getElementById('fghName').value.trim();
+      const edrpou = document.getElementById('edrpou').value.trim();
+      const region = document.getElementById('region').value.trim();
+      const district = document.getElementById('district').value.trim();
+      const city = document.getElementById('city').value.trim();
+      
+      const culture = document.getElementById('culture').value.trim();
+      const quantity = document.getElementById('quantity').value.trim();
       const price = document.getElementById('price').value.trim();
       const paytype = document.getElementById('paytype').value;
+      const comment = document.getElementById('comment').value.trim();
       
-      // Перевірка обов'язкових полів (ті, що мають атрибут required у HTML)
-      if (!quantity || !culture || !region || !district || !city || !price || !paytype) {
-        alert("Будь ласка, заповніть усі обов'язкові поля!");
+      // Перевірка обов'язкових полів сторінки 2
+      if (!culture || !quantity || !price || !paytype) {
+        alert("Будь ласка, заповніть усі обов’язкові поля на цьому кроці!");
         return;
       }
       
@@ -157,16 +176,16 @@
       // Формуємо повний об'єкт заявки
       const payload = {
         user_id: userId,
-        fgh_name: fghName,      // може бути порожнім
-        edrpou: edrpou,         // може бути порожнім
-        quantity: quantity,
-        comment: comment,
-        culture: culture,
+        fgh_name: fghName,
+        edrpou: edrpou,
         region: region,
         district: district,
         city: city,
+        culture: culture,
+        quantity: quantity,
         price: price,
-        paytype: paytype
+        paytype: paytype,
+        comment: comment
       };
       
       console.log("Заявка заповнена. Payload:", payload);
@@ -181,7 +200,6 @@
       .then(data => {
         console.log("Отримано відповідь від API:", data);
         if (data.status === "ok") {
-          // Закриваємо WebApp через 1 секунду після успішного відправлення
           setTimeout(() => {
             Telegram.WebApp.close();
           }, 1000);
