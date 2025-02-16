@@ -2,28 +2,25 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <!-- Забезпечення адаптивності для мобільних пристроїв -->
+  <!-- Адаптивність для мобільних пристроїв -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Вибір культури та геоданих</title>
+  <title>Заповнення заявки</title>
   <style>
     body, html {
       margin: 0;
       padding: 0;
       height: 100%;
       font-family: sans-serif;
-      color: #fff;
       background: url('https://images.pexels.com/photos/730897/pexels-photo-730897.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940') no-repeat center center fixed;
       background-size: cover;
+      color: #fff;
       text-align: center;
     }
     .overlay {
-      backdrop-filter: blur(12px);
-      background-color: rgba(0,0,0,0.3);
+      backdrop-filter: blur(8px);
+      background-color: rgba(0, 0, 0, 0.4);
       width: 100%;
       height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -34,7 +31,7 @@
       background: rgba(255,255,255,0.1);
       padding: 20px;
       border-radius: 10px;
-      max-width: 400px;
+      max-width: 500px;
       width: 100%;
       box-sizing: border-box;
     }
@@ -47,7 +44,7 @@
       font-weight: bold;
       margin: 10px 0 5px;
     }
-    input, button {
+    input, select, textarea, button {
       width: 100%;
       padding: 10px;
       margin-bottom: 10px;
@@ -60,35 +57,76 @@
       background: #007bff;
       color: #fff;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background 0.3s ease;
     }
     button:hover {
       background: #0056b3;
     }
   </style>
-  <!-- Підключення Telegram WebApp SDK (з параметром версії для сумісності) -->
+  <!-- Підключення Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 </head>
 <body>
   <div class="overlay">
     <div class="container">
-      <h2>Оберіть дані</h2>
+      <h2>Заповніть заявку</h2>
       
-      <label for="cultureInput">Культура:</label>
-      <input type="text" id="cultureInput" placeholder="Введіть культуру" list="cultureList">
-      <datalist id="cultureList"></datalist>
+      <!-- Перша частина даних -->
+      <label for="fghName">Назва ФГ:</label>
+      <input type="text" id="fghName" placeholder="Введіть назву ФГ" required>
       
-      <label for="regionInput">Область:</label>
-      <input type="text" id="regionInput" placeholder="Введіть область" list="regionList">
-      <datalist id="regionList"></datalist>
+      <label for="edrpou">Код ЄДРПОУ (8 цифр):</label>
+      <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" required>
       
-      <label for="districtInput">Район:</label>
-      <input type="text" id="districtInput" placeholder="Введіть район">
+      <label for="quantity">Кількість:</label>
+      <input type="number" id="quantity" placeholder="Введіть кількість" required>
       
-      <label for="cityInput">Населений пункт:</label>
-      <input type="text" id="cityInput" placeholder="Введіть населенець">
+      <label for="comment">Коментар:</label>
+      <textarea id="comment" placeholder="Введіть коментар (опціонально)"></textarea>
       
-      <button id="submitBtn">Підтвердити</button>
+      <!-- Друга частина даних -->
+      <label for="culture">Культура:</label>
+      <input type="text" id="culture" placeholder="Введіть культуру" list="cultureList" required>
+      <datalist id="cultureList">
+        <!-- Опції можна завантажувати з API, тут приклад -->
+        <option value="Пшениця">
+        <option value="Ячмінь">
+        <option value="Кукурудза">
+        <option value="Соя">
+        <option value="Соняшник">
+      </datalist>
+      
+      <label for="region">Область:</label>
+      <input type="text" id="region" placeholder="Введіть область" list="regionList" required>
+      <datalist id="regionList">
+        <!-- Опції можна завантажувати з API, тут приклад -->
+        <option value="Київська">
+        <option value="Львівська">
+        <option value="Одеська">
+      </datalist>
+      
+      <label for="district">Район:</label>
+      <input type="text" id="district" placeholder="Введіть район" required>
+      
+      <label for="city">Населений пункт:</label>
+      <input type="text" id="city" placeholder="Введіть населений пункт" required>
+      
+      <!-- Додаткові дані, наприклад, оплата -->
+      <label for="price">Бажана ціна (цифри):</label>
+      <input type="text" id="price" placeholder="Введіть бажану ціну" required>
+      
+      <label for="paytype">Тип оплати:</label>
+      <select id="paytype" required>
+        <option value="">Оберіть тип оплати</option>
+        <option value="Гривня: БН з ПДВ">Гривня: БН з ПДВ</option>
+        <option value="Гривня: БН без ПДВ">Гривня: БН без ПДВ</option>
+        <option value="Гривня: Готівка">Гривня: Готівка</option>
+        <option value="Долар: БН">Долар: БН</option>
+        <option value="Долар: Готівка">Долар: Готівка</option>
+        <option value="Євро: БН">Євро: БН</option>
+      </select>
+      
+      <button id="submitBtn">Підтвердити заявку</button>
     </div>
   </div>
   
@@ -97,79 +135,46 @@
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
 
-    // (Опціонально) URL для завантаження даних для автозаповнення
-    const CULTURES_URL = "https://raw.githubusercontent.com/danza13/data/main/cultures.json";
-    const LOCATIONS_URL = "https://raw.githubusercontent.com/danza13/data/main/locations.json";
-    
-    let cultures = [];
-    let regions = [];
-    let locations = {};
-    
-    async function loadData(url) {
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        console.log("Дані завантажено з", url, data);
-        return data;
-      } catch (e) {
-        console.error("Помилка завантаження з " + url, e);
-      }
-    }
-    
-    async function initData() {
-      const culturesData = await loadData(CULTURES_URL);
-      if (culturesData && culturesData.cultures) {
-        cultures = culturesData.cultures;
-        updateDatalist("cultureInput", "cultureList", cultures);
-      }
-      const locationsData = await loadData(LOCATIONS_URL);
-      if (locationsData && locationsData["області"]) {
-        locations = locationsData["області"];
-        regions = Object.keys(locations);
-        updateDatalist("regionInput", "regionList", regions);
-      }
-    }
-    
-    function updateDatalist(inputId, datalistId, dataArray) {
-      const input = document.getElementById(inputId);
-      const datalist = document.getElementById(datalistId);
-      const filter = input.value.toLowerCase();
-      datalist.innerHTML = "";
-      dataArray.filter(item => item.toLowerCase().includes(filter))
-               .forEach(item => {
-                 const option = document.createElement("option");
-                 option.value = item;
-                 datalist.appendChild(option);
-               });
-    }
-    
-    // Опціонально: ініціалізація автозаповнення
-    initData();
-    
     document.getElementById('submitBtn').addEventListener('click', () => {
-      const culture = document.getElementById('cultureInput').value.trim();
-      const region = document.getElementById('regionInput').value.trim();
-      const district = document.getElementById('districtInput').value.trim();
-      const city = document.getElementById('cityInput').value.trim();
+      // Збираємо всі дані з форми
+      const fghName = document.getElementById('fghName').value.trim();
+      const edrpou = document.getElementById('edrpou').value.trim();
+      const quantity = document.getElementById('quantity').value.trim();
+      const comment = document.getElementById('comment').value.trim();
+      const culture = document.getElementById('culture').value.trim();
+      const region = document.getElementById('region').value.trim();
+      const district = document.getElementById('district').value.trim();
+      const city = document.getElementById('city').value.trim();
+      const price = document.getElementById('price').value.trim();
+      const paytype = document.getElementById('paytype').value;
       
-      if (!culture || !region || !district || !city) {
-        alert("Будь ласка, заповніть усі поля!");
+      // Перевірка обов'язкових полів
+      if (!fghName || !edrpou || !quantity || !culture || !region || !district || !city || !price || !paytype) {
+        alert("Будь ласка, заповніть усі обов'язкові поля!");
         return;
       }
       
-      // Отримуємо user_id (якщо доступно)
+      // Отримуємо user_id з даних Telegram WebApp (якщо доступно)
       const userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
+      
+      // Формуємо повний об'єкт заявки
       const payload = {
         user_id: userId,
+        fgh_name: fghName,
+        edrpou: edrpou,
+        quantity: quantity,
+        comment: comment,
         culture: culture,
         region: region,
         district: district,
-        city: city
+        city: city,
+        price: price,
+        paytype: paytype
       };
       
-      console.log("Форма заповнена. Payload:", payload);
+      console.log("Заявка заповнена. Payload:", payload);
       
-      // Відправка даних через fetch до API_URL
+      // Відправка даних через fetch на API_URL
       fetch("https://agro-api-url.onrender.com/endpoint", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -179,6 +184,7 @@
       .then(data => {
         console.log("Отримано відповідь від API:", data);
         if (data.status === "ok") {
+          // Закриваємо WebApp через 1 секунду після успішного відправлення
           setTimeout(() => {
             Telegram.WebApp.close();
           }, 1000);
