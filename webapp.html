@@ -179,7 +179,6 @@
       .then(data => {
         console.log("Отримано відповідь від API:", data);
         if (data.status === "ok") {
-          // Закриваємо WebApp через 1 секунду
           setTimeout(() => {
             Telegram.WebApp.close();
           }, 1000);
