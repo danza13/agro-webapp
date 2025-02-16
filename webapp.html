@@ -20,7 +20,8 @@
       width: 100%;
       height: 100%;
       position: absolute;
-      top: 0; left: 0;
+      top: 0;
+      left: 0;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -60,135 +61,138 @@
   </style>
 </head>
 <body>
-<div class="overlay">
-  <div class="container">
-    <h2>Оберіть дані</h2>
+  <div class="overlay">
+    <div class="container">
+      <h2>Оберіть дані</h2>
 
-    <label for="cultureInput">Культура:</label>
-    <input type="text" id="cultureInput" placeholder="Введіть культуру" list="cultureList">
-    <datalist id="cultureList">
-      <!-- Опції завантажуватимуться -->
-    </datalist>
+      <label for="cultureInput">Культура:</label>
+      <input type="text" id="cultureInput" placeholder="Введіть культуру" list="cultureList">
+      <datalist id="cultureList">
+        <!-- Опції завантажуватимуться -->
+      </datalist>
 
-    <label for="regionInput">Область:</label>
-    <input type="text" id="regionInput" placeholder="Введіть область" list="regionList">
-    <datalist id="regionList">
-      <!-- Опції завантажуватимуться -->
-    </datalist>
+      <label for="regionInput">Область:</label>
+      <input type="text" id="regionInput" placeholder="Введіть область" list="regionList">
+      <datalist id="regionList">
+        <!-- Опції завантажуватимуться -->
+      </datalist>
 
-    <label for="districtInput">Район:</label>
-    <input type="text" id="districtInput" placeholder="Введіть район">
+      <label for="districtInput">Район:</label>
+      <input type="text" id="districtInput" placeholder="Введіть район">
 
-    <label for="cityInput">Населений пункт:</label>
-    <input type="text" id="cityInput" placeholder="Введіть населенець">
+      <label for="cityInput">Населений пункт:</label>
+      <input type="text" id="cityInput" placeholder="Введіть населенець">
 
-    <button id="submitBtn">Підтвердити</button>
+      <button id="submitBtn">Підтвердити</button>
+    </div>
   </div>
-</div>
 
-<!-- Підключення Telegram WebApp SDK -->
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-  // Розгортаємо WebApp
-  Telegram.WebApp.expand();
-  console.log("WebApp запущено, розгортання виконано.");
+  <!-- Підключення Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    // Розгортаємо WebApp
+    Telegram.WebApp.expand();
+    console.log("WebApp запущено, розгортання виконано.");
 
-  // URL для завантаження даних
-  const CULTURES_URL = "https://raw.githubusercontent.com/danza13/data/main/cultures.json";
-  const LOCATIONS_URL = "https://raw.githubusercontent.com/danza13/data/main/locations.json";
+    // URL для завантаження даних
+    const CULTURES_URL = "https://raw.githubusercontent.com/danza13/data/main/cultures.json";
+    const LOCATIONS_URL = "https://raw.githubusercontent.com/danza13/data/main/locations.json";
 
-  let cultures = [];
-  let regions = [];
-  let locations = {};
+    let cultures = [];
+    let regions = [];
+    let locations = {};
 
-  // Функція для завантаження даних із GitHub
-  async function loadData(url) {
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      console.log("Дані завантажено з", url, data);
-      return data;
-    } catch (e) {
-      console.error("Помилка завантаження даних з " + url, e);
+    // Функція для завантаження даних із GitHub
+    async function loadData(url) {
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log("Дані завантажено з", url, data);
+        return data;
+      } catch (e) {
+        console.error("Помилка завантаження даних з " + url, e);
+      }
     }
-  }
 
-  // Завантаження даних для автозаповнення
-  async function initData() {
-    const culturesData = await loadData(CULTURES_URL);
-    if(culturesData && culturesData.cultures){
-      cultures = culturesData.cultures;
+    // Ініціалізація даних для автозаповнення
+    async function initData() {
+      const culturesData = await loadData(CULTURES_URL);
+      if (culturesData && culturesData.cultures) {
+        cultures = culturesData.cultures;
+        updateDatalist("cultureInput", "cultureList", cultures);
+      }
+      const locationsData = await loadData(LOCATIONS_URL);
+      if (locationsData && locationsData["області"]) {
+        locations = locationsData["області"];
+        regions = Object.keys(locations);
+        updateDatalist("regionInput", "regionList", regions);
+      }
+    }
+
+    // Функція для оновлення datalist
+    function updateDatalist(inputId, datalistId, dataArray) {
+      const input = document.getElementById(inputId);
+      const datalist = document.getElementById(datalistId);
+      const filter = input.value.toLowerCase();
+      datalist.innerHTML = "";
+      dataArray.filter(item => item.toLowerCase().includes(filter))
+               .forEach(item => {
+                 const option = document.createElement("option");
+                 option.value = item;
+                 datalist.appendChild(option);
+               });
+    }
+
+    // Обробники подій для автопошуку
+    document.getElementById('cultureInput').addEventListener('input', () => {
       updateDatalist("cultureInput", "cultureList", cultures);
-    }
-
-    const locationsData = await loadData(LOCATIONS_URL);
-    if(locationsData && locationsData["області"]){
-      locations = locationsData["області"];
-      regions = Object.keys(locations);
+    });
+    document.getElementById('regionInput').addEventListener('input', () => {
       updateDatalist("regionInput", "regionList", regions);
-    }
-  }
+    });
 
-  // Функція для оновлення списку (datalist)
-  function updateDatalist(inputId, datalistId, dataArray) {
-    const input = document.getElementById(inputId);
-    const datalist = document.getElementById(datalistId);
-    const filter = input.value.toLowerCase();
-    datalist.innerHTML = "";
-    dataArray.filter(item => item.toLowerCase().includes(filter))
-             .forEach(item => {
-               const option = document.createElement("option");
-               option.value = item;
-               datalist.appendChild(option);
-             });
-  }
+    // Ініціалізація даних при завантаженні сторінки
+    initData();
 
-  // Додаємо обробники подій для автопошуку
-  document.getElementById('cultureInput').addEventListener('input', () => {
-    updateDatalist("cultureInput", "cultureList", cultures);
-  });
-  document.getElementById('regionInput').addEventListener('input', () => {
-    updateDatalist("regionInput", "regionList", regions);
-  });
+    // Обробник кнопки "Підтвердити"
+    document.getElementById('submitBtn').addEventListener('click', () => {
+      const culture = document.getElementById('cultureInput').value.trim();
+      const region = document.getElementById('regionInput').value.trim();
+      const district = document.getElementById('districtInput').value.trim();
+      const city = document.getElementById('cityInput').value.trim();
 
-  // Ініціалізація даних при завантаженні сторінки
-  initData();
+      if (!culture || !region || !district || !city) {
+        alert("Будь ласка, заповніть усі поля!");
+        console.warn("Не всі поля заповнено:", { culture, region, district, city });
+        return;
+      }
 
-  // Обробник кнопки "Підтвердити"
-  document.getElementById('submitBtn').addEventListener('click', () => {
-    const culture = document.getElementById('cultureInput').value.trim();
-    const region = document.getElementById('regionInput').value.trim();
-    const district = document.getElementById('districtInput').value.trim();
-    const city = document.getElementById('cityInput').value.trim();
+      // Отримуємо user_id із даних Telegram WebApp (якщо користувач увійшов)
+      const userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
+      const payload = {
+        user_id: userId,
+        culture: culture,
+        region: region,
+        district: district,
+        city: city
+      };
 
-    if (!culture || !region || !district || !city) {
-      alert("Будь ласка, заповніть усі поля!");
-      console.warn("Не всі поля заповнено:", {culture, region, district, city});
-      return;
-    }
+      console.log("Форма заповнена. Формую payload:", payload);
 
-    // Отримуємо user_id із даних Telegram WebApp
-    const userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
-    const payload = {
-      user_id: userId,
-      culture: culture,
-      region: region,
-      district: district,
-      city: city
-    };
-
-    console.log("Форма заповнена. Надсилаємо payload:", payload);
-
-    // Надсилаємо дані до бота
-    Telegram.WebApp.sendData(JSON.stringify(payload));
-    console.log("Payload відправлено через sendData().");
-
-    // Затримка 1000 мс перед закриттям WebApp
-    setTimeout(() => {
-      console.log("Закриваємо WebApp через 1000 мс.");
-      Telegram.WebApp.close();
-    }, 1000);
-  });
-</script>
+      // Якщо метод sendData доступний, використовуємо його
+      if (typeof Telegram.WebApp.sendData === 'function') {
+        Telegram.WebApp.sendData(JSON.stringify(payload));
+        console.log("Payload відправлено через sendData().");
+        setTimeout(() => {
+          console.log("Закриваємо WebApp через 1000 мс.");
+          Telegram.WebApp.close();
+        }, 1000);
+      } else {
+        // Фолбек для клієнтів, де sendData не підтримується
+        console.warn("Метод sendData() недоступний. Відображаємо дані для ручного копіювання.");
+        alert("Ваш пристрій не підтримує автоматичне відправлення даних. Скопіюйте наступні дані та надішліть їх боту вручну:\n\n" + JSON.stringify(payload, null, 2));
+      }
+    });
+  </script>
 </body>
 </html>
