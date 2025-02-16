@@ -130,6 +130,7 @@
   </div>
   
   <script>
+    // Ініціалізація Telegram WebApp
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
 
@@ -166,8 +167,13 @@
         return;
       }
       
-      // Отримуємо user_id з Telegram WebApp (якщо доступно)
-      const userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
+      // Отримуємо user_id з Telegram WebApp, якщо доступно
+      let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
+      // Для тестування: якщо userId не отримано, встановлюємо дефолтне значення
+      if (userId === null) {
+        userId = 1124775269;
+        console.log("userId не отримано, встановлено дефолтне значення:", userId);
+      }
       
       const payload = {
         user_id: userId,
@@ -185,6 +191,7 @@
       
       console.log("Заявка заповнена. Payload:", payload);
       
+      // Замініть URL нижче на правильну адресу вашого API
       fetch("https://agro-api-url.onrender.com/endpoint", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
