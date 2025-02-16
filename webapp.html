@@ -65,23 +65,15 @@
     <h2>Оберіть дані</h2>
 
     <label for="cultureInput">Культура:</label>
-    <input type="text" id="cultureInput" placeholder="Введіть культуру">
+    <input type="text" id="cultureInput" placeholder="Введіть культуру" list="cultureList">
     <datalist id="cultureList">
-      <option value="Пшениця">
-      <option value="Ячмінь">
-      <option value="Кукурудза">
-      <option value="Соя">
-      <option value="Соняшник">
+      <!-- Опції будуть заповнюватися з GitHub -->
     </datalist>
 
     <label for="regionInput">Область:</label>
-    <input type="text" id="regionInput" placeholder="Введіть область">
+    <input type="text" id="regionInput" placeholder="Введіть область" list="regionList">
     <datalist id="regionList">
-      <option value="Київська">
-      <option value="Львівська">
-      <option value="Одеська">
-      <option value="Дніпропетровська">
-      <option value="Харківська">
+      <!-- Опції будуть заповнюватися з GitHub -->
     </datalist>
 
     <label for="districtInput">Район:</label>
@@ -100,7 +92,68 @@
   // Ініціалізація Telegram WebApp
   Telegram.WebApp.expand();
 
-  // Функція для відправки даних на API-сервер
+  // URL-и до файлів даних на GitHub (raw-версії)
+  const CULTURES_URL = "https://raw.githubusercontent.com/danza13/data/main/cultures.json";
+  const LOCATIONS_URL = "https://raw.githubusercontent.com/danza13/data/main/locations.json";
+
+  let cultures = [];
+  let regions = [];
+  let locations = {};
+
+  // Функція для завантаження даних із GitHub
+  async function loadData(url) {
+    const response = await fetch(url);
+    return await response.json();
+  }
+
+  // Завантажуємо дані
+  async function initData() {
+    try {
+      const culturesData = await loadData(CULTURES_URL);
+      cultures = culturesData.cultures || [];
+      // Оновлюємо список культур
+      updateDatalist("cultureInput", "cultureList", cultures);
+    } catch (e) {
+      console.error("Помилка завантаження культур:", e);
+    }
+
+    try {
+      const locationsData = await loadData(LOCATIONS_URL);
+      locations = locationsData.obласті || {};
+      // Створимо масив областей із об'єкта locations
+      regions = Object.keys(locations);
+      updateDatalist("regionInput", "regionList", regions);
+    } catch (e) {
+      console.error("Помилка завантаження локацій:", e);
+    }
+  }
+
+  // Функція для оновлення datalist на основі введеного тексту
+  function updateDatalist(inputId, datalistId, dataArray) {
+    const input = document.getElementById(inputId);
+    const datalist = document.getElementById(datalistId);
+    const filter = input.value.toLowerCase();
+    datalist.innerHTML = "";
+    dataArray.filter(item => item.toLowerCase().includes(filter))
+             .forEach(item => {
+               const option = document.createElement("option");
+               option.value = item;
+               datalist.appendChild(option);
+             });
+  }
+
+  // Додаємо обробники подій для автопошуку
+  document.getElementById('cultureInput').addEventListener('input', () => {
+    updateDatalist("cultureInput", "cultureList", cultures);
+  });
+  document.getElementById('regionInput').addEventListener('input', () => {
+    updateDatalist("regionInput", "regionList", regions);
+  });
+
+  // Ініціалізація даних при завантаженні сторінки
+  initData();
+
+  // Обробник кнопки "Підтвердити"
   document.getElementById('submitBtn').addEventListener('click', async () => {
     const culture = document.getElementById('cultureInput').value.trim();
     const region = document.getElementById('regionInput').value.trim();
@@ -122,7 +175,7 @@
       city
     };
 
-    // URL API-сервера (змініть за потребою)
+    // URL API-сервера (наприклад, розгорнутого на Render)
     const API_ENDPOINT = "https://agro-api-url.onrender.com/endpoint";
 
     try {
