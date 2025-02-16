@@ -71,24 +71,23 @@
     <div class="container">
       <h2>Заповніть заявку</h2>
       
-      <!-- Перша частина даних -->
-      <label for="fghName">Назва ФГ:</label>
-      <input type="text" id="fghName" placeholder="Введіть назву ФГ" required>
+      <!-- Поля, що більше не є обов'язковими -->
+      <label for="fghName">Назва ФГ (не обов'язково):</label>
+      <input type="text" id="fghName" placeholder="Введіть назву ФГ">
       
-      <label for="edrpou">Код ЄДРПОУ (8 цифр):</label>
-      <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" required>
+      <label for="edrpou">Код ЄДРПОУ (8 цифр, не обов'язково):</label>
+      <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ">
       
+      <!-- Обов'язкові дані -->
       <label for="quantity">Кількість:</label>
       <input type="number" id="quantity" placeholder="Введіть кількість" required>
       
       <label for="comment">Коментар:</label>
       <textarea id="comment" placeholder="Введіть коментар (опціонально)"></textarea>
       
-      <!-- Друга частина даних -->
       <label for="culture">Культура:</label>
       <input type="text" id="culture" placeholder="Введіть культуру" list="cultureList" required>
       <datalist id="cultureList">
-        <!-- Опції можна завантажувати з API, тут приклад -->
         <option value="Пшениця">
         <option value="Ячмінь">
         <option value="Кукурудза">
@@ -99,7 +98,6 @@
       <label for="region">Область:</label>
       <input type="text" id="region" placeholder="Введіть область" list="regionList" required>
       <datalist id="regionList">
-        <!-- Опції можна завантажувати з API, тут приклад -->
         <option value="Київська">
         <option value="Львівська">
         <option value="Одеська">
@@ -111,7 +109,6 @@
       <label for="city">Населений пункт:</label>
       <input type="text" id="city" placeholder="Введіть населений пункт" required>
       
-      <!-- Додаткові дані, наприклад, оплата -->
       <label for="price">Бажана ціна (цифри):</label>
       <input type="text" id="price" placeholder="Введіть бажану ціну" required>
       
@@ -148,8 +145,8 @@
       const price = document.getElementById('price').value.trim();
       const paytype = document.getElementById('paytype').value;
       
-      // Перевірка обов'язкових полів
-      if (!fghName || !edrpou || !quantity || !culture || !region || !district || !city || !price || !paytype) {
+      // Перевірка обов'язкових полів (ті, що мають атрибут required у HTML)
+      if (!quantity || !culture || !region || !district || !city || !price || !paytype) {
         alert("Будь ласка, заповніть усі обов'язкові поля!");
         return;
       }
@@ -160,8 +157,8 @@
       // Формуємо повний об'єкт заявки
       const payload = {
         user_id: userId,
-        fgh_name: fghName,
-        edrpou: edrpou,
+        fgh_name: fghName,      // може бути порожнім
+        edrpou: edrpou,         // може бути порожнім
         quantity: quantity,
         comment: comment,
         culture: culture,
