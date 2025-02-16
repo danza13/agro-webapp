@@ -93,11 +93,11 @@
   </div>
   
   <script>
-    // Розгортаємо WebApp (Telegram WebApp API)
+    // Ініціалізація WebApp
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
 
-    // URL-и для завантаження даних (опціонально, якщо потрібна автозаповнювальна логіка)
+    // (Опціонально) URL для завантаження даних для автозаповнення
     const CULTURES_URL = "https://raw.githubusercontent.com/danza13/data/main/cultures.json";
     const LOCATIONS_URL = "https://raw.githubusercontent.com/danza13/data/main/locations.json";
     
@@ -105,7 +105,6 @@
     let regions = [];
     let locations = {};
     
-    // Завантаження даних із GitHub для автозаповнення (опціонально)
     async function loadData(url) {
       try {
         const response = await fetch(url);
@@ -144,7 +143,7 @@
                });
     }
     
-    // Опціонально: ініціалізація даних
+    // Опціонально: ініціалізація автозаповнення
     initData();
     
     document.getElementById('submitBtn').addEventListener('click', () => {
@@ -158,7 +157,7 @@
         return;
       }
       
-      // Отримуємо user_id з даних Telegram WebApp (якщо доступно)
+      // Отримуємо user_id (якщо доступно)
       const userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
       const payload = {
         user_id: userId,
@@ -170,7 +169,7 @@
       
       console.log("Форма заповнена. Payload:", payload);
       
-      // Відправка даних через fetch на API_URL
+      // Відправка даних через fetch до API_URL
       fetch("https://agro-api-url.onrender.com/endpoint", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -179,8 +178,8 @@
       .then(response => response.json())
       .then(data => {
         console.log("Отримано відповідь від API:", data);
-        // Якщо API повертає успішний статус, можна закрити WebApp
         if (data.status === "ok") {
+          // Закриваємо WebApp через 1 секунду
           setTimeout(() => {
             Telegram.WebApp.close();
           }, 1000);
