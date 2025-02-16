@@ -2,7 +2,7 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <!-- Адаптивність для мобільних пристроїв -->
+  <!-- Адаптивність -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Заповнення заявки – кроки</title>
   <style>
@@ -70,7 +70,7 @@
 <body>
   <div class="overlay">
     <div class="container">
-      <!-- Етап 1 -->
+      <!-- Крок 1 -->
       <div id="page1">
         <h2>Крок 1: Основні дані</h2>
         <label for="fghName">Назва ФГ (не обов’язково):</label>
@@ -91,7 +91,7 @@
         <button id="nextBtn">Далі</button>
       </div>
       
-      <!-- Етап 2 -->
+      <!-- Крок 2 -->
       <div id="page2" class="hidden">
         <h2>Крок 2: Деталі заявки</h2>
         <label for="culture">Культура:</label>
@@ -130,28 +130,25 @@
   </div>
   
   <script>
-    // Ініціалізація WebApp
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
-    
-    // Перехід від сторінки 1 до сторінки 2
+
+    // Перехід з Кроку 1 до Кроку 2
     document.getElementById('nextBtn').addEventListener('click', () => {
-      // Перевірка обов'язкових полів сторінки 1: region, district, city
       const region = document.getElementById('region').value.trim();
       const district = document.getElementById('district').value.trim();
       const city = document.getElementById('city').value.trim();
       if (!region || !district || !city) {
-        alert("Будь ласка, заповніть усі обов’язкові поля на цьому кроці!");
+        alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
-      // Приховуємо сторінку 1 та показуємо сторінку 2
       document.getElementById('page1').classList.add('hidden');
       document.getElementById('page2').classList.remove('hidden');
     });
     
-    // Обробка фінального надсилання форми
+    // Фінальна відправка даних
     document.getElementById('submitBtn').addEventListener('click', () => {
-      // Збираємо дані з обох сторінок
+      // Збираємо дані з обох кроків
       const fghName = document.getElementById('fghName').value.trim();
       const edrpou = document.getElementById('edrpou').value.trim();
       const region = document.getElementById('region').value.trim();
@@ -164,16 +161,16 @@
       const paytype = document.getElementById('paytype').value;
       const comment = document.getElementById('comment').value.trim();
       
-      // Перевірка обов'язкових полів сторінки 2
+      // Перевірка обов'язкових полів Кроку 2
       if (!culture || !quantity || !price || !paytype) {
-        alert("Будь ласка, заповніть усі обов’язкові поля на цьому кроці!");
+        alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
       
       // Отримуємо user_id з даних Telegram WebApp (якщо доступно)
       const userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
       
-      // Формуємо повний об'єкт заявки
+      // Формуємо об'єкт заявки
       const payload = {
         user_id: userId,
         fgh_name: fghName,
@@ -200,6 +197,7 @@
       .then(data => {
         console.log("Отримано відповідь від API:", data);
         if (data.status === "ok") {
+          // Закриваємо WebApp через 1 секунду після успішного відправлення
           setTimeout(() => {
             Telegram.WebApp.close();
           }, 1000);
