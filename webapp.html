@@ -277,7 +277,7 @@
       .then(response => response.json())
       .then(data => {
         console.log("Отримано відповідь від API:", data);
-        if (data.status === "ok") {
+        if (data.status === "ok" || data.status === "preview") {
           setTimeout(() => {
             Telegram.WebApp.close();
           }, 1000);
