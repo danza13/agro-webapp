@@ -2,7 +2,6 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <!-- Адаптивність -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Заповнення заявки – кроки</title>
   <style>
@@ -33,38 +32,15 @@
       max-width: 500px;
       box-sizing: border-box;
     }
-    h2 {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      text-align: left;
-      font-weight: bold;
-      margin: 10px 0 5px;
-    }
+    h2 { margin-bottom: 15px; }
+    label { display: block; text-align: left; font-weight: bold; margin: 10px 0 5px; }
     input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: none;
-      box-sizing: border-box;
-      font-size: 16px;
+      width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none; box-sizing: border-box; font-size: 16px;
     }
-    button {
-      background: #007bff;
-      color: #fff;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover {
-      background: #0056b3;
-    }
-    .hidden {
-      display: none;
-    }
+    button { background: #007bff; color: #fff; cursor: pointer; transition: background 0.3s ease; }
+    button:hover { background: #0056b3; }
+    .hidden { display: none; }
   </style>
-  <!-- Підключення Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 </head>
 <body>
@@ -75,19 +51,14 @@
         <h2>Крок 1: Основні дані</h2>
         <label for="fghName">Назва ФГ (не обов’язково):</label>
         <input type="text" id="fghName" placeholder="Введіть назву ФГ">
-        
         <label for="edrpou">Код ЄДРПОУ (8 цифр, не обов’язково):</label>
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ">
-        
         <label for="region">Область:</label>
         <input type="text" id="region" placeholder="Введіть область" required>
-        
         <label for="district">Район:</label>
         <input type="text" id="district" placeholder="Введіть район" required>
-        
         <label for="city">Населений пункт:</label>
         <input type="text" id="city" placeholder="Введіть населений пункт" required>
-        
         <button id="nextBtn">Далі</button>
       </div>
       
@@ -103,13 +74,10 @@
           <option value="Соя">
           <option value="Соняшник">
         </datalist>
-        
         <label for="quantity">Кількість:</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
-        
         <label for="price">Бажана ціна (цифри):</label>
         <input type="text" id="price" placeholder="Введіть бажану ціну" required>
-        
         <label for="paytype">Тип оплати:</label>
         <select id="paytype" required>
           <option value="">Оберіть тип оплати</option>
@@ -120,16 +88,43 @@
           <option value="Долар: Готівка">Долар: Готівка</option>
           <option value="Євро: БН">Євро: БН</option>
         </select>
-        
         <label for="comment">Коментар:</label>
         <textarea id="comment" placeholder="Введіть коментар (опціонально)"></textarea>
-        
         <button id="submitBtn">Підтвердити заявку</button>
       </div>
     </div>
   </div>
   
   <script>
+    // Функція для заповнення форми з попередніми даними (якщо є параметр data)
+    function prefillForm(prefillData) {
+      document.getElementById('fghName').value = prefillData.fgh_name || "";
+      document.getElementById('edrpou').value = prefillData.edrpou || "";
+      document.getElementById('region').value = prefillData.region || "";
+      document.getElementById('district').value = prefillData.district || "";
+      document.getElementById('city').value = prefillData.city || "";
+      document.getElementById('culture').value = prefillData.culture || "";
+      document.getElementById('quantity').value = prefillData.quantity || "";
+      document.getElementById('price').value = prefillData.price || "";
+      document.getElementById('paytype').value = prefillData.paytype || "";
+      document.getElementById('comment').value = prefillData.comment || "";
+    }
+    
+    // Перевіряємо, чи є query-параметр data
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefill = urlParams.get('data');
+    if (prefill) {
+      try {
+        const dataObj = JSON.parse(decodeURIComponent(prefill));
+        // Якщо є попередні дані, заповнюємо форму і переходимо одразу до кроку 2
+        prefillForm(dataObj);
+        document.getElementById('page1').classList.add('hidden');
+        document.getElementById('page2').classList.remove('hidden');
+      } catch (e) {
+        console.error("Помилка при розборі prefill даних:", e);
+      }
+    }
+    
     // Ініціалізація Telegram WebApp
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
@@ -155,7 +150,6 @@
       const region = document.getElementById('region').value.trim();
       const district = document.getElementById('district').value.trim();
       const city = document.getElementById('city').value.trim();
-      
       const culture = document.getElementById('culture').value.trim();
       const quantity = document.getElementById('quantity').value.trim();
       const price = document.getElementById('price').value.trim();
@@ -169,7 +163,6 @@
       
       // Отримуємо user_id з Telegram WebApp, якщо доступно
       let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
-      // Для тестування: якщо userId не отримано, встановлюємо дефолтне значення
       if (userId === null) {
         userId = 1124775269;
         console.log("userId не отримано, встановлено дефолтне значення:", userId);
@@ -191,7 +184,7 @@
       
       console.log("Заявка заповнена. Payload:", payload);
       
-      // Замініть URL нижче на правильну адресу вашого API (переконайтеся, що воно співпадає з API_PORT у bot.py)
+      // Замініть URL нижче на адресу вашого API (переконайтеся, що порт співпадає з API_PORT у bot.py)
       fetch("https://agro-api-url.onrender.com/api/webapp_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
