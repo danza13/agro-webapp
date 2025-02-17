@@ -35,11 +35,18 @@
     h2 { margin-bottom: 15px; }
     label { display: block; text-align: left; font-weight: bold; margin: 10px 0 5px; }
     input, select, textarea, button {
-      width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none; box-sizing: border-box; font-size: 16px;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+      box-sizing: border-box;
+      font-size: 16px;
     }
     button { background: #007bff; color: #fff; cursor: pointer; transition: background 0.3s ease; }
     button:hover { background: #0056b3; }
     .hidden { display: none; }
+    .error { color: #ff8080; font-size: 0.9em; text-align: left; }
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 </head>
@@ -53,6 +60,7 @@
         <input type="text" id="fghName" placeholder="Введіть назву ФГ">
         <label for="edrpou">Код ЄДРПОУ (8 цифр, не обов’язково):</label>
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ">
+        <div id="edrpouError" class="error"></div>
         <label for="region">Область:</label>
         <input type="text" id="region" placeholder="Введіть область" required>
         <label for="district">Район:</label>
@@ -74,10 +82,12 @@
           <option value="Соя">
           <option value="Соняшник">
         </datalist>
-        <label for="quantity">Кількість:</label>
+        <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
+        <div id="quantityError" class="error"></div>
         <label for="price">Бажана ціна (цифри):</label>
         <input type="text" id="price" placeholder="Введіть бажану ціну" required>
+        <div id="priceError" class="error"></div>
         <label for="paytype">Тип оплати:</label>
         <select id="paytype" required>
           <option value="">Оберіть тип оплати</option>
@@ -110,7 +120,7 @@
       document.getElementById('comment').value = prefillData.comment || "";
     }
     
-    // Перевірка query-параметра data
+    // Перевірка query-параметра data для попереднього заповнення
     const urlParams = new URLSearchParams(window.location.search);
     const prefill = urlParams.get('data');
     if (prefill) {
@@ -128,6 +138,39 @@
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
 
+    // Перевірка поля ЄДРПОУ: має бути або порожнім, або рівно 8 цифр
+    document.getElementById('edrpou').addEventListener('input', function() {
+      const val = this.value.trim();
+      const errorDiv = document.getElementById('edrpouError');
+      if (val && !/^\d{8}$/.test(val)) {
+        errorDiv.textContent = "ЄДРПОУ має містити рівно 8 цифр або бути порожнім.";
+      } else {
+        errorDiv.textContent = "";
+      }
+    });
+    
+    // Перевірка кількості
+    document.getElementById('quantity').addEventListener('input', function() {
+      const val = this.value.trim();
+      const errorDiv = document.getElementById('quantityError');
+      if (val && isNaN(val)) {
+        errorDiv.textContent = "Введіть числове значення для кількості.";
+      } else {
+        errorDiv.textContent = "";
+      }
+    });
+    
+    // Перевірка бажаної ціни
+    document.getElementById('price').addEventListener('input', function() {
+      const val = this.value.trim();
+      const errorDiv = document.getElementById('priceError');
+      if (val && isNaN(val)) {
+        errorDiv.textContent = "Введіть числове значення для ціни.";
+      } else {
+        errorDiv.textContent = "";
+      }
+    });
+    
     // Перехід від Кроку 1 до Кроку 2
     document.getElementById('nextBtn').addEventListener('click', () => {
       const region = document.getElementById('region').value.trim();
@@ -154,11 +197,13 @@
       const paytype = document.getElementById('paytype').value;
       const comment = document.getElementById('comment').value.trim();
       
+      // Перевірка обов'язкових полів на Кроці 2
       if (!culture || !quantity || !price || !paytype) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
       
+      // Отримання user_id з Telegram WebApp (якщо не отримано, використовується дефолтне значення)
       let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
       if (userId === null) {
         userId = 1124775269;
