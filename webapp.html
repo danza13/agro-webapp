@@ -269,6 +269,10 @@
       
       console.log("Заявка заповнена. Payload:", payload);
       
+      // Надсилаємо дані безпосередньо до бота
+      Telegram.WebApp.sendData(JSON.stringify(payload));
+      
+      // Також надсилаємо дані до API (якщо потрібно)
       fetch("https://agro-api-url.onrender.com/api/webapp_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
