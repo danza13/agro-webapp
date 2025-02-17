@@ -226,7 +226,7 @@
       
       console.log("Заявка заповнена. Payload:", payload);
       
-      fetch("https://agro-api-url.onrender.com/api/webapp_data", {
+      fetch("https://agro-api-url.onrender.com/submit_app", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
