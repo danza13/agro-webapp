@@ -35,18 +35,11 @@
     h2 { margin-bottom: 15px; }
     label { display: block; text-align: left; font-weight: bold; margin: 10px 0 5px; }
     input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: none;
-      box-sizing: border-box;
-      font-size: 16px;
+      width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none; box-sizing: border-box; font-size: 16px;
     }
     button { background: #007bff; color: #fff; cursor: pointer; transition: background 0.3s ease; }
     button:hover { background: #0056b3; }
     .hidden { display: none; }
-    .error { color: #ff8080; font-size: 0.9em; text-align: left; }
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 </head>
@@ -60,13 +53,14 @@
         <input type="text" id="fghName" placeholder="Введіть назву ФГ">
         <label for="edrpou">Код ЄДРПОУ (8 цифр, не обов’язково):</label>
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ">
-        <div id="edrpouError" class="error"></div>
+        
+        <!-- Замість простих текстових полів використовуємо select для локацій -->
         <label for="region">Область:</label>
-        <input type="text" id="region" placeholder="Введіть область" required>
+        <select id="region" required></select>
         <label for="district">Район:</label>
-        <input type="text" id="district" placeholder="Введіть район" required>
+        <select id="district" required></select>
         <label for="city">Населений пункт:</label>
-        <input type="text" id="city" placeholder="Введіть населений пункт" required>
+        <select id="city" required></select>
         <button id="nextBtn">Далі</button>
       </div>
       
@@ -74,45 +68,103 @@
       <div id="page2" class="hidden">
         <h2>Крок 2: Деталі заявки</h2>
         <label for="culture">Культура:</label>
-        <input type="text" id="culture" placeholder="Введіть культуру" list="cultureList" required>
-        <datalist id="cultureList">
-          <option value="Пшениця">
-          <option value="Ячмінь">
-          <option value="Кукурудза">
-          <option value="Соя">
-          <option value="Соняшник">
-        </datalist>
+        <select id="culture" required></select>
         <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
-        <div id="quantityError" class="error"></div>
         <label for="price">Бажана ціна (цифри):</label>
         <input type="text" id="price" placeholder="Введіть бажану ціну" required>
-        <div id="priceError" class="error"></div>
         <label for="paytype">Тип оплати:</label>
         <select id="paytype" required>
           <option value="">Оберіть тип оплати</option>
           <option value="Гривня: БН з ПДВ">Гривня: БН з ПДВ</option>
           <option value="Гривня: БН без ПДВ">Гривня: БН без ПДВ</option>
           <option value="Гривня: Готівка">Гривня: Готівка</option>
-          <option value="Долар: БН">Долар: БН</option>
+          <option value="Долар: Валютний контракт">Долар: Валютний контракт</option>
           <option value="Долар: Готівка">Долар: Готівка</option>
-          <option value="Євро: БН">Євро: БН</option>
+          <option value="Євро: Валютний контракт">Євро: Валютний контракт</option>
         </select>
-        <label for="comment">Коментар:</label>
-        <textarea id="comment" placeholder="Введіть коментар (опціонально)"></textarea>
+        <label for="comment">Коментар (опціонально):</label>
+        <textarea id="comment" placeholder="Введіть коментар"></textarea>
         <button id="submitBtn">Підтвердити заявку</button>
       </div>
     </div>
   </div>
   
   <script>
-    // Функція для заповнення форми з попередніми даними (якщо є параметр data)
+    // Завантаження даних з зовнішніх JSON для культур та локацій
+    async function loadExternalData() {
+      try {
+        // Завантаження культур
+        let culturesResp = await fetch("https://raw.githubusercontent.com/danza13/data/main/cultures.json");
+        let culturesData = await culturesResp.json();
+        let cultureSelect = document.getElementById("culture");
+        cultureSelect.innerHTML = '<option value="">Оберіть культуру</option>';
+        culturesData.forEach(item => {
+          let opt = document.createElement("option");
+          opt.value = item;
+          opt.textContent = item;
+          cultureSelect.appendChild(opt);
+        });
+        // Завантаження локацій
+        let locationsResp = await fetch("https://raw.githubusercontent.com/danza13/data/main/locations.json");
+        let locationsData = await locationsResp.json();
+        let regionSelect = document.getElementById("region");
+        regionSelect.innerHTML = '<option value="">Оберіть область</option>';
+        Object.keys(locationsData).forEach(region => {
+          let opt = document.createElement("option");
+          opt.value = region;
+          opt.textContent = region;
+          regionSelect.appendChild(opt);
+        });
+        // При зміні області заповнюємо райони
+        regionSelect.addEventListener("change", () => {
+          let districts = locationsData[regionSelect.value] || {};
+          let districtSelect = document.getElementById("district");
+          districtSelect.innerHTML = '<option value="">Оберіть район</option>';
+          Object.keys(districts).forEach(district => {
+            let opt = document.createElement("option");
+            opt.value = district;
+            opt.textContent = district;
+            districtSelect.appendChild(opt);
+          });
+          // Очищаємо місто
+          document.getElementById("city").innerHTML = '<option value="">Оберіть місто</option>';
+        });
+        // При зміні району заповнюємо населені пункти
+        document.getElementById("district").addEventListener("change", () => {
+          let districts = locationsData[regionSelect.value] || {};
+          let cities = districts[document.getElementById("district").value] || [];
+          let citySelect = document.getElementById("city");
+          citySelect.innerHTML = '<option value="">Оберіть місто</option>';
+          cities.forEach(city => {
+            let opt = document.createElement("option");
+            opt.value = city;
+            opt.textContent = city;
+            citySelect.appendChild(opt);
+          });
+        });
+      } catch (error) {
+        console.error("Помилка завантаження зовнішніх даних:", error);
+      }
+    }
+    
+    loadExternalData();
+    
+    // Функція для попереднього заповнення форми (при редагуванні)
     function prefillForm(prefillData) {
       document.getElementById('fghName').value = prefillData.fgh_name || "";
       document.getElementById('edrpou').value = prefillData.edrpou || "";
+      // Для select'ів встановлюємо вибрані значення
       document.getElementById('region').value = prefillData.region || "";
-      document.getElementById('district').value = prefillData.district || "";
-      document.getElementById('city').value = prefillData.city || "";
+      // Для district і city потрібно тригерити change, тому затримка
+      setTimeout(() => {
+        document.getElementById('district').value = prefillData.district || "";
+        let event = new Event('change');
+        document.getElementById('district').dispatchEvent(event);
+        setTimeout(() => {
+          document.getElementById('city').value = prefillData.city || "";
+        }, 300);
+      }, 300);
       document.getElementById('culture').value = prefillData.culture || "";
       document.getElementById('quantity').value = prefillData.quantity || "";
       document.getElementById('price').value = prefillData.price || "";
@@ -120,7 +172,7 @@
       document.getElementById('comment').value = prefillData.comment || "";
     }
     
-    // Перевірка query-параметра data для попереднього заповнення
+    // Перевірка query-параметра data
     const urlParams = new URLSearchParams(window.location.search);
     const prefill = urlParams.get('data');
     if (prefill) {
@@ -137,47 +189,14 @@
     // Ініціалізація Telegram WebApp
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
-
-    // Перевірка поля ЄДРПОУ: має бути або порожнім, або рівно 8 цифр
-    document.getElementById('edrpou').addEventListener('input', function() {
-      const val = this.value.trim();
-      const errorDiv = document.getElementById('edrpouError');
-      if (val && !/^\d{8}$/.test(val)) {
-        errorDiv.textContent = "ЄДРПОУ має містити рівно 8 цифр або бути порожнім.";
-      } else {
-        errorDiv.textContent = "";
-      }
-    });
-    
-    // Перевірка кількості
-    document.getElementById('quantity').addEventListener('input', function() {
-      const val = this.value.trim();
-      const errorDiv = document.getElementById('quantityError');
-      if (val && isNaN(val)) {
-        errorDiv.textContent = "Введіть числове значення для кількості.";
-      } else {
-        errorDiv.textContent = "";
-      }
-    });
-    
-    // Перевірка бажаної ціни
-    document.getElementById('price').addEventListener('input', function() {
-      const val = this.value.trim();
-      const errorDiv = document.getElementById('priceError');
-      if (val && isNaN(val)) {
-        errorDiv.textContent = "Введіть числове значення для ціни.";
-      } else {
-        errorDiv.textContent = "";
-      }
-    });
     
     // Перехід від Кроку 1 до Кроку 2
     document.getElementById('nextBtn').addEventListener('click', () => {
-      const region = document.getElementById('region').value.trim();
-      const district = document.getElementById('district').value.trim();
-      const city = document.getElementById('city').value.trim();
+      const region = document.getElementById('region').value;
+      const district = document.getElementById('district').value;
+      const city = document.getElementById('city').value;
       if (!region || !district || !city) {
-        alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
+        alert("Будь ласка, оберіть усі обов'язкові поля для локації!");
         return;
       }
       document.getElementById('page1').classList.add('hidden');
@@ -188,22 +207,20 @@
     document.getElementById('submitBtn').addEventListener('click', () => {
       const fghName = document.getElementById('fghName').value.trim();
       const edrpou = document.getElementById('edrpou').value.trim();
-      const region = document.getElementById('region').value.trim();
-      const district = document.getElementById('district').value.trim();
-      const city = document.getElementById('city').value.trim();
-      const culture = document.getElementById('culture').value.trim();
+      const region = document.getElementById('region').value;
+      const district = document.getElementById('district').value;
+      const city = document.getElementById('city').value;
+      const culture = document.getElementById('culture').value;
       const quantity = document.getElementById('quantity').value.trim();
       const price = document.getElementById('price').value.trim();
       const paytype = document.getElementById('paytype').value;
       const comment = document.getElementById('comment').value.trim();
       
-      // Перевірка обов'язкових полів на Кроці 2
       if (!culture || !quantity || !price || !paytype) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
       
-      // Отримання user_id з Telegram WebApp (якщо не отримано, використовується дефолтне значення)
       let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
       if (userId === null) {
         userId = 1124775269;
@@ -226,7 +243,7 @@
       
       console.log("Заявка заповнена. Payload:", payload);
       
-      fetch("https://agro-api-url.onrender.com/submit_app", {
+      fetch("https://agro-api-url.onrender.com/api/webapp_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
