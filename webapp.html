@@ -54,7 +54,7 @@
         <label for="edrpou">Код ЄДРПОУ (8 цифр, не обов’язково):</label>
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ">
         
-        <!-- Замість простих текстових полів використовуємо select для локацій -->
+        <!-- Використовуємо select для локацій -->
         <label for="region">Область:</label>
         <select id="region" required></select>
         <label for="district">Район:</label>
@@ -91,72 +91,98 @@
   </div>
   
   <script>
-    // Завантаження даних з зовнішніх JSON для культур та локацій
-    async function loadExternalData() {
-      try {
-        // Завантаження культур
-        let culturesResp = await fetch("https://raw.githubusercontent.com/danza13/data/main/cultures.json");
-        let culturesData = await culturesResp.json();
-        let cultureSelect = document.getElementById("culture");
-        cultureSelect.innerHTML = '<option value="">Оберіть культуру</option>';
-        culturesData.forEach(item => {
-          let opt = document.createElement("option");
-          opt.value = item;
-          opt.textContent = item;
-          cultureSelect.appendChild(opt);
-        });
-        // Завантаження локацій
-        let locationsResp = await fetch("https://raw.githubusercontent.com/danza13/data/main/locations.json");
-        let locationsData = await locationsResp.json();
-        let regionSelect = document.getElementById("region");
-        regionSelect.innerHTML = '<option value="">Оберіть область</option>';
-        Object.keys(locationsData).forEach(region => {
-          let opt = document.createElement("option");
-          opt.value = region;
-          opt.textContent = region;
-          regionSelect.appendChild(opt);
-        });
-        // При зміні області заповнюємо райони
-        regionSelect.addEventListener("change", () => {
-          let districts = locationsData[regionSelect.value] || {};
-          let districtSelect = document.getElementById("district");
-          districtSelect.innerHTML = '<option value="">Оберіть район</option>';
-          Object.keys(districts).forEach(district => {
-            let opt = document.createElement("option");
-            opt.value = district;
-            opt.textContent = district;
-            districtSelect.appendChild(opt);
-          });
-          // Очищаємо місто
-          document.getElementById("city").innerHTML = '<option value="">Оберіть місто</option>';
-        });
-        // При зміні району заповнюємо населені пункти
-        document.getElementById("district").addEventListener("change", () => {
-          let districts = locationsData[regionSelect.value] || {};
-          let cities = districts[document.getElementById("district").value] || [];
-          let citySelect = document.getElementById("city");
-          citySelect.innerHTML = '<option value="">Оберіть місто</option>';
-          cities.forEach(city => {
-            let opt = document.createElement("option");
-            opt.value = city;
-            opt.textContent = city;
-            citySelect.appendChild(opt);
-          });
-        });
-      } catch (error) {
-        console.error("Помилка завантаження зовнішніх даних:", error);
+    // Жорстко задані дані для культур
+    const culturesData = [
+      "Пшениця",
+      "Ячмінь",
+      "Кукурудза",
+      "Соя",
+      "Соняшник",
+      "Ріпак",
+      "Овес"
+    ];
+    
+    // Жорстко задані дані для локацій
+    const locationsData = {
+      "Київська область": {
+        "Біла Церква": ["Біла Церква", "Сквира", "Кагарлик"],
+        "Бровари": ["Бровари"],
+        "Ірпінь": ["Ірпінь"]
+      },
+      "Львівська область": {
+        "Львів": ["Львів"],
+        "Дрогобицький район": ["Дрогобиць", "Невиць", "Броди"],
+        "Сокальський район": ["Сокаль", "Копачів"]
+      },
+      "Одеська область": {
+        "Одеса": ["Одеса"],
+        "Ізмаїльський район": ["Ізмаїл", "Кілія"],
+        "Білгород-Дністровський район": ["Білгород-Дністровський", "Енергодар"]
       }
+    };
+
+    // Функція заповнення select для культур
+    function loadCultures() {
+      let cultureSelect = document.getElementById("culture");
+      cultureSelect.innerHTML = '<option value="">Оберіть культуру</option>';
+      culturesData.forEach(item => {
+        let opt = document.createElement("option");
+        opt.value = item;
+        opt.textContent = item;
+        cultureSelect.appendChild(opt);
+      });
     }
     
-    loadExternalData();
+    // Функція заповнення select для локацій (областей, районів, міст)
+    function loadLocations() {
+      let regionSelect = document.getElementById("region");
+      regionSelect.innerHTML = '<option value="">Оберіть область</option>';
+      Object.keys(locationsData).forEach(region => {
+        let opt = document.createElement("option");
+        opt.value = region;
+        opt.textContent = region;
+        regionSelect.appendChild(opt);
+      });
+      
+      // При зміні області заповнюємо райони
+      regionSelect.addEventListener("change", () => {
+        let districts = locationsData[regionSelect.value] || {};
+        let districtSelect = document.getElementById("district");
+        districtSelect.innerHTML = '<option value="">Оберіть район</option>';
+        Object.keys(districts).forEach(district => {
+          let opt = document.createElement("option");
+          opt.value = district;
+          opt.textContent = district;
+          districtSelect.appendChild(opt);
+        });
+        // Очищаємо місто
+        document.getElementById("city").innerHTML = '<option value="">Оберіть місто</option>';
+      });
+      
+      // При зміні району заповнюємо населені пункти
+      document.getElementById("district").addEventListener("change", () => {
+        let districts = locationsData[regionSelect.value] || {};
+        let cities = districts[document.getElementById("district").value] || [];
+        let citySelect = document.getElementById("city");
+        citySelect.innerHTML = '<option value="">Оберіть місто</option>';
+        cities.forEach(city => {
+          let opt = document.createElement("option");
+          opt.value = city;
+          opt.textContent = city;
+          citySelect.appendChild(opt);
+        });
+      });
+    }
+    
+    // Викликаємо завантаження даних
+    loadCultures();
+    loadLocations();
     
     // Функція для попереднього заповнення форми (при редагуванні)
     function prefillForm(prefillData) {
       document.getElementById('fghName').value = prefillData.fgh_name || "";
       document.getElementById('edrpou').value = prefillData.edrpou || "";
-      // Для select'ів встановлюємо вибрані значення
       document.getElementById('region').value = prefillData.region || "";
-      // Для district і city потрібно тригерити change, тому затримка
       setTimeout(() => {
         document.getElementById('district').value = prefillData.district || "";
         let event = new Event('change');
@@ -172,7 +198,7 @@
       document.getElementById('comment').value = prefillData.comment || "";
     }
     
-    // Перевірка query-параметра data
+    // Перевірка query-параметра data для попереднього заповнення
     const urlParams = new URLSearchParams(window.location.search);
     const prefill = urlParams.get('data');
     if (prefill) {
