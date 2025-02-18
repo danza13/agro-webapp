@@ -37,13 +37,33 @@
     h2 { margin-bottom: 15px; }
     label { display: block; text-align: left; font-weight: bold; margin: 10px 0 5px; }
     input, select, textarea, button {
-      width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none; box-sizing: border-box; font-size: 16px;
+      width: 100%; 
+      padding: 10px; 
+      margin-bottom: 10px; 
+      border-radius: 5px; 
+      border: none; 
+      box-sizing: border-box; 
+      font-size: 16px;
     }
-    button { background: #007bff; color: #fff; cursor: pointer; transition: background 0.3s ease; }
+    button { 
+      background: #007bff; 
+      color: #fff; 
+      cursor: pointer; 
+      transition: background 0.3s ease;
+      border: none;
+    }
     button:hover { background: #0056b3; }
     .hidden { display: none; }
+    /* Контейнер для кнопок */
+    .button-container {
+      display: flex;
+      justify-content: space-between;
+    }
+    .button-container button {
+      width: 48%;
+    }
     
-    /* Стилі для директиви dropdownList (залишається для локації) */
+    /* Стилі для директиви dropdownList (для локації) */
     .dropdown-container {
       position: relative;
       text-align: left;
@@ -121,7 +141,11 @@
         <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
         
-        <button id="nextBtn2">Далі</button>
+        <!-- Контейнер кнопок: Назад і Далі -->
+        <div class="button-container">
+          <button id="backBtn2" type="button">Назад</button>
+          <button id="nextBtn2" type="button">Далі</button>
+        </div>
       </div>
       
       <!-- Крок 3: Оплата -->
@@ -143,7 +167,11 @@
           <option value="">Оберіть форму оплати</option>
         </select>
         
-        <button id="submitBtn">Підтвердити заявку</button>
+        <!-- Контейнер кнопок: Назад і Підтвердити заявку -->
+        <div class="button-container">
+          <button id="backBtn3" type="button">Назад</button>
+          <button id="submitBtn" type="button">Підтвердити заявку</button>
+        </div>
       </div>
     </div>
   </div>
@@ -151,7 +179,7 @@
   <!-- AngularJS: модуль, контролери та директива dropdownList -->
   <script>
     angular.module('app', [])
-      // Директива dropdownList для локації (залишається без змін)
+      // Директива dropdownList для локації (без змін)
       .directive('dropdownList', function() {
         return {
           restrict: 'E',
@@ -232,7 +260,7 @@
           }
         });
       }])
-      // Контролер для кроку 2: вибір групи та культур (сортування за алфавітом)
+      // Контролер для кроку 2: вибір групи та культур із сортуванням за алфавітом
       .controller('step2Ctrl', ['$scope', function($scope) {
         const cultureGroups = {
           "Зернова": [
@@ -274,17 +302,15 @@
       }]);
   </script>
   
-  <!-- Основна логіка для кроку 3 -->
+  <!-- Логіка для кроку 3 -->
   <script>
     /* --- Крок 3: Робота з оплатою --- */
-    // Об'єкт з варіантами форми оплати для кожної валюти
     const paymentForms = {
       "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
       "Долар": ["Валютний контракт", "Готівка"],
       "Євро": ["Валютний контракт"]
     };
   
-    // Оновлення списку форми оплати при зміні валюти
     document.getElementById("currency").addEventListener("change", function() {
       const currency = this.value;
       const paymentSelect = document.getElementById("paymentForm");
@@ -299,16 +325,17 @@
       }
     });
   
-    // Фільтрація вводу для ЄДРПОУ: дозволяємо лише цифри
+    // Фільтрація вводу для ЄДРПОУ
     document.getElementById("edrpou").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
     
-    // Фільтрація вводу для бажаної ціни: дозволяємо лише цифри
+    // Фільтрація вводу для бажаної ціни
     document.getElementById("price").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
     
+    // Перехід з кроку 1 до кроку 2
     document.getElementById("nextBtn1").addEventListener("click", function() {
       const edrpou = document.getElementById("edrpou").value;
       if(edrpou && !(edrpou.length === 8 || edrpou.length === 10)) {
@@ -324,6 +351,13 @@
       document.getElementById("page2").classList.remove("hidden");
     });
     
+    // Кнопка "Назад" на кроці 2
+    document.getElementById("backBtn2").addEventListener("click", function() {
+      document.getElementById("page2").classList.add("hidden");
+      document.getElementById("page1").classList.remove("hidden");
+    });
+    
+    // Перехід з кроку 2 до кроку 3
     document.getElementById("nextBtn2").addEventListener("click", function() {
       var scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
       if(!scope.selectedGroup || !scope.selectedCulture || !document.getElementById("quantity").value) {
@@ -334,6 +368,13 @@
       document.getElementById("page3").classList.remove("hidden");
     });
     
+    // Кнопка "Назад" на кроці 3
+    document.getElementById("backBtn3").addEventListener("click", function() {
+      document.getElementById("page3").classList.add("hidden");
+      document.getElementById("page2").classList.remove("hidden");
+    });
+    
+    // Відправка заявки
     document.getElementById("submitBtn").addEventListener("click", function() {
       if(!document.getElementById("currency").value || !document.getElementById("paymentForm").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
@@ -352,9 +393,9 @@
       const culture  = step2Scope.selectedCulture;
       const quantity = document.getElementById("quantity").value.trim();
       
-      const price        = document.getElementById("price").value.trim();
-      const currency     = document.getElementById("currency").value;
-      const paymentForm  = document.getElementById("paymentForm").value;
+      const price       = document.getElementById("price").value.trim();
+      const currency    = document.getElementById("currency").value;
+      const paymentForm = document.getElementById("paymentForm").value;
       
       let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : 1124775269;
       
