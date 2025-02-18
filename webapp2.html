@@ -41,7 +41,7 @@
     button:hover { background: #0056b3; }
     .hidden { display: none; }
 
-    /* Стилі для кастомного випадаючого списку */
+    /* Стилі для кастомного випадаючого списку з пошуком */
     .dropdown {
       position: relative;
       width: 100%;
@@ -90,6 +90,16 @@
     }
     .dropdown-menu li:hover {
       background-color: #f0f0f0;
+    }
+    
+    /* Стилі для простого випадаючого списку */
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      box-sizing: border-box;
+      font-size: 16px;
     }
   </style>
   <!-- Підключення Telegram WebApp -->
@@ -145,13 +155,13 @@
                ng-change="formData.price = formData.price.replace(/\D/g, '')">
         
         <label>Вибір валюти:</label>
-        <dropdown-list data-items-list="currencies" data-placeholder="Оберіть валюту" model="formData.currency"></dropdown-list>
+        <simple-dropdown data-items-list="currencies" data-placeholder="Оберіть валюту" model="formData.currency"></simple-dropdown>
         
         <label>Вибір форми:</label>
-        <dropdown-list data-items-list="forms" data-placeholder="Оберіть форму" model="formData.form"></dropdown-list>
+        <simple-dropdown data-items-list="forms" data-placeholder="Оберіть форму" model="formData.form"></simple-dropdown>
         
         <label>Тип оплати:</label>
-        <dropdown-list data-items-list="paytypes" data-placeholder="Оберіть тип оплати" model="formData.paytype"></dropdown-list>
+        <simple-dropdown data-items-list="paytypes" data-placeholder="Оберіть тип оплати" model="formData.paytype"></simple-dropdown>
         
         <button ng-click="submitForm()">Підтвердити заявку</button>
       </div>
@@ -161,8 +171,8 @@
   <script>
     var app = angular.module('app', []);
     
-    // Директива dropdown-list з підтримкою пошуку
-    app.directive('dropdownList', function($document, $timeout) {
+    // Директива dropdown-list з пошуком (для полів з великою кількістю елементів)
+    app.directive('dropdownList', function($document) {
       return {
         restrict: 'E',
         scope: {
@@ -212,6 +222,23 @@
             $document.off('click', handleClick);
           });
         }
+      };
+    });
+    
+    // Директива simple-dropdown (без поля пошуку)
+    app.directive('simpleDropdown', function() {
+      return {
+        restrict: 'E',
+        scope: {
+          itemsList: '=',
+          placeholder: '@',
+          model: '='
+        },
+        template: `
+          <select ng-model="model" ng-options="item for item in itemsList">
+            <option value="">{{ placeholder }}</option>
+          </select>
+        `
       };
     });
     
