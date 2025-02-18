@@ -102,11 +102,11 @@
       </div>
       
       <!-- Крок 2: Деталі заявки -->
-      <!-- Додаємо контролер step2Ctrl для управління культурою та групою -->
+      <!-- Використовуємо один контролер step2Ctrl для вибору культури та групи -->
       <div id="page2" class="hidden" ng-controller="step2Ctrl">
         <h2>Крок 2: Деталі заявки</h2>
         <label for="culture">Вибір культури:</label>
-        <select id="culture" ng-model="selectedCulture" ng-change="updateGroups(selectedCulture)" required>
+        <select id="culture" ng-model="selectedCulture" ng-change="updateGroups()" required>
           <option value="">Оберіть культуру</option>
           <option value="Зернова">Зернова</option>
           <option value="Олійна">Олійна</option>
@@ -115,11 +115,8 @@
           <option value="Нішеві культури">Нішеві культури</option>
         </select>
         
-        <!-- Контролер для групи -->
-        <div ng-controller="mainCtrlGroup">
-          <label>Вибір групи:</label>
-          <dropdown-list data-items-list="groups" data-placeholder="Оберіть групу" ng-model="selectedGroup"></dropdown-list>
-        </div>
+        <label>Вибір групи:</label>
+        <dropdown-list data-items-list="groups" data-placeholder="Оберіть групу" ng-model="selectedGroup"></dropdown-list>
         
         <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
@@ -156,11 +153,10 @@
     </div>
   </div>
   
-  <!-- AngularJS: створення модуля, контролерів та директиви -->
+  <!-- AngularJS: модуль, контролери та директива dropdownList -->
   <script>
-    // Створюємо модуль
     angular.module('app', [])
-      // Директива dropdownList
+      // Директива dropdownList із пошуком
       .directive('dropdownList', function() {
         return {
           restrict: 'E',
@@ -184,17 +180,17 @@
           link: function(scope, element, attrs) {
             scope.listVisible = false;
             scope.searchText = scope.ngModel || '';
-
+  
             scope.toggleList = function() {
               scope.listVisible = true;
             };
-
+  
             scope.selectItem = function(item) {
               scope.ngModel = item;
               scope.searchText = item;
               scope.listVisible = false;
             };
-
+  
             document.addEventListener('click', function(e) {
               if (!element[0].contains(e.target)) {
                 scope.$apply(function() {
@@ -205,7 +201,7 @@
           }
         };
       })
-      // Контролер для полів локації
+      // Контролер для локації
       .controller('mainCtrl', ['$scope', function($scope) {
         const locationsData = {
           "Київська область": {
@@ -224,14 +220,14 @@
             "Білгород-Дністровський район": ["Білгород-Дністровський", "Енергодар"]
           }
         };
-        
+  
         $scope.regions = Object.keys(locationsData);
         $scope.selectedRegion = "";
         $scope.selectedDistrict = "";
         $scope.selectedCity = "";
         $scope.districts = [];
         $scope.cities = [];
-        
+  
         $scope.$watch('selectedRegion', function(newVal) {
           if(newVal && locationsData[newVal]) {
             $scope.districts = Object.keys(locationsData[newVal]);
@@ -242,7 +238,7 @@
             $scope.selectedCity = "";
           }
         });
-        
+  
         $scope.$watch('selectedDistrict', function(newVal) {
           if(newVal && $scope.selectedRegion && locationsData[$scope.selectedRegion][newVal]) {
             $scope.cities = locationsData[$scope.selectedRegion][newVal];
@@ -252,20 +248,12 @@
           }
         });
       }])
-      // Контролер для груп культури
-      .controller('mainCtrlGroup', ['$scope', function($scope) {
+      // Контролер для кроку 2: вибір культури та групи
+      .controller('step2Ctrl', ['$scope', function($scope) {
+        $scope.selectedCulture = "";
         $scope.groups = [];
         $scope.selectedGroup = "";
-        window.updateGroupDropdown = function(newGroups) {
-          $scope.$apply(function() {
-            $scope.groups = newGroups || [];
-            $scope.selectedGroup = "";
-          });
-        };
-      }])
-      // Контролер для кроку 2 (управління культурою та виклик оновлення груп)
-      .controller('step2Ctrl', ['$scope', function($scope) {
-        // Глобальний об'єкт груп культур
+  
         const cultureGroups = {
           "Зернова": [
             "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "жито", "кукурудза кремніста",
@@ -289,31 +277,28 @@
             "Льон золотистий", "Льон коричневий", "Просо чорне"
           ]
         };
-
-        $scope.selectedCulture = "";
-        $scope.updateGroups = function(culture) {
-          if(culture && cultureGroups[culture]) {
-            window.updateGroupDropdown(cultureGroups[culture]);
+  
+        $scope.updateGroups = function() {
+          if($scope.selectedCulture && cultureGroups[$scope.selectedCulture]){
+            $scope.groups = cultureGroups[$scope.selectedCulture];
           } else {
-            window.updateGroupDropdown([]);
+            $scope.groups = [];
+            $scope.selectedGroup = "";
           }
         };
       }]);
   </script>
   
-  <!-- Основна логіка WebApp -->
+  <!-- Основна логіка WebApp (залишилось без змін) -->
   <script>
-    /* ====== Обмеження для поля Код ЄДРПОУ ====== */
     document.getElementById("edrpou").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
     
-    /* ====== Обмеження для поля Бажана ціна ====== */
     document.getElementById("price").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
     
-    /* ====== Перехід між кроками ====== */
     document.getElementById("nextBtn1").addEventListener("click", function() {
       const edrpou = document.getElementById("edrpou").value;
       if(edrpou && edrpou.length !== 8) {
@@ -330,9 +315,9 @@
     });
     
     document.getElementById("nextBtn2").addEventListener("click", function() {
-      const culture = document.getElementById("culture").value;
-      var groupScope = angular.element(document.querySelector('[ng-controller="mainCtrlGroup"]')).scope();
-      if(!culture || !groupScope.selectedGroup || !document.getElementById("quantity").value) {
+      // Отримання значень з контролера step2Ctrl
+      var scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
+      if(!scope.selectedCulture || !scope.selectedGroup || !document.getElementById("quantity").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
@@ -340,7 +325,6 @@
       document.getElementById("page3").classList.remove("hidden");
     });
     
-    /* ====== Фінальна відправка ====== */
     document.getElementById("submitBtn").addEventListener("click", function() {
       if(!document.getElementById("currency").value || !document.getElementById("form").value || !document.getElementById("paytype").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
@@ -355,8 +339,8 @@
       const city      = locScope.selectedCity;
       
       const culture   = document.getElementById("culture").value;
-      var groupScope = angular.element(document.querySelector('[ng-controller="mainCtrlGroup"]')).scope();
-      const group     = groupScope.selectedGroup;
+      var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
+      const group     = step2Scope.selectedGroup;
       const quantity  = document.getElementById("quantity").value.trim();
       
       const price     = document.getElementById("price").value.trim();
@@ -364,11 +348,7 @@
       const form      = document.getElementById("form").value;
       const paytype   = document.getElementById("paytype").value;
       
-      let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
-      if(userId === null) {
-        userId = 1124775269;
-        console.log("userId не отримано, встановлено дефолтне значення:", userId);
-      }
+      let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : 1124775269;
       
       const payload = {
         user_id: userId,
@@ -411,60 +391,6 @@
         alert("Помилка при відправленні даних. Спробуйте ще раз.");
       });
     });
-    
-    /* ====== Попереднє заповнення форми ====== */
-    function prefillForm(prefillData) {
-      document.getElementById("fghName").value = prefillData.fgh_name || "";
-      document.getElementById("edrpou").value = prefillData.edrpou || "";
-      
-      var locScope = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
-      locScope.$apply(function(){
-        locScope.selectedRegion = prefillData.region || "";
-        locScope.selectedDistrict = prefillData.district || "";
-        locScope.selectedCity = prefillData.city || "";
-      });
-      
-      document.getElementById("culture").value = prefillData.culture || "";
-      // Викликаємо функцію оновлення груп із контролера step2Ctrl
-      var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
-      step2Scope.$apply(function(){
-        step2Scope.selectedCulture = prefillData.culture || "";
-        step2Scope.updateGroups(prefillData.culture);
-      });
-      
-      setTimeout(() => {
-        var groupScope = angular.element(document.querySelector('[ng-controller="mainCtrlGroup"]')).scope();
-        groupScope.$apply(function(){
-          groupScope.selectedGroup = prefillData.group || "";
-        });
-      }, 300);
-      
-      document.getElementById("quantity").value = prefillData.quantity || "";
-      document.getElementById("price").value = prefillData.price || "";
-      document.getElementById("currency").value = prefillData.currency || "";
-      document.getElementById("currency").dispatchEvent(new Event('change'));
-      setTimeout(() => {
-        document.getElementById("form").value = prefillData.form || "";
-        document.getElementById("form").dispatchEvent(new Event('change'));
-        setTimeout(() => {
-          document.getElementById("paytype").value = prefillData.paytype || "";
-          document.getElementById("page1").classList.add("hidden");
-          document.getElementById("page2").classList.add("hidden");
-          document.getElementById("page3").classList.remove("hidden");
-        }, 300);
-      }, 300);
-    }
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const prefill = urlParams.get("data");
-    if(prefill) {
-      try {
-        const dataObj = JSON.parse(decodeURIComponent(prefill));
-        prefillForm(dataObj);
-      } catch(e) {
-        console.error("Помилка при розборі prefill даних:", e);
-      }
-    }
     
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
