@@ -91,7 +91,7 @@
     .dropdown-list div:hover {
       background: #f0f0f0;
     }
-    /* Стилі для прикладів заповнення (placeholder) */
+    /* Стилі для placeholder */
     input::placeholder {
       color: rgba(0,0,0,0.5);
     }
@@ -256,7 +256,7 @@
     </div>
   </div>
   
-  <!-- AngularJS: модуль, контролери, директива dropdownList та директива formatDecimal -->
+  <!-- AngularJS: модуль, контролери, директиви -->
   <script>
     angular.module('app', [])
       // Директива dropdownList для локації (без змін)
@@ -304,39 +304,41 @@
           }
         };
       })
-      // Директива formatDecimal для додаткових полів (дозволяє формат XX.X, приймає крапку чи кому)
+      // Директива formatDecimal для додаткових полів
       .directive('formatDecimal', function() {
         return {
           require: 'ngModel',
           link: function(scope, element, attrs, ngModel) {
-            function fromUser(text) {
-              if (!text) return text;
-              text = text.replace(',', '.');
+            // Валідатор: дозволено тільки число з 0 або 1 десятковою цифрою
+            ngModel.$validators.decimal = function(modelValue, viewValue) {
+              var value = modelValue || viewValue;
+              if (!value) return true; // пусте значення допустиме
+              value = value.toString().replace(',', '.');
               var regex = /^\d+(?:\.\d)?$/;
-              if(regex.test(text)) {
-                return text;
-              } else {
-                // Якщо введено невірний формат, повертаємо undefined
-                return undefined;
-              }
-            }
-            function toUser(value) {
-              if(value === undefined || value === null || value === '') return value;
+              return regex.test(value);
+            };
+  
+            // Парсер: замінюємо кому на крапку
+            ngModel.$parsers.push(function(value) {
+              if (!value) return value;
+              return value.replace(',', '.');
+            });
+  
+            // Форматер: якщо нема десяткової частини – додаємо ".0"
+            ngModel.$formatters.push(function(value) {
+              if (value === undefined || value === null || value === '') return value;
               value = value.toString().replace(',', '.');
               if(value.indexOf('.') === -1) {
                 return value + '.0';
               }
               return value;
-            }
-            ngModel.$parsers.push(fromUser);
-            ngModel.$formatters.push(toUser);
+            });
+  
             element.on('blur', function() {
               var value = ngModel.$modelValue;
-              if(value !== undefined && value !== null && value !== '') {
-                if(value.toString().indexOf('.') === -1) {
-                  ngModel.$setViewValue(value + '.0');
-                  ngModel.$render();
-                }
+              if (value && value.toString().indexOf('.') === -1) {
+                ngModel.$setViewValue(value + '.0');
+                ngModel.$render();
               }
             });
           }
@@ -421,7 +423,7 @@
       }]);
   </script>
   
-  <!-- Логіка для кроку 3 -->
+  <!-- Логіка для кроку 3 та перевірка додаткових полів -->
   <script>
     /* --- Крок 3: Робота з оплатою --- */
     const paymentForms = {
@@ -476,12 +478,24 @@
       document.getElementById("page1").classList.remove("hidden");
     });
     
-    // Перехід з кроку 2 до кроку 3
+    // Перехід з кроку 2 до кроку 3 із валідацією додаткових полів
     document.getElementById("nextBtn2").addEventListener("click", function() {
-      var scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
-      if(!scope.selectedGroup || !scope.selectedCulture || !document.getElementById("quantity").value) {
+      var scope2 = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
+      if(!scope2.selectedGroup || !scope2.selectedCulture || !document.getElementById("quantity").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
+      }
+      // Перевірка кожного з додаткових полів (якщо значення введено)
+      var extra = scope2.extraFields;
+      var regex = /^\d+(?:[\.,]\d)?$/;
+      for(var key in extra) {
+        if(extra.hasOwnProperty(key) && extra[key]) {
+          var val = extra[key].toString().replace(',', '.');
+          if(!regex.test(val)) {
+            alert("Некоректний формат у полі '" + key + "'. Будь ласка, введіть число у форматі XX.X (одна десяткова цифра).");
+            return;
+          }
+        }
       }
       document.getElementById("page2").classList.add("hidden");
       document.getElementById("page3").classList.remove("hidden");
