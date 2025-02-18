@@ -276,7 +276,7 @@
         alert("Код ЄДРПОУ повинен містити 8 цифр або бути порожнім.");
         return;
       }
-      // Перевірка для Angular dropdown‑списків (значення беруться із внутрішнього input)
+      // Перевірка для Angular dropdown‑списків (значення беруться з атрибута value)
       if(!document.getElementById("region").value || !document.getElementById("district").value || !document.getElementById("city").value) {
         alert("Будь ласка, оберіть усі обов'язкові поля для локації!");
         return;
@@ -502,6 +502,11 @@
           scope.onInputChange = function() {
             scope.dropdownVisible = true;
           };
+          
+          // Додаємо функцію синхронізації значення з атрибутом value
+          scope.$watch('model', function(newValue) {
+            element[0].setAttribute("value", newValue);
+          });
           
           // Закриваємо список при кліку поза елементом
           document.addEventListener('click', function(e) {
