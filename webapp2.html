@@ -34,12 +34,63 @@
     }
     h2 { margin-bottom: 15px; }
     label { display: block; text-align: left; font-weight: bold; margin: 10px 0 5px; }
-    input, select, textarea, button {
+    input, button {
       width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none; box-sizing: border-box; font-size: 16px;
     }
     button { background: #007bff; color: #fff; cursor: pointer; transition: background 0.3s ease; }
     button:hover { background: #0056b3; }
     .hidden { display: none; }
+
+    /* Стилі для кастомного випадаючого списку */
+    .dropdown {
+      position: relative;
+      width: 100%;
+    }
+    .dropdown .selected {
+      background-color: #fff;
+      color: #000;
+      padding: 10px;
+      border-radius: 5px;
+      text-align: left;
+      cursor: pointer;
+    }
+    .dropdown .selected.placeholder {
+      color: #888;
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background-color: #fff;
+      color: #000;
+      max-height: 200px;
+      overflow-y: auto;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 1000;
+      margin-top: 5px;
+    }
+    .dropdown-menu input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: none;
+      border-bottom: 1px solid #ddd;
+      outline: none;
+    }
+    .dropdown-menu ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .dropdown-menu li {
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+    .dropdown-menu li:hover {
+      background-color: #f0f0f0;
+    }
   </style>
   <!-- Підключення Telegram WebApp -->
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
@@ -110,8 +161,8 @@
   <script>
     var app = angular.module('app', []);
     
-    // Директива dropdown-list: створює випадаючий список за даними itemsList
-    app.directive('dropdownList', function() {
+    // Директива dropdown-list з підтримкою пошуку
+    app.directive('dropdownList', function($document, $timeout) {
       return {
         restrict: 'E',
         scope: {
@@ -119,9 +170,48 @@
           placeholder: '@',
           model: '='
         },
-        template: '<select ng-model="model" ng-options="item for item in itemsList" required>' +
-                  '  <option value="">{{ placeholder }}</option>' +
-                  '</select>'
+        template: `
+          <div class="dropdown">
+            <div class="selected" ng-class="{'placeholder': !model}" ng-click="toggleDropdown()">
+              {{ model || placeholder }}
+            </div>
+            <div class="dropdown-menu" ng-show="isOpen">
+              <input type="text" ng-model="filterText" placeholder="Пошук..." ng-click="$event.stopPropagation()">
+              <ul>
+                <li ng-repeat="item in itemsList | filter:filterText" ng-click="selectItem(item)">{{item}}</li>
+              </ul>
+            </div>
+          </div>
+        `,
+        link: function(scope, element) {
+          scope.isOpen = false;
+          scope.filterText = "";
+          
+          scope.toggleDropdown = function() {
+            scope.isOpen = !scope.isOpen;
+            scope.filterText = "";
+          };
+          
+          scope.selectItem = function(item) {
+            scope.model = item;
+            scope.isOpen = false;
+          };
+          
+          // Закриття випадаючого меню при кліку поза його областю
+          function handleClick(event) {
+            if (!element[0].contains(event.target)) {
+              scope.$apply(function() {
+                scope.isOpen = false;
+              });
+            }
+          }
+          
+          $document.on('click', handleClick);
+          
+          scope.$on('$destroy', function() {
+            $document.off('click', handleClick);
+          });
+        }
       };
     });
     
