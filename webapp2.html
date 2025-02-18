@@ -105,14 +105,14 @@
       <!-- Крок 2: Деталі заявки -->
       <div id="page2" class="hidden" ng-controller="step2Ctrl">
         <h2>Крок 2: Деталі заявки</h2>
-        <!-- Вибір групи: це ключі об'єкта cultureGroups -->
+        <!-- Вибір групи: це ключі об'єкта cultureGroups, відсортовані за алфавітом -->
         <label for="groupSelect">Вибір групи:</label>
         <select id="groupSelect" ng-model="selectedGroup" required>
           <option value="">Оберіть групу</option>
           <option ng-repeat="group in groups" value="{{group}}">{{group}}</option>
         </select>
         
-        <!-- Вибір культури: тепер це звичайний select без можливості вводу -->
+        <!-- Вибір культури: стандартний select, дані відсортовані за алфавітом -->
         <label for="cultureSelect">Вибір культури:</label>
         <select id="cultureSelect" ng-model="selectedCulture" required>
           <option value="">Оберіть культуру</option>
@@ -241,7 +241,7 @@
           }
         });
       }])
-      // Контролер для кроку 2: вибір групи та культур
+      // Контролер для кроку 2: вибір групи та культур із сортуванням за алфавітом
       .controller('step2Ctrl', ['$scope', function($scope) {
         // Об'єкт, що містить відповідність: група -> список культур
         const cultureGroups = {
@@ -268,17 +268,18 @@
           ]
         };
   
-        // Групи – це ключі об'єкта cultureGroups
-        $scope.groups = Object.keys(cultureGroups);
+        // Групи – це ключі об'єкта cultureGroups, відсортовані за алфавітом
+        $scope.groups = Object.keys(cultureGroups).sort();
         $scope.selectedGroup = "";
-        // Список культур оновиться при виборі групи
+        // Список культур оновиться при виборі групи та буде відсортовано за алфавітом
         $scope.cultures = [];
         $scope.selectedCulture = "";
   
         // Слідкуємо за зміною вибраної групи
         $scope.$watch('selectedGroup', function(newVal) {
           if(newVal){
-            $scope.cultures = cultureGroups[newVal];
+            // Копіюємо масив і сортуємо
+            $scope.cultures = cultureGroups[newVal].slice().sort();
           } else {
             $scope.cultures = [];
             $scope.selectedCulture = "";
