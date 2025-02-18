@@ -309,13 +309,41 @@
         return {
           require: 'ngModel',
           link: function(scope, element, attrs, ngModel) {
-            // Валідатор: дозволено тільки число з 0 або 1 десятковою цифрою
+            var decimalRegex = /^\d+(?:[.,]\d)?$/; // дозволяє тільки число з необов'язковою однією десятковою цифрою
+            // Блокуємо введення недопустимих символів і надлишкових цифр після роздільника
+            element.on('keypress', function(e) {
+              var char = String.fromCharCode(e.which);
+              // Дозволяємо лише цифри, крапку або кому
+              if (!/[0-9\.,]/.test(char)) {
+                e.preventDefault();
+                return false;
+              }
+              var currentVal = element.val();
+              var selectionStart = element[0].selectionStart;
+              // Якщо символ – крапка або кома, і вже є роздільник, забороняємо
+              if ((char === '.' || char === ',') && (currentVal.indexOf('.') !== -1 || currentVal.indexOf(',') !== -1)) {
+                e.preventDefault();
+                return false;
+              }
+              // Якщо вже є десяткова частина і курсор після роздільника, забороняємо введення більше однієї цифри
+              var decIndex = currentVal.indexOf('.') !== -1 ? currentVal.indexOf('.') : currentVal.indexOf(',');
+              if(decIndex !== -1 && selectionStart > decIndex) {
+                var digitsAfter = currentVal.substring(decIndex + 1).length;
+                // Якщо нічого не виділено, і вже введено одна цифра після роздільника – блокуємо
+                var selectionEnd = element[0].selectionEnd;
+                if(digitsAfter >= 1 && (selectionEnd - selectionStart) === 0) {
+                  e.preventDefault();
+                  return false;
+                }
+              }
+            });
+  
+            // Валідатор – перевіряє формат
             ngModel.$validators.decimal = function(modelValue, viewValue) {
               var value = modelValue || viewValue;
               if (!value) return true; // пусте значення допустиме
               value = value.toString().replace(',', '.');
-              var regex = /^\d+(?:\.\d)?$/;
-              return regex.test(value);
+              return decimalRegex.test(value);
             };
   
             // Парсер: замінюємо кому на крапку
@@ -324,7 +352,7 @@
               return value.replace(',', '.');
             });
   
-            // Форматер: якщо нема десяткової частини – додаємо ".0"
+            // Форматер: якщо немає десяткової частини – додаємо ".0"
             ngModel.$formatters.push(function(value) {
               if (value === undefined || value === null || value === '') return value;
               value = value.toString().replace(',', '.');
@@ -487,7 +515,7 @@
       }
       // Перевірка кожного з додаткових полів (якщо значення введено)
       var extra = scope2.extraFields;
-      var regex = /^\d+(?:[\.,]\d)?$/;
+      var regex = /^\d+(?:[.,]\d)?$/;
       for(var key in extra) {
         if(extra.hasOwnProperty(key) && extra[key]) {
           var val = extra[key].toString().replace(',', '.');
