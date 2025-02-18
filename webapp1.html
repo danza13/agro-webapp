@@ -112,9 +112,12 @@
           <option ng-repeat="group in groups" value="{{group}}">{{group}}</option>
         </select>
         
-        <!-- Вибір культури: після вибору групи з'являється перелік культур -->
-        <label>Вибір культури:</label>
-        <dropdown-list data-items-list="cultures" data-placeholder="Оберіть культуру" ng-model="selectedCulture"></dropdown-list>
+        <!-- Вибір культури: тепер це звичайний select без можливості вводу -->
+        <label for="cultureSelect">Вибір культури:</label>
+        <select id="cultureSelect" ng-model="selectedCulture" required>
+          <option value="">Оберіть культуру</option>
+          <option ng-repeat="culture in cultures" value="{{culture}}">{{culture}}</option>
+        </select>
         
         <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
@@ -154,7 +157,7 @@
   <!-- AngularJS: модуль, контролери та директива dropdownList -->
   <script>
     angular.module('app', [])
-      // Директива dropdownList із пошуком
+      // Директива dropdownList із пошуком (залишається для полів локації)
       .directive('dropdownList', function() {
         return {
           restrict: 'E',
