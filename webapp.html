@@ -200,36 +200,27 @@
           }
         };
       })
-      // Контролер для локації
-      .controller('mainCtrl', ['$scope', function($scope) {
-        const locationsData = {
-          "Київська область": {
-            "Біла Церква": ["Біла Церква", "Сквира", "Кагарлик"],
-            "Бровари": ["Бровари"],
-            "Ірпінь": ["Ірпінь"]
-          },
-          "Львівська область": {
-            "Львів": ["Львів"],
-            "Дрогобицький район": ["Дрогобиць", "Невиць", "Броди"],
-            "Сокальський район": ["Сокаль", "Копачів"]
-          },
-          "Одеська область": {
-            "Одеса": ["Одеса"],
-            "Ізмаїльський район": ["Ізмаїл", "Кілія"],
-            "Білгород-Дністровський район": ["Білгород-Дністровський", "Енергодар"]
-          }
-        };
-  
-        $scope.regions = Object.keys(locationsData);
+      // Контролер для локації (завантажує дані з data.json)
+      .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
         $scope.selectedRegion = "";
         $scope.selectedDistrict = "";
         $scope.selectedCity = "";
         $scope.districts = [];
         $scope.cities = [];
   
+        // Завантаження даних з файлу data.json
+        $http.get('data.json')
+          .then(function(response) {
+            $scope.locationsData = response.data;
+            $scope.regions = Object.keys($scope.locationsData);
+          }, function(error) {
+            console.error("Помилка завантаження даних:", error);
+          });
+  
+        // Відслідковування зміни області
         $scope.$watch('selectedRegion', function(newVal) {
-          if(newVal && locationsData[newVal]) {
-            $scope.districts = Object.keys(locationsData[newVal]);
+          if(newVal && $scope.locationsData[newVal]) {
+            $scope.districts = Object.keys($scope.locationsData[newVal]);
           } else {
             $scope.districts = [];
             $scope.selectedDistrict = "";
@@ -238,9 +229,10 @@
           }
         });
   
+        // Відслідковування зміни району
         $scope.$watch('selectedDistrict', function(newVal) {
-          if(newVal && $scope.selectedRegion && locationsData[$scope.selectedRegion][newVal]) {
-            $scope.cities = locationsData[$scope.selectedRegion][newVal];
+          if(newVal && $scope.selectedRegion && $scope.locationsData[$scope.selectedRegion][newVal]) {
+            $scope.cities = $scope.locationsData[$scope.selectedRegion][newVal];
           } else {
             $scope.cities = [];
             $scope.selectedCity = "";
