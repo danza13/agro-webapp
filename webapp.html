@@ -107,8 +107,8 @@
         <select id="currency" required>
           <option value="">Оберіть валюту</option>
           <option value="Грн">Грн</option>
-          <option value="доллар">доллар</option>
-          <option value="євро">євро</option>
+          <option value="Долар">Долар</option>
+          <option value="Євро">Євро</option>
         </select>
         
         <label for="form">Вибір форми:</label>
@@ -172,21 +172,21 @@
     };
     
     /* ====== Дані для форм оплати ====== */
-    // Для валюти "Грн" доступні всі форми; для "доллар" – Ф1 і Ф2; для "євро" – тільки Ф1
+    // Для валюти "Грн" доступні всі форми; для "Долар" – Ф1 і Ф2; для "Євро" – тільки Ф1
     const formsData = {
       "Грн": ["Ф1", "Ф2", "Ф3"],
-      "доллар": ["Ф1", "Ф2"],
-      "євро": ["Ф1"]
+      "Долар": ["Ф1", "Ф2"],
+      "Євро": ["Ф1"]
     };
     
     // Функція повертає доступні типи оплати залежно від вибраних валюти та форми
     function getPaytypes(currency, form) {
       if(form === "Ф1") {
         if(currency === "Грн") return ["Перерахунок з ПДВ"];
-        if(currency === "доллар" || currency === "євро") return ["Валютний контракт"];
+        if(currency === "Долар" || currency === "Євро") return ["Валютний контракт"];
       }
       if(form === "Ф2") {
-        if(currency === "Грн" || currency === "доллар") return ["Готівка"];
+        if(currency === "Грн" || currency === "Долар") return ["Готівка"];
       }
       if(form === "Ф3") {
         if(currency === "Грн") return ["Перерахунок без ПДВ"];
