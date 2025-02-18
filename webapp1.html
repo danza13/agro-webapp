@@ -91,6 +91,10 @@
     .dropdown-list div:hover {
       background: #f0f0f0;
     }
+    /* Стилі для прикладів заповнення (placeholder) */
+    input::placeholder {
+      color: rgba(0,0,0,0.5);
+    }
   </style>
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 </head>
@@ -138,6 +142,82 @@
           <option ng-repeat="culture in cultures" value="{{culture}}">{{culture}}</option>
         </select>
         
+        <!-- Блок додаткових полів (з'являється залежно від вибраної культури) -->
+        <div ng-if="selectedCulture">
+          <!-- Якщо обрано будь-яку з пшениць -->
+          <div ng-if="selectedCulture.indexOf('Пшениця') !== -1">
+            <label for="natura">Натура (Не обов'язково):</label>
+            <input type="text" id="natura" ng-model="extraFields.natura" format-decimal placeholder="Наприклад, 12.3">
+            <label for="bilok">Білок (Не обов'язково):</label>
+            <input type="text" id="bilok" ng-model="extraFields.bilok" format-decimal placeholder="Наприклад, 12.3">
+            <label for="kleikovina">Клейковина (Не обов'язково):</label>
+            <input type="text" id="kleikovina" ng-model="extraFields.kleikovina" format-decimal placeholder="Наприклад, 12.3">
+            <label for="smitteva">Сміттєва домішка (Не обов'язково):</label>
+            <input type="text" id="smitteva" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3">
+            <label for="vologhist">Вологість (Не обов'язково):</label>
+            <input type="text" id="vologhist" ng-model="extraFields.vologhist" format-decimal placeholder="Наприклад, 12.3">
+            <label for="sazhkov">Сажкові зерна (Не обов'язково):</label>
+            <input type="text" id="sazhkov" ng-model="extraFields.sazhkov" format-decimal placeholder="Наприклад, 12.3">
+          </div>
+          <!-- Якщо обрано будь-який ячмінь -->
+          <div ng-if="selectedCulture.indexOf('Ячмінь') !== -1">
+            <label for="natura_ya">Натура (Не обов'язково):</label>
+            <input type="text" id="natura_ya" ng-model="extraFields.natura" format-decimal placeholder="Наприклад, 12.3">
+            <label for="vologhist_ya">Вологість (Не обов'язково):</label>
+            <input type="text" id="vologhist_ya" ng-model="extraFields.vologhist" format-decimal placeholder="Наприклад, 12.3">
+            <label for="smitteva_ya">Сміттєва домішка (Не обов'язково):</label>
+            <input type="text" id="smitteva_ya" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3">
+          </div>
+          <!-- Якщо обрано будь-яку з кукурудз (без врахування регістру) -->
+          <div ng-if="selectedCulture.toLowerCase().indexOf('кукуруд') !== -1">
+            <label for="vologhist_k">Вологість (Не обов'язково):</label>
+            <input type="text" id="vologhist_k" ng-model="extraFields.vologhist" format-decimal placeholder="Наприклад, 12.3">
+            <label for="zernovadomishka">Зернова домішка (Не обов'язково):</label>
+            <input type="text" id="zernovadomishka" ng-model="extraFields.zernovadomishka" format-decimal placeholder="Наприклад, 12.3">
+            <label for="poshkodjeni">Пошкоджені зерна (Не обов'язково):</label>
+            <input type="text" id="poshkodjeni" ng-model="extraFields.poshkodjeni" format-decimal placeholder="Наприклад, 12.3">
+            <label for="smitteva_k">Сміттєва домішка (Не обов'язково):</label>
+            <input type="text" id="smitteva_k" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3">
+            <label for="zipsovani">Зіпсовані зерна (Не обов'язково):</label>
+            <input type="text" id="zipsovani" ng-model="extraFields.zipsovani" format-decimal placeholder="Наприклад, 12.3">
+          </div>
+          <!-- Якщо обрано будь-який соняшник -->
+          <div ng-if="selectedCulture.indexOf('Соняшник') !== -1">
+            <label for="olijnist_na_suhu">Олійність на суху (Не обов'язково):</label>
+            <input type="text" id="olijnist_na_suhu" ng-model="extraFields.olijnist_na_suhu" format-decimal placeholder="Наприклад, 12.3">
+            <label for="vologhist_son">Вологість (Не обов'язково):</label>
+            <input type="text" id="vologhist_son" ng-model="extraFields.vologhist" format-decimal placeholder="Наприклад, 12.3">
+            <label for="smitteva_son">Сміттєва домішка (Не обов'язково):</label>
+            <input type="text" id="smitteva_son" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3">
+            <label for="kislotne">Кислотне число (Не обов'язково):</label>
+            <input type="text" id="kislotne" ng-model="extraFields.kislotne" format-decimal placeholder="Наприклад, 12.3">
+          </div>
+          <!-- Якщо обрано Ріпак -->
+          <div ng-if="selectedCulture == 'Ріпак'">
+            <label for="olijnist_na_siru">Олійність на сиру (Не обов'язково):</label>
+            <input type="text" id="olijnist_na_siru" ng-model="extraFields.olijnist_na_siru" format-decimal placeholder="Наприклад, 12.3">
+            <label for="vologhist_ripak">Вологість (Не обов'язково):</label>
+            <input type="text" id="vologhist_ripak" ng-model="extraFields.vologhist" format-decimal placeholder="Наприклад, 12.3">
+            <label for="glukozinolati">Глюкозінолати (Не обов'язково):</label>
+            <input type="text" id="glukozinolati" ng-model="extraFields.glukozinolati" format-decimal placeholder="Наприклад, 12.3">
+            <label for="smitteva_ripak">Сміттєва домішка (Не обов'язково):</label>
+            <input type="text" id="smitteva_ripak" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3">
+          </div>
+          <!-- Якщо обрано Соя -->
+          <div ng-if="selectedCulture == 'Соя'">
+            <label for="bilok_na_siru">Білок на сиру (Не обов'язково):</label>
+            <input type="text" id="bilok_na_siru" ng-model="extraFields.bilok_na_siru" format-decimal placeholder="Наприклад, 12.3">
+            <label for="vologhist_soya">Вологість (Не обов'язково):</label>
+            <input type="text" id="vologhist_soya" ng-model="extraFields.vologhist" format-decimal placeholder="Наприклад, 12.3">
+            <label for="smitteva_soya">Сміттєва домішка (Не обов'язково):</label>
+            <input type="text" id="smitteva_soya" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3">
+            <label for="olijna_domishka">Олійна домішка (Не обов'язково):</label>
+            <input type="text" id="olijna_domishka" ng-model="extraFields.olijna_domishka" format-decimal placeholder="Наприклад, 12.3">
+            <label for="ambrizia">Амброзія (Не обов'язково):</label>
+            <input type="text" id="ambrizia" ng-model="extraFields.ambrizia" format-decimal placeholder="Наприклад, 12.3">
+          </div>
+        </div>
+        
         <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
         
@@ -176,7 +256,7 @@
     </div>
   </div>
   
-  <!-- AngularJS: модуль, контролери та директива dropdownList -->
+  <!-- AngularJS: модуль, контролери, директива dropdownList та директива formatDecimal -->
   <script>
     angular.module('app', [])
       // Директива dropdownList для локації (без змін)
@@ -224,6 +304,44 @@
           }
         };
       })
+      // Директива formatDecimal для додаткових полів (дозволяє формат XX.X, приймає крапку чи кому)
+      .directive('formatDecimal', function() {
+        return {
+          require: 'ngModel',
+          link: function(scope, element, attrs, ngModel) {
+            function fromUser(text) {
+              if (!text) return text;
+              text = text.replace(',', '.');
+              var regex = /^\d+(?:\.\d)?$/;
+              if(regex.test(text)) {
+                return text;
+              } else {
+                // Якщо введено невірний формат, повертаємо undefined
+                return undefined;
+              }
+            }
+            function toUser(value) {
+              if(value === undefined || value === null || value === '') return value;
+              value = value.toString().replace(',', '.');
+              if(value.indexOf('.') === -1) {
+                return value + '.0';
+              }
+              return value;
+            }
+            ngModel.$parsers.push(fromUser);
+            ngModel.$formatters.push(toUser);
+            element.on('blur', function() {
+              var value = ngModel.$modelValue;
+              if(value !== undefined && value !== null && value !== '') {
+                if(value.toString().indexOf('.') === -1) {
+                  ngModel.$setViewValue(value + '.0');
+                  ngModel.$render();
+                }
+              }
+            });
+          }
+        };
+      })
       // Контролер для локації
       .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
         $scope.selectedRegion = "";
@@ -260,7 +378,7 @@
           }
         });
       }])
-      // Контролер для кроку 2: вибір групи та культур із сортуванням за алфавітом
+      // Контролер для кроку 2: вибір групи, культур та додаткових полів
       .controller('step2Ctrl', ['$scope', function($scope) {
         const cultureGroups = {
           "Зернова": [
@@ -290,6 +408,7 @@
         $scope.selectedGroup = "";
         $scope.cultures = [];
         $scope.selectedCulture = "";
+        $scope.extraFields = {}; // об'єкт для додаткових полів
   
         $scope.$watch('selectedGroup', function(newVal) {
           if(newVal){
@@ -411,7 +530,8 @@
         quantity: quantity,
         price: price,
         currency: currency,
-        payment_form: paymentForm
+        payment_form: paymentForm,
+        extra_fields: step2Scope.extraFields
       };
       
       console.log("Заявка заповнена. Payload:", payload);
