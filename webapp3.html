@@ -102,7 +102,6 @@
       </div>
       
       <!-- Крок 2: Деталі заявки -->
-      <!-- Використовуємо один контролер step2Ctrl для вибору культури та групи -->
       <div id="page2" class="hidden" ng-controller="step2Ctrl">
         <h2>Крок 2: Деталі заявки</h2>
         <label for="culture">Вибір культури:</label>
@@ -289,8 +288,65 @@
       }]);
   </script>
   
-  <!-- Основна логіка WebApp (залишилось без змін) -->
+  <!-- Основна логіка WebApp для всіх кроків -->
   <script>
+    /* --- Крок 3: Робота з оплатою --- */
+    // Дані для форм оплати
+    const formsData = {
+      "Грн": ["Ф1", "Ф2", "Ф3"],
+      "Долар": ["Ф1", "Ф2"],
+      "Євро": ["Ф1"]
+    };
+  
+    // Функція для отримання типів оплати залежно від валюти та форми
+    function getPaytypes(currency, form) {
+      if(form === "Ф1") {
+        if(currency === "Грн") return ["Перерахунок з ПДВ"];
+        if(currency === "Долар" || currency === "Євро") return ["Валютний контракт"];
+      }
+      if(form === "Ф2") {
+        if(currency === "Грн" || currency === "Долар") return ["Готівка"];
+      }
+      if(form === "Ф3") {
+        if(currency === "Грн") return ["Перерахунок без ПДВ"];
+      }
+      return [];
+    }
+  
+    // Оновлення списку форм при зміні валюти
+    document.getElementById("currency").addEventListener("change", function() {
+      const currency = this.value;
+      const formSelect = document.getElementById("form");
+      formSelect.innerHTML = '<option value="">Оберіть форму</option>';
+      if(formsData[currency]) {
+        formsData[currency].forEach(function(form) {
+          const option = document.createElement("option");
+          option.value = form;
+          option.textContent = form;
+          formSelect.appendChild(option);
+        });
+      }
+      // Очищення типів оплати
+      document.getElementById("paytype").innerHTML = '<option value="">Оберіть тип оплати</option>';
+    });
+  
+    // Оновлення списку типів оплати при зміні форми
+    document.getElementById("form").addEventListener("change", function() {
+      const currency = document.getElementById("currency").value;
+      const form = this.value;
+      const paytypeSelect = document.getElementById("paytype");
+      paytypeSelect.innerHTML = '<option value="">Оберіть тип оплати</option>';
+      const types = getPaytypes(currency, form);
+      types.forEach(function(type) {
+        const option = document.createElement("option");
+        option.value = type;
+        option.textContent = type;
+        paytypeSelect.appendChild(option);
+      });
+    });
+  
+    /* --- Решта логіки (кроки, відправка, prefill тощо) --- */
+  
     document.getElementById("edrpou").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
@@ -315,7 +371,6 @@
     });
     
     document.getElementById("nextBtn2").addEventListener("click", function() {
-      // Отримання значень з контролера step2Ctrl
       var scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
       if(!scope.selectedCulture || !scope.selectedGroup || !document.getElementById("quantity").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
