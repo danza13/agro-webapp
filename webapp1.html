@@ -43,7 +43,7 @@
     button:hover { background: #0056b3; }
     .hidden { display: none; }
     
-    /* Стилі для директиви dropdownList */
+    /* Стилі для директиви dropdownList (залишається для локації) */
     .dropdown-container {
       position: relative;
       text-align: left;
@@ -84,10 +84,9 @@
         <input type="text" id="fghName" placeholder="Введіть назву ФГ">
         
         <label for="edrpou">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
-        <!-- Дозволено 8 або 10 цифр -->
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$">
         
-        <!-- Поля локації через AngularJS з директивою dropdownList -->
+        <!-- Поля локації через AngularJS -->
         <div ng-controller="mainCtrl">
           <label>Область:</label>
           <dropdown-list data-items-list="regions" data-placeholder="Оберіть область" ng-model="selectedRegion"></dropdown-list>
@@ -105,14 +104,14 @@
       <!-- Крок 2: Деталі заявки -->
       <div id="page2" class="hidden" ng-controller="step2Ctrl">
         <h2>Крок 2: Деталі заявки</h2>
-        <!-- Вибір групи: це ключі об'єкта cultureGroups, відсортовані за алфавітом -->
+        <!-- Вибір групи -->
         <label for="groupSelect">Вибір групи:</label>
         <select id="groupSelect" ng-model="selectedGroup" required>
           <option value="">Оберіть групу</option>
           <option ng-repeat="group in groups" value="{{group}}">{{group}}</option>
         </select>
         
-        <!-- Вибір культури: стандартний select, дані відсортовані за алфавітом -->
+        <!-- Вибір культури -->
         <label for="cultureSelect">Вибір культури:</label>
         <select id="cultureSelect" ng-model="selectedCulture" required>
           <option value="">Оберіть культуру</option>
@@ -139,14 +138,9 @@
           <option value="Євро">Євро</option>
         </select>
         
-        <label for="form">Вибір форми:</label>
-        <select id="form" required>
-          <option value="">Оберіть форму</option>
-        </select>
-        
-        <label for="paytype">Тип оплати:</label>
-        <select id="paytype" required>
-          <option value="">Оберіть тип оплати</option>
+        <label for="paymentForm">Вибір форми оплати:</label>
+        <select id="paymentForm" required>
+          <option value="">Оберіть форму оплати</option>
         </select>
         
         <button id="submitBtn">Підтвердити заявку</button>
@@ -157,7 +151,7 @@
   <!-- AngularJS: модуль, контролери та директива dropdownList -->
   <script>
     angular.module('app', [])
-      // Директива dropdownList із пошуком (залишається для полів локації)
+      // Директива dropdownList для локації (залишається без змін)
       .directive('dropdownList', function() {
         return {
           restrict: 'E',
@@ -202,7 +196,7 @@
           }
         };
       })
-      // Контролер для локації (завантажує дані з data.json)
+      // Контролер для локації
       .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
         $scope.selectedRegion = "";
         $scope.selectedDistrict = "";
@@ -210,7 +204,6 @@
         $scope.districts = [];
         $scope.cities = [];
   
-        // Завантаження даних з файлу data.json
         $http.get('data.json')
           .then(function(response) {
             $scope.locationsData = response.data;
@@ -219,7 +212,6 @@
             console.error("Помилка завантаження даних:", error);
           });
   
-        // Відслідковування зміни області
         $scope.$watch('selectedRegion', function(newVal) {
           if(newVal && $scope.locationsData[newVal]) {
             $scope.districts = Object.keys($scope.locationsData[newVal]);
@@ -231,7 +223,6 @@
           }
         });
   
-        // Відслідковування зміни району
         $scope.$watch('selectedDistrict', function(newVal) {
           if(newVal && $scope.selectedRegion && $scope.locationsData[$scope.selectedRegion][newVal]) {
             $scope.cities = $scope.locationsData[$scope.selectedRegion][newVal];
@@ -241,9 +232,8 @@
           }
         });
       }])
-      // Контролер для кроку 2: вибір групи та культур із сортуванням за алфавітом
+      // Контролер для кроку 2: вибір групи та культур (сортування за алфавітом)
       .controller('step2Ctrl', ['$scope', function($scope) {
-        // Об'єкт, що містить відповідність: група -> список культур
         const cultureGroups = {
           "Зернова": [
             "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "Жито", "Кукурудза кремніста",
@@ -268,17 +258,13 @@
           ]
         };
   
-        // Групи – це ключі об'єкта cultureGroups, відсортовані за алфавітом
         $scope.groups = Object.keys(cultureGroups).sort();
         $scope.selectedGroup = "";
-        // Список культур оновиться при виборі групи та буде відсортовано за алфавітом
         $scope.cultures = [];
         $scope.selectedCulture = "";
   
-        // Слідкуємо за зміною вибраної групи
         $scope.$watch('selectedGroup', function(newVal) {
           if(newVal){
-            // Копіюємо масив і сортуємо
             $scope.cultures = cultureGroups[newVal].slice().sort();
           } else {
             $scope.cultures = [];
@@ -288,64 +274,30 @@
       }]);
   </script>
   
-  <!-- Основна логіка WebApp для всіх кроків -->
+  <!-- Основна логіка для кроку 3 -->
   <script>
     /* --- Крок 3: Робота з оплатою --- */
-    // Дані для форм оплати
-    const formsData = {
-      "Грн": ["Ф1", "Ф2", "Ф3"],
-      "Долар": ["Ф1", "Ф2"],
-      "Євро": ["Ф1"]
+    // Об'єкт з варіантами форми оплати для кожної валюти
+    const paymentForms = {
+      "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
+      "Долар": ["Валютний контракт", "Готівка"],
+      "Євро": ["Валютний контракт"]
     };
   
-    // Функція для отримання типів оплати залежно від валюти та форми
-    function getPaytypes(currency, form) {
-      if(form === "Ф1") {
-        if(currency === "Грн") return ["Перерахунок з ПДВ"];
-        if(currency === "Долар" || currency === "Євро") return ["Валютний контракт"];
-      }
-      if(form === "Ф2") {
-        if(currency === "Грн" || currency === "Долар") return ["Готівка"];
-      }
-      if(form === "Ф3") {
-        if(currency === "Грн") return ["Перерахунок без ПДВ"];
-      }
-      return [];
-    }
-  
-    // Оновлення списку форм при зміні валюти
+    // Оновлення списку форми оплати при зміні валюти
     document.getElementById("currency").addEventListener("change", function() {
       const currency = this.value;
-      const formSelect = document.getElementById("form");
-      formSelect.innerHTML = '<option value="">Оберіть форму</option>';
-      if(formsData[currency]) {
-        formsData[currency].forEach(function(form) {
+      const paymentSelect = document.getElementById("paymentForm");
+      paymentSelect.innerHTML = '<option value="">Оберіть форму оплати</option>';
+      if(paymentForms[currency]) {
+        paymentForms[currency].forEach(function(optionText) {
           const option = document.createElement("option");
-          option.value = form;
-          option.textContent = form;
-          formSelect.appendChild(option);
+          option.value = optionText;
+          option.textContent = optionText;
+          paymentSelect.appendChild(option);
         });
       }
-      // Очищення типів оплати
-      document.getElementById("paytype").innerHTML = '<option value="">Оберіть тип оплати</option>';
     });
-  
-    // Оновлення списку типів оплати при зміні форми
-    document.getElementById("form").addEventListener("change", function() {
-      const currency = document.getElementById("currency").value;
-      const form = this.value;
-      const paytypeSelect = document.getElementById("paytype");
-      paytypeSelect.innerHTML = '<option value="">Оберіть тип оплати</option>';
-      const types = getPaytypes(currency, form);
-      types.forEach(function(type) {
-        const option = document.createElement("option");
-        option.value = type;
-        option.textContent = type;
-        paytypeSelect.appendChild(option);
-      });
-    });
-  
-    /* --- Решта логіки (кроки, відправка, prefill тощо) --- */
   
     // Фільтрація вводу для ЄДРПОУ: дозволяємо лише цифри
     document.getElementById("edrpou").addEventListener("input", function() {
@@ -359,7 +311,6 @@
     
     document.getElementById("nextBtn1").addEventListener("click", function() {
       const edrpou = document.getElementById("edrpou").value;
-      // Якщо поле не порожнє, його довжина має бути 8 або 10 цифр
       if(edrpou && !(edrpou.length === 8 || edrpou.length === 10)) {
         alert("Код ЄДРПОУ повинен містити 8 або 10 цифр або бути порожнім.");
         return;
@@ -375,7 +326,6 @@
     
     document.getElementById("nextBtn2").addEventListener("click", function() {
       var scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
-      // Перевірка: мають бути обрані група, культура та кількість
       if(!scope.selectedGroup || !scope.selectedCulture || !document.getElementById("quantity").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
@@ -385,28 +335,26 @@
     });
     
     document.getElementById("submitBtn").addEventListener("click", function() {
-      if(!document.getElementById("currency").value || !document.getElementById("form").value || !document.getElementById("paytype").value) {
+      if(!document.getElementById("currency").value || !document.getElementById("paymentForm").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
       
-      const fghName   = document.getElementById("fghName").value.trim();
-      const edrpou    = document.getElementById("edrpou").value.trim();
+      const fghName  = document.getElementById("fghName").value.trim();
+      const edrpou   = document.getElementById("edrpou").value.trim();
       var locScope = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
-      const region    = locScope.selectedRegion;
-      const district  = locScope.selectedDistrict;
-      const city      = locScope.selectedCity;
+      const region   = locScope.selectedRegion;
+      const district = locScope.selectedDistrict;
+      const city     = locScope.selectedCity;
       
-      // Дані з кроку 2: група та культура
       var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
-      const group     = step2Scope.selectedGroup;
-      const culture   = step2Scope.selectedCulture;
-      const quantity  = document.getElementById("quantity").value.trim();
+      const group    = step2Scope.selectedGroup;
+      const culture  = step2Scope.selectedCulture;
+      const quantity = document.getElementById("quantity").value.trim();
       
-      const price     = document.getElementById("price").value.trim();
-      const currency  = document.getElementById("currency").value;
-      const form      = document.getElementById("form").value;
-      const paytype   = document.getElementById("paytype").value;
+      const price        = document.getElementById("price").value.trim();
+      const currency     = document.getElementById("currency").value;
+      const paymentForm  = document.getElementById("paymentForm").value;
       
       let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : 1124775269;
       
@@ -417,13 +365,12 @@
         region: region,
         district: district,
         city: city,
-        group: group,         // Група (наприклад, "Зернова", "Олійна" тощо)
-        culture: culture,     // Культура (наприклад, "Пшениця 2 кл.", "Соняшник" тощо)
+        group: group,
+        culture: culture,
         quantity: quantity,
         price: price,
         currency: currency,
-        form: form,
-        paytype: paytype
+        payment_form: paymentForm
       };
       
       console.log("Заявка заповнена. Payload:", payload);
