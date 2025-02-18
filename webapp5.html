@@ -117,8 +117,7 @@
         <input type="text" ng-model="formData.fghName" placeholder="Введіть назву ФГ">
         
         <label>Код ЄДРПОУ (8 цифр, не обов’язково):</label>
-        <input type="number" ng-model="formData.edrpou" placeholder="Введіть код ЄДРПОУ"
-               min="10000000" max="99999999">
+        <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8})?$">
         
         <label>Область:</label>
         <dropdown-list data-items-list="regions" data-placeholder="Оберіть область" model="formData.region"></dropdown-list>
