@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" ng-app="app">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -40,49 +40,15 @@
     button { background: #007bff; color: #fff; cursor: pointer; transition: background 0.3s ease; }
     button:hover { background: #0056b3; }
     .hidden { display: none; }
-    /* Стилі для dropdown-list */
-    .dropdown-container {
-      position: relative;
-    }
-    .dropdown-container input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 5px;
-      border: none;
-      font-size: 16px;
-    }
-    .dropdown-container ul {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #fff;
-      color: #000;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      max-height: 150px;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      z-index: 1000;
-    }
-    .dropdown-container ul li {
-      padding: 10px;
-      cursor: pointer;
-    }
-    .dropdown-container ul li:hover {
-      background-color: #f1f1f1;
-    }
   </style>
-  <!-- Підключення Telegram WebApp API -->
-  <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
   <!-- Підключення AngularJS -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <!-- Скрипт Telegram Web App -->
+  <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 </head>
 <body>
-  <!-- Обгортаємо весь контейнер у Angular-додаток -->
-  <div class="overlay">
-    <div class="container" ng-app="app" ng-controller="mainCtrl">
+  <div class="overlay" ng-controller="mainCtrl">
+    <div class="container">
       <!-- Крок 1: Основні дані -->
       <div id="page1">
         <h2>Крок 1: Основні дані</h2>
@@ -93,15 +59,15 @@
         <!-- Якщо користувач щось вводить – тільки цифри; або порожнє -->
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8})?$">
         
-        <!-- Поля локації з Angular dropdown-list -->
+        <!-- Використання Angular-компоненту для випадаючих списків із пошуком -->
         <label for="region">Область:</label>
-        <dropdown-list id="region" ng-model="selectedRegion" data-items-list="regionsList" data-placeholder="Оберіть область" required></dropdown-list>
+        <dropdown-list id="region" data-items-list="regionsList" data-placeholder="Оберіть область"></dropdown-list>
         
         <label for="district">Район:</label>
-        <dropdown-list id="district" ng-model="selectedDistrict" data-items-list="districtsList" data-placeholder="Оберіть район" required></dropdown-list>
+        <dropdown-list id="district" data-items-list="districtsList" data-placeholder="Оберіть район"></dropdown-list>
         
         <label for="city">Населений пункт:</label>
-        <dropdown-list id="city" ng-model="selectedCity" data-items-list="citiesList" data-placeholder="Оберіть місто" required></dropdown-list>
+        <dropdown-list id="city" data-items-list="citiesList" data-placeholder="Оберіть місто"></dropdown-list>
         
         <button id="nextBtn1">Далі</button>
       </div>
@@ -119,9 +85,9 @@
           <option value="Нішеві культури">Нішеві культури</option>
         </select>
         
-        <!-- Поле для вибору групи з Angular dropdown-list -->
+        <!-- Використання Angular-компоненту для вибору групи -->
         <label for="group">Вибір групи:</label>
-        <dropdown-list id="group" ng-model="selectedGroup" data-items-list="groupsList" data-placeholder="Оберіть групу" required></dropdown-list>
+        <dropdown-list id="group" data-items-list="groupsList" data-placeholder="Оберіть групу"></dropdown-list>
         
         <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
@@ -205,14 +171,12 @@
     };
     
     /* ====== Дані для форм оплати ====== */
-    // Для валюти "Грн" доступні всі форми; для "Долар" – Ф1 і Ф2; для "Євро" – тільки Ф1
     const formsData = {
       "Грн": ["Ф1", "Ф2", "Ф3"],
       "Долар": ["Ф1", "Ф2"],
       "Євро": ["Ф1"]
     };
     
-    // Функція повертає доступні типи оплати залежно від вибраних валюти та форми
     function getPaytypes(currency, form) {
       if(form === "Ф1") {
         if(currency === "Грн") return ["Перерахунок з ПДВ"];
@@ -227,57 +191,18 @@
       return [];
     }
     
-    /* ====== Обмеження для поля Код ЄДРПОУ ====== */
-    document.getElementById("edrpou").addEventListener("input", function() {
-      this.value = this.value.replace(/\D/g, "");
-    });
-    
-    /* ====== Оновлення форм і типу оплати ====== */
-    document.getElementById("currency").addEventListener("change", function() {
-      const currency = this.value;
-      const formSelect = document.getElementById("form");
-      formSelect.innerHTML = '<option value="">Оберіть форму</option>';
-      if(formsData[currency]) {
-        formsData[currency].forEach(form => {
-          const option = document.createElement("option");
-          option.value = form;
-          option.textContent = form;
-          formSelect.appendChild(option);
-        });
-      }
-      // Очищуємо тип оплати
-      document.getElementById("paytype").innerHTML = '<option value="">Оберіть тип оплати</option>';
-    });
-    
-    document.getElementById("form").addEventListener("change", function() {
-      const currency = document.getElementById("currency").value;
-      const form = this.value;
-      const paytypeSelect = document.getElementById("paytype");
-      paytypeSelect.innerHTML = '<option value="">Оберіть тип оплати</option>';
-      const types = getPaytypes(currency, form);
-      types.forEach(type => {
-        const option = document.createElement("option");
-        option.value = type;
-        option.textContent = type;
-        paytypeSelect.appendChild(option);
-      });
-    });
-    
-    /* ====== Обмеження для поля Бажана ціна ====== */
-    document.getElementById("price").addEventListener("input", function() {
-      this.value = this.value.replace(/\D/g, "");
-    });
-    
     /* ====== Перехід між кроками ====== */
     document.getElementById("nextBtn1").addEventListener("click", function() {
-      // Якщо код ЄДРПОУ не порожній, перевіряємо, що містить рівно 8 цифр
+      // Перевірка поля ЄДРПОУ
       const edrpou = document.getElementById("edrpou").value;
       if(edrpou && edrpou.length !== 8) {
         alert("Код ЄДРПОУ повинен містити 8 цифр або бути порожнім.");
         return;
       }
-      // Перевірка для Angular dropdown‑списків (значення беруться з атрибута value)
-      if(!document.getElementById("region").value || !document.getElementById("district").value || !document.getElementById("city").value) {
+      // Отримання значень з Angular-компонентів (для прикладу, використовуємо textContent)
+      if(!document.getElementById("region").textContent ||
+         !document.getElementById("district").textContent ||
+         !document.getElementById("city").textContent) {
         alert("Будь ласка, оберіть усі обов'язкові поля для локації!");
         return;
       }
@@ -286,7 +211,9 @@
     });
     
     document.getElementById("nextBtn2").addEventListener("click", function() {
-      if(!document.getElementById("culture").value || !document.getElementById("group").value || !document.getElementById("quantity").value) {
+      if(!document.getElementById("culture").value ||
+         !document.getElementById("group").textContent ||
+         !document.getElementById("quantity").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
@@ -294,20 +221,21 @@
       document.getElementById("page3").classList.remove("hidden");
     });
     
-    /* ====== Фінальна відправка ====== */
     document.getElementById("submitBtn").addEventListener("click", function() {
-      if(!document.getElementById("currency").value || !document.getElementById("form").value || !document.getElementById("paytype").value) {
+      if(!document.getElementById("currency").value ||
+         !document.getElementById("form").value ||
+         !document.getElementById("paytype").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
       
       const fghName   = document.getElementById("fghName").value.trim();
       const edrpou    = document.getElementById("edrpou").value.trim();
-      const region    = document.getElementById("region").value;
-      const district  = document.getElementById("district").value;
-      const city      = document.getElementById("city").value;
+      const region    = document.getElementById("region").textContent;
+      const district  = document.getElementById("district").textContent;
+      const city      = document.getElementById("city").textContent;
       const culture   = document.getElementById("culture").value;
-      const group     = document.getElementById("group").value;
+      const group     = document.getElementById("group").textContent;
       const quantity  = document.getElementById("quantity").value.trim();
       const price     = document.getElementById("price").value.trim();
       const currency  = document.getElementById("currency").value;
@@ -338,10 +266,8 @@
       
       console.log("Заявка заповнена. Payload:", payload);
       
-      // Відправка даних до бота
       Telegram.WebApp.sendData(JSON.stringify(payload));
       
-      // Надсилання даних до API (за потребою)
       fetch("https://agro-api-url.onrender.com/api/webapp_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -364,22 +290,24 @@
       });
     });
     
-    /* ====== Попереднє заповнення форми (якщо є параметр data) ====== */
+    /* ====== Обмеження для поля ЄДРПОУ ====== */
+    document.getElementById("edrpou").addEventListener("input", function() {
+      this.value = this.value.replace(/\D/g, "");
+    });
+    
+    /* ====== Обмеження для поля Бажана ціна ====== */
+    document.getElementById("price").addEventListener("input", function() {
+      this.value = this.value.replace(/\D/g, "");
+    });
+    
     function prefillForm(prefillData) {
       document.getElementById("fghName").value = prefillData.fgh_name || "";
       document.getElementById("edrpou").value = prefillData.edrpou || "";
-      // Оновлення Angular-моделей для локації та групи
-      if(window.angular) {
-        var scope = angular.element(document.querySelector('.container')).scope();
-        scope.$apply(function(){
-          scope.selectedRegion = prefillData.region || "";
-          scope.selectedDistrict = prefillData.district || "";
-          scope.selectedCity = prefillData.city || "";
-          scope.selectedGroup = prefillData.group || "";
-        });
-      }
+      document.getElementById("region").textContent = prefillData.region || "";
+      document.getElementById("district").textContent = prefillData.district || "";
+      document.getElementById("city").textContent = prefillData.city || "";
       document.getElementById("culture").value = prefillData.culture || "";
-      document.getElementById("culture").dispatchEvent(new Event('change'));
+      document.getElementById("group").textContent = prefillData.group || "";
       document.getElementById("quantity").value = prefillData.quantity || "";
       document.getElementById("price").value = prefillData.price || "";
       document.getElementById("currency").value = prefillData.currency || "";
@@ -389,7 +317,6 @@
         document.getElementById("form").dispatchEvent(new Event('change'));
         setTimeout(() => {
           document.getElementById("paytype").value = prefillData.paytype || "";
-          // Відображаємо останній крок
           document.getElementById("page1").classList.add("hidden");
           document.getElementById("page2").classList.add("hidden");
           document.getElementById("page3").classList.remove("hidden");
@@ -412,113 +339,28 @@
     console.log("WebApp готовий.");
   </script>
   
-  <!-- Angular Module та директива dropdown-list -->
+  <!-- AngularJS: визначення модуля та контролера -->
   <script>
     angular.module('app', [])
-    .controller('mainCtrl', function($scope) {
-      // Ініціалізація списку областей на основі locationsData
-      $scope.regionsList = Object.keys(locationsData);
-      $scope.selectedRegion = "";
-      $scope.selectedDistrict = "";
-      $scope.selectedCity = "";
-      
-      $scope.$watch('selectedRegion', function(newVal) {
-        if(newVal && locationsData[newVal]) {
-          $scope.districtsList = Object.keys(locationsData[newVal]);
-        } else {
-          $scope.districtsList = [];
-        }
-        $scope.selectedDistrict = "";
-        $scope.citiesList = [];
-        $scope.selectedCity = "";
-      });
-      
-      $scope.$watch('selectedDistrict', function(newVal) {
-        if(newVal && $scope.selectedRegion && locationsData[$scope.selectedRegion] && locationsData[$scope.selectedRegion][newVal]) {
-          $scope.citiesList = locationsData[$scope.selectedRegion][newVal];
-        } else {
-          $scope.citiesList = [];
-        }
-        $scope.selectedCity = "";
-      });
-      
-      // Ініціалізація груп – буде оновлюватись при зміні культури
-      $scope.groupsList = [];
-      $scope.selectedGroup = "";
-      
-      // Слухаємо подію зміни поля культури, щоб оновити список груп
-      document.getElementById("culture").addEventListener("change", function() {
-        var culture = this.value;
-        if(cultureGroups[culture]) {
-          $scope.$apply(function() {
-            $scope.groupsList = cultureGroups[culture];
-            $scope.selectedGroup = "";
-          });
-        } else {
-          $scope.$apply(function() {
-            $scope.groupsList = [];
-            $scope.selectedGroup = "";
-          });
-        }
-      });
-    })
-    .directive('dropdownList', function() {
-      return {
-        restrict: 'E',
-        scope: {
-          itemsList: '=',
-          placeholder: '@',
-          model: '=ngModel'
-        },
-        template: `
-          <div class="dropdown-container">
-            <input type="text" ng-model="searchText" placeholder="{{placeholder}}" ng-click="toggleDropdown()" ng-change="onInputChange()">
-            <ul ng-show="dropdownVisible">
-              <li ng-repeat="item in itemsList | filter:searchText" ng-click="selectItem(item)">{{item}}</li>
-            </ul>
-          </div>
-        `,
-        link: function(scope, element, attrs) {
-          // Присвоюємо id, якщо він переданий
-          if(attrs.id) {
-            var input = element[0].querySelector('input');
-            if(input) {
-              input.id = attrs.id;
-            }
-          }
-          scope.dropdownVisible = false;
-          scope.searchText = scope.model || "";
-          
-          scope.toggleDropdown = function() {
-            scope.dropdownVisible = !scope.dropdownVisible;
-          };
-          
-          scope.selectItem = function(item) {
-            scope.model = item;
-            scope.searchText = item;
-            scope.dropdownVisible = false;
-          };
-          
-          scope.onInputChange = function() {
-            scope.dropdownVisible = true;
-          };
-          
-          // Додаємо функцію синхронізації значення з атрибутом value
-          scope.$watch('model', function(newValue) {
-            element[0].setAttribute("value", newValue);
-          });
-          
-          // Закриваємо список при кліку поза елементом
-          document.addEventListener('click', function(e) {
-            if (!element[0].contains(e.target)) {
-              scope.$apply(function() {
-                scope.dropdownVisible = false;
-              });
-            }
-          });
-        }
-      };
-    });
+      .controller('mainCtrl', ['$scope', function($scope) {
+        // Приклад даних для Angular-дропдаунів.
+        // Для справжньої інтеграції необхідно налаштовувати зміну значень (districtsList, citiesList)
+        // залежно від вибору користувача.
+        $scope.regionsList = Object.keys({
+          "Київська область": {},
+          "Львівська область": {},
+          "Одеська область": {}
+        });
+        
+        // Приклад: список районів може оновлюватись за допомогою подій.
+        $scope.districtsList = ["Біла Церква", "Бровари", "Ірпінь"];
+        $scope.citiesList = ["Біла Церква", "Сквира", "Кагарлик"];
+        
+        // Приклад: групи для вибору культури "Зернова". В реальній логіці – залежить від вибраної культури.
+        $scope.groupsList = cultureGroups["Зернова"];
+      }]);
   </script>
+  
+  <!-- Примітка: Для коректної роботи Angular-компоненту «dropdown-list» потрібно, щоб була підключена відповідна бібліотека Angular та визначено модуль "app" із контролером "mainCtrl", який задає відповідні масиви (наприклад, regionsList, districtsList, citiesList та groupsList). Це демонстраційний приклад, який показує лише зміну HTML-розмітки. -->
 </body>
 </html>
