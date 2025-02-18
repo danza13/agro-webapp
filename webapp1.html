@@ -102,7 +102,8 @@
       </div>
       
       <!-- Крок 2: Деталі заявки -->
-      <div id="page2" class="hidden">
+      <!-- Додаємо контролер step2Ctrl для управління культурою та групою -->
+      <div id="page2" class="hidden" ng-controller="step2Ctrl">
         <h2>Крок 2: Деталі заявки</h2>
         <label for="culture">Вибір культури:</label>
         <select id="culture" ng-model="selectedCulture" ng-change="updateGroups(selectedCulture)" required>
@@ -114,7 +115,7 @@
           <option value="Нішеві культури">Нішеві культури</option>
         </select>
         
-        <!-- Поле для вибору групи через директиву dropdownList -->
+        <!-- Контролер для групи -->
         <div ng-controller="mainCtrlGroup">
           <label>Вибір групи:</label>
           <dropdown-list data-items-list="groups" data-placeholder="Оберіть групу" ng-model="selectedGroup"></dropdown-list>
@@ -157,8 +158,9 @@
   
   <!-- AngularJS: створення модуля, контролерів та директиви -->
   <script>
-    // Створюємо модуль та директиву для dropdownList
+    // Створюємо модуль
     angular.module('app', [])
+      // Директива dropdownList
       .directive('dropdownList', function() {
         return {
           restrict: 'E',
@@ -193,7 +195,6 @@
               scope.listVisible = false;
             };
 
-            // При кліку поза елементом закриваємо список
             document.addEventListener('click', function(e) {
               if (!element[0].contains(e.target)) {
                 scope.$apply(function() {
@@ -204,7 +205,7 @@
           }
         };
       })
-      // Дані для локацій
+      // Контролер для полів локації
       .controller('mainCtrl', ['$scope', function($scope) {
         const locationsData = {
           "Київська область": {
@@ -231,7 +232,6 @@
         $scope.districts = [];
         $scope.cities = [];
         
-        // Слідкуємо за вибором області
         $scope.$watch('selectedRegion', function(newVal) {
           if(newVal && locationsData[newVal]) {
             $scope.districts = Object.keys(locationsData[newVal]);
@@ -243,7 +243,6 @@
           }
         });
         
-        // Слідкуємо за вибором району
         $scope.$watch('selectedDistrict', function(newVal) {
           if(newVal && $scope.selectedRegion && locationsData[$scope.selectedRegion][newVal]) {
             $scope.cities = locationsData[$scope.selectedRegion][newVal];
@@ -253,51 +252,53 @@
           }
         });
       }])
-      // Контролер для групи культури
+      // Контролер для груп культури
       .controller('mainCtrlGroup', ['$scope', function($scope) {
         $scope.groups = [];
         $scope.selectedGroup = "";
-        // Функція для оновлення груп буде викликатися через window.updateGroupDropdown
         window.updateGroupDropdown = function(newGroups) {
           $scope.$apply(function() {
             $scope.groups = newGroups || [];
             $scope.selectedGroup = "";
           });
         };
-      }]);
-      
-    // Окремий контролер/функція для оновлення груп на основі вибраної культури
-    const cultureGroups = {
-      "Зернова": [
-        "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "жито", "кукурудза кремніста",
-        "Пшениця тверда", "Тритикале", "Кукурудза фуражна", "Овес голозерний", "Кукурудза бита", "кукурудза Зерноотход",
-        "кукурудза з підвищ. зерна", "Пшениця бита", "Пшениця спельта", "Пшениця неконд."
-      ],
-      "Олійна": [
-        "Соняшник", "Соняшник високоолеїновий", "Ріпак", "Ріпак технічний", "Ріпак з ГМО"
-      ],
-      "Бобові": [
-        "Соя", "Гороох жовтий", "Боби", "Горох зелений", "Горох", "Соя без ГМО"
-      ],
-      "Продукти переробки": [
-        "Олія соняшникова", "Макуха соняшникова високопрот.", "Шрот соняшник високопрот.", "Шрот соняшник. низькопрот.",
-        "Шрот соєвий", "Шрот ріпаку", "Отруби пшен. гран.", "Олія соєва", "Висівки пшеничні", "Макуха соєва",
-        "Макуха ріпакова", "Цукор", "Олія ріпакова", "Шрот соняшн."
-      ],
-      "Нішеві культури": [
-        "Сорго", "Сорго біле", "Сорго червоне", "Просо жовте", "Просо червоне", "Просо біле",
-        "Гречка", "Нут", "Льон", "Віка", "Коріандр", "Сочевиця", "Спельта", "Сочевиця червона",
-        "Льон золотистий", "Льон коричневий", "Просо чорне"
-      ]
-    };
+      }])
+      // Контролер для кроку 2 (управління культурою та виклик оновлення груп)
+      .controller('step2Ctrl', ['$scope', function($scope) {
+        // Глобальний об'єкт груп культур
+        const cultureGroups = {
+          "Зернова": [
+            "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "жито", "кукурудза кремніста",
+            "Пшениця тверда", "Тритикале", "Кукурудза фуражна", "Овес голозерний", "Кукурудза бита", "кукурудза Зерноотход",
+            "кукурудза з підвищ. зерна", "Пшениця бита", "Пшениця спельта", "Пшениця неконд."
+          ],
+          "Олійна": [
+            "Соняшник", "Соняшник високоолеїновий", "Ріпак", "Ріпак технічний", "Ріпак з ГМО"
+          ],
+          "Бобові": [
+            "Соя", "Гороох жовтий", "Боби", "Горох зелений", "Горох", "Соя без ГМО"
+          ],
+          "Продукти переробки": [
+            "Олія соняшникова", "Макуха соняшникова високопрот.", "Шрот соняшник високопрот.", "Шрот соняшник. низькопрот.",
+            "Шрот соєвий", "Шрот ріпаку", "Отруби пшен. гран.", "Олія соєва", "Висівки пшеничні", "Макуха соєва",
+            "Макуха ріпакова", "Цукор", "Олія ріпакова", "Шрот соняшн."
+          ],
+          "Нішеві культури": [
+            "Сорго", "Сорго біле", "Сорго червоне", "Просо жовте", "Просо червоне", "Просо біле",
+            "Гречка", "Нут", "Льон", "Віка", "Коріандр", "Сочевиця", "Спельта", "Сочевиця червона",
+            "Льон золотистий", "Льон коричневий", "Просо чорне"
+          ]
+        };
 
-    window.updateGroups = function(culture) {
-      if(culture && cultureGroups[culture]) {
-        window.updateGroupDropdown(cultureGroups[culture]);
-      } else {
-        window.updateGroupDropdown([]);
-      }
-    };
+        $scope.selectedCulture = "";
+        $scope.updateGroups = function(culture) {
+          if(culture && cultureGroups[culture]) {
+            window.updateGroupDropdown(cultureGroups[culture]);
+          } else {
+            window.updateGroupDropdown([]);
+          }
+        };
+      }]);
   </script>
   
   <!-- Основна логіка WebApp -->
@@ -424,7 +425,13 @@
       });
       
       document.getElementById("culture").value = prefillData.culture || "";
-      window.updateGroups(prefillData.culture);
+      // Викликаємо функцію оновлення груп із контролера step2Ctrl
+      var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
+      step2Scope.$apply(function(){
+        step2Scope.selectedCulture = prefillData.culture || "";
+        step2Scope.updateGroups(prefillData.culture);
+      });
+      
       setTimeout(() => {
         var groupScope = angular.element(document.querySelector('[ng-controller="mainCtrlGroup"]')).scope();
         groupScope.$apply(function(){
