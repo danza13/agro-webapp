@@ -35,329 +35,410 @@
     h2 { margin-bottom: 15px; }
     label { display: block; text-align: left; font-weight: bold; margin: 10px 0 5px; }
     input, select, textarea, button {
-      width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none;
-      box-sizing: border-box; font-size: 16px;
+      width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none; box-sizing: border-box; font-size: 16px;
     }
     button { background: #007bff; color: #fff; cursor: pointer; transition: background 0.3s ease; }
     button:hover { background: #0056b3; }
+    .hidden { display: none; }
   </style>
-  <!-- Підключаємо AngularJS -->
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
-  <!-- Telegram WebApp JS -->
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 </head>
-<body ng-controller="mainCtrl">
+<body>
   <div class="overlay">
     <div class="container">
       <!-- Крок 1: Основні дані -->
-      <div id="page1" ng-show="currentPage === 1">
+      <div id="page1">
         <h2>Крок 1: Основні дані</h2>
         <label for="fghName">Назва ФГ (не обов’язково):</label>
-        <input type="text" id="fghName" ng-model="formData.fghName" placeholder="Введіть назву ФГ">
+        <input type="text" id="fghName" placeholder="Введіть назву ФГ">
         
         <label for="edrpou">Код ЄДРПОУ (8 цифр, не обов’язково):</label>
-        <input type="text" id="edrpou" ng-model="formData.edrpou" placeholder="Введіть код ЄДРПОУ" ng-change="validateEdrpou()">
+        <!-- Якщо користувач щось вводить – тільки цифри; або порожнє -->
+        <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8})?$">
         
-        <label>Область:</label>
-        <!-- Використання директиви dropdown-list -->
-        <dropdown-list data-items-list="regions" data-placeholder="Оберіть область" selected="formData.selectedRegion"></dropdown-list>
+        <!-- Для пошуку використано input з datalist -->
+        <label for="region">Область:</label>
+        <input type="text" id="region" list="regionList" placeholder="Оберіть область" required>
+        <datalist id="regionList"></datalist>
         
-        <label>Район:</label>
-        <dropdown-list data-items-list="districts" data-placeholder="Оберіть район" selected="formData.selectedDistrict"></dropdown-list>
+        <label for="district">Район:</label>
+        <input type="text" id="district" list="districtList" placeholder="Оберіть район" required>
+        <datalist id="districtList"></datalist>
         
-        <label>Населений пункт:</label>
-        <dropdown-list data-items-list="cities" data-placeholder="Оберіть місто" selected="formData.selectedCity"></dropdown-list>
+        <label for="city">Населений пункт:</label>
+        <input type="text" id="city" list="cityList" placeholder="Оберіть місто" required>
+        <datalist id="cityList"></datalist>
         
-        <button ng-click="goToPage(2)">Далі</button>
+        <button id="nextBtn1">Далі</button>
       </div>
       
       <!-- Крок 2: Деталі заявки -->
-      <div id="page2" ng-show="currentPage === 2">
+      <div id="page2" class="hidden">
         <h2>Крок 2: Деталі заявки</h2>
-        <label>Вибір культури:</label>
-        <dropdown-list data-items-list="cultures" data-placeholder="Оберіть культуру" selected="formData.selectedCulture"></dropdown-list>
+        <label for="culture">Вибір культури:</label>
+        <select id="culture" required>
+          <option value="">Оберіть культуру</option>
+          <option value="Зернова">Зернова</option>
+          <option value="Олійна">Олійна</option>
+          <option value="Бобові">Бобові</option>
+          <option value="Продукти переробки">Продукти переробки</option>
+          <option value="Нішеві культури">Нішеві культури</option>
+        </select>
         
-        <label>Вибір групи:</label>
-        <dropdown-list data-items-list="groups" data-placeholder="Оберіть групу" selected="formData.selectedGroup"></dropdown-list>
+        <label for="group">Вибір групи:</label>
+        <select id="group" required>
+          <option value="">Оберіть групу</option>
+        </select>
         
-        <label>Кількість (тонни):</label>
-        <input type="number" ng-model="formData.quantity" placeholder="Введіть кількість" required>
+        <label for="quantity">Кількість (тонни):</label>
+        <input type="number" id="quantity" placeholder="Введіть кількість" required>
         
-        <button ng-click="goToPage(3)">Далі</button>
+        <button id="nextBtn2">Далі</button>
       </div>
       
       <!-- Крок 3: Оплата -->
-      <div id="page3" ng-show="currentPage === 3">
+      <div id="page3" class="hidden">
         <h2>Крок 3: Оплата</h2>
-        <label>Бажана ціна (не обов’язково):</label>
-        <input type="text" ng-model="formData.price" placeholder="Введіть бажану ціну" ng-change="validatePrice()">
+        <label for="price">Бажана ціна (не обов’язково):</label>
+        <!-- Поле лише для цифр -->
+        <input type="text" id="price" placeholder="Введіть бажану ціну">
         
-        <label>Вибір валюти:</label>
-        <dropdown-list data-items-list="currencies" data-placeholder="Оберіть валюту" selected="formData.selectedCurrency"></dropdown-list>
+        <label for="currency">Вибір валюти:</label>
+        <select id="currency" required>
+          <option value="">Оберіть валюту</option>
+          <option value="Грн">Грн</option>
+          <option value="Долар">Долар</option>
+          <option value="Євро">Євро</option>
+        </select>
         
-        <label>Вибір форми:</label>
-        <dropdown-list data-items-list="forms" data-placeholder="Оберіть форму" selected="formData.selectedForm"></dropdown-list>
+        <label for="form">Вибір форми:</label>
+        <select id="form" required>
+          <option value="">Оберіть форму</option>
+        </select>
         
-        <label>Тип оплати:</label>
-        <dropdown-list data-items-list="paytypes" data-placeholder="Оберіть тип оплати" selected="formData.selectedPaytype"></dropdown-list>
+        <label for="paytype">Тип оплати:</label>
+        <select id="paytype" required>
+          <option value="">Оберіть тип оплати</option>
+        </select>
         
-        <button ng-click="submit()">Підтвердити заявку</button>
+        <button id="submitBtn">Підтвердити заявку</button>
       </div>
     </div>
   </div>
   
   <script>
-    angular.module('app', [])
-    // Директива для випадаючого списку
-    .directive('dropdownList', function() {
-      return {
-        restrict: 'E',
-        scope: {
-          itemsList: '=',
-          placeholder: '@',
-          selected: '='
-        },
-        template: '<select ng-model="selected" ng-options="item for item in itemsList">' +
-                  '<option value="">{{placeholder}}</option>' +
-                  '</select>'
-      };
-    })
-    .controller('mainCtrl', ['$scope', '$timeout', function($scope, $timeout) {
-      // Ініціалізація поточної сторінки
-      $scope.currentPage = 1;
-      
-      // Модель даних форми
-      $scope.formData = {
-        fghName: '',
-        edrpou: '',
-        selectedRegion: '',
-        selectedDistrict: '',
-        selectedCity: '',
-        selectedCulture: '',
-        selectedGroup: '',
-        quantity: '',
-        price: '',
-        selectedCurrency: '',
-        selectedForm: '',
-        selectedPaytype: ''
-      };
-      
-      // Дані для локацій
-      $scope.locationsData = {
-        "Київська область": {
-          "Біла Церква": ["Біла Церква", "Сквира", "Кагарлик"],
-          "Бровари": ["Бровари"],
-          "Ірпінь": ["Ірпінь"]
-        },
-        "Львівська область": {
-          "Львів": ["Львів"],
-          "Дрогобицький район": ["Дрогобиць", "Невиць", "Броди"],
-          "Сокальський район": ["Сокаль", "Копачів"]
-        },
-        "Одеська область": {
-          "Одеса": ["Одеса"],
-          "Ізмаїльський район": ["Ізмаїл", "Кілія"],
-          "Білгород-Дністровський район": ["Білгород-Дністровський", "Енергодар"]
-        }
-      };
-      
-      // Дані для культур і груп
-      $scope.cultures = ["Зернова", "Олійна", "Бобові", "Продукти переробки", "Нішеві культури"];
-      $scope.cultureGroups = {
-        "Зернова": [
-          "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "жито", "кукурудза кремніста",
-          "Пшениця тверда", "Тритикале", "Кукурудза фуражна", "Овес голозерний", "Кукурудза бита", "кукурудза Зерноотход",
-          "кукурудза з підвищ. зерна", "Пшениця бита", "Пшениця спельта", "Пшениця неконд."
-        ],
-        "Олійна": [
-          "Соняшник", "Соняшник високоолеїновий", "Ріпак", "Ріпак технічний", "Ріпак з ГМО"
-        ],
-        "Бобові": [
-          "Соя", "Гороох жовтий", "Боби", "Горох зелений", "Горох", "Соя без ГМО"
-        ],
-        "Продукти переробки": [
-          "Олія соняшникова", "Макуха соняшникова високопрот.", "Шрот соняшник високопрот.", "Шрот соняшник. низькопрот.",
-          "Шрот соєвий", "Шрот ріпаку", "Отруби пшен. гран.", "Олія соєва", "Висівки пшеничні", "Макуха соєва",
-          "Макуха ріпакова", "Цукор", "Олія ріпакова", "Шрот соняшн."
-        ],
-        "Нішеві культури": [
-          "Сорго", "Сорго біле", "Сорго червоне", "Просо жовте", "Просо червоне", "Просо біле",
-          "Гречка", "Нут", "Льон", "Віка", "Коріандр", "Сочевиця", "Спельта", "Сочевиця червона",
-          "Льон золотистий", "Льон коричневий", "Просо чорне"
-        ]
-      };
-      
-      // Дані для валюти, форм і типів оплати
-      $scope.currencies = ["Грн", "Долар", "Євро"];
-      $scope.formsData = {
-        "Грн": ["Ф1", "Ф2", "Ф3"],
-        "Долар": ["Ф1", "Ф2"],
-        "Євро": ["Ф1"]
-      };
-      // Функція для отримання типів оплати
-      $scope.getPaytypes = function(currency, form) {
-        if(form === "Ф1") {
-          if(currency === "Грн") return ["Перерахунок з ПДВ"];
-          if(currency === "Долар" || currency === "Євро") return ["Валютний контракт"];
-        }
-        if(form === "Ф2") {
-          if(currency === "Грн" || currency === "Долар") return ["Готівка"];
-        }
-        if(form === "Ф3") {
-          if(currency === "Грн") return ["Перерахунок без ПДВ"];
-        }
-        return [];
-      };
-      
-      // Ініціалізуємо список областей
-      $scope.regions = Object.keys($scope.locationsData);
-      
-      // При зміні області оновлюємо список районів
-      $scope.$watch('formData.selectedRegion', function(newVal) {
-        if(newVal && $scope.locationsData[newVal]) {
-          $scope.districts = Object.keys($scope.locationsData[newVal]);
-        } else {
-          $scope.districts = [];
-        }
-        $scope.formData.selectedDistrict = '';
-        $scope.cities = [];
-        $scope.formData.selectedCity = '';
+    /* ====== Дані для локацій ====== */
+    const locationsData = {
+      "Київська область": {
+        "Біла Церква": ["Біла Церква", "Сквира", "Кагарлик"],
+        "Бровари": ["Бровари"],
+        "Ірпінь": ["Ірпінь"]
+      },
+      "Львівська область": {
+        "Львів": ["Львів"],
+        "Дрогобицький район": ["Дрогобиць", "Невиць", "Броди"],
+        "Сокальський район": ["Сокаль", "Копачів"]
+      },
+      "Одеська область": {
+        "Одеса": ["Одеса"],
+        "Ізмаїльський район": ["Ізмаїл", "Кілія"],
+        "Білгород-Дністровський район": ["Білгород-Дністровський", "Енергодар"]
+      }
+    };
+    
+    /* ====== Дані для груп культур ====== */
+    const cultureGroups = {
+      "Зернова": [
+        "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "жито", "кукурудза кремніста",
+        "Пшениця тверда", "Тритикале", "Кукурудза фуражна", "Овес голозерний", "Кукурудза бита", "кукурудза Зерноотход",
+        "кукурудза з підвищ. зерна", "Пшениця бита", "Пшениця спельта", "Пшениця неконд."
+      ],
+      "Олійна": [
+        "Соняшник", "Соняшник високоолеїновий", "Ріпак", "Ріпак технічний", "Ріпак з ГМО"
+      ],
+      "Бобові": [
+        "Соя", "Гороох жовтий", "Боби", "Горох зелений", "Горох", "Соя без ГМО"
+      ],
+      "Продукти переробки": [
+        "Олія соняшникова", "Макуха соняшникова високопрот.", "Шрот соняшник високопрот.", "Шрот соняшник. низькопрот.",
+        "Шрот соєвий", "Шрот ріпаку", "Отруби пшен. гран.", "Олія соєва", "Висівки пшеничні", "Макуха соєва",
+        "Макуха ріпакова", "Цукор", "Олія ріпакова", "Шрот соняшн."
+      ],
+      "Нішеві культури": [
+        "Сорго", "Сорго біле", "Сорго червоне", "Просо жовте", "Просо червоне", "Просо біле",
+        "Гречка", "Нут", "Льон", "Віка", "Коріандр", "Сочевиця", "Спельта", "Сочевиця червона",
+        "Льон золотистий", "Льон коричневий", "Просо чорне"
+      ]
+    };
+    
+    /* ====== Дані для форм оплати ====== */
+    // Для валюти "Грн" доступні всі форми; для "Долар" – Ф1 і Ф2; для "Євро" – тільки Ф1
+    const formsData = {
+      "Грн": ["Ф1", "Ф2", "Ф3"],
+      "Долар": ["Ф1", "Ф2"],
+      "Євро": ["Ф1"]
+    };
+    
+    // Функція повертає доступні типи оплати залежно від вибраних валюти та форми
+    function getPaytypes(currency, form) {
+      if(form === "Ф1") {
+        if(currency === "Грн") return ["Перерахунок з ПДВ"];
+        if(currency === "Долар" || currency === "Євро") return ["Валютний контракт"];
+      }
+      if(form === "Ф2") {
+        if(currency === "Грн" || currency === "Долар") return ["Готівка"];
+      }
+      if(form === "Ф3") {
+        if(currency === "Грн") return ["Перерахунок без ПДВ"];
+      }
+      return [];
+    }
+    
+    /* ====== Заповнення списків локацій ====== */
+    function loadRegions() {
+      const regionList = document.getElementById("regionList");
+      regionList.innerHTML = "";
+      Object.keys(locationsData).forEach(region => {
+        const option = document.createElement("option");
+        option.value = region;
+        regionList.appendChild(option);
       });
-      
-      // При зміні району оновлюємо список населених пунктів
-      $scope.$watch('formData.selectedDistrict', function(newVal) {
-        if(newVal && $scope.formData.selectedRegion && $scope.locationsData[$scope.formData.selectedRegion][newVal]) {
-          $scope.cities = $scope.locationsData[$scope.formData.selectedRegion][newVal];
-        } else {
-          $scope.cities = [];
-        }
-        $scope.formData.selectedCity = '';
-      });
-      
-      // При зміні культури оновлюємо групи
-      $scope.$watch('formData.selectedCulture', function(newVal) {
-        if(newVal && $scope.cultureGroups[newVal]) {
-          $scope.groups = $scope.cultureGroups[newVal];
-        } else {
-          $scope.groups = [];
-        }
-        $scope.formData.selectedGroup = '';
-      });
-      
-      // При зміні валюти оновлюємо форми
-      $scope.$watch('formData.selectedCurrency', function(newVal) {
-        if(newVal && $scope.formsData[newVal]) {
-          $scope.forms = $scope.formsData[newVal];
-        } else {
-          $scope.forms = [];
-        }
-        $scope.formData.selectedForm = '';
-        $scope.paytypes = [];
-        $scope.formData.selectedPaytype = '';
-      });
-      
-      // При зміні форми оновлюємо типи оплати
-      $scope.$watch('formData.selectedForm', function(newVal) {
-        if(newVal && $scope.formData.selectedCurrency) {
-          $scope.paytypes = $scope.getPaytypes($scope.formData.selectedCurrency, newVal);
-        } else {
-          $scope.paytypes = [];
-        }
-        $scope.formData.selectedPaytype = '';
-      });
-      
-      // Перевірка поля ЄДРПОУ (або порожнє, або рівно 8 цифр)
-      $scope.validateEdrpou = function() {
-        if($scope.formData.edrpou) {
-          $scope.formData.edrpou = $scope.formData.edrpou.replace(/\D/g, '');
-          if($scope.formData.edrpou.length > 8) {
-            $scope.formData.edrpou = $scope.formData.edrpou.substring(0, 8);
-          }
-        }
-      };
-      
-      // Обмеження для ціни (лише цифри)
-      $scope.validatePrice = function() {
-        if($scope.formData.price) {
-          $scope.formData.price = $scope.formData.price.replace(/\D/g, '');
-        }
-      };
-      
-      // Функція навігації між кроками
-      $scope.goToPage = function(page) {
-        if(page === 2) {
-          if($scope.formData.edrpou && $scope.formData.edrpou.length !== 8) {
-            alert("Код ЄДРПОУ повинен містити 8 цифр або бути порожнім.");
-            return;
-          }
-          if(!$scope.formData.selectedRegion || !$scope.formData.selectedDistrict || !$scope.formData.selectedCity) {
-            alert("Будь ласка, оберіть усі обов'язкові поля для локації!");
-            return;
-          }
-        }
-        if(page === 3) {
-          if(!$scope.formData.selectedCulture || !$scope.formData.selectedGroup || !$scope.formData.quantity) {
-            alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
-            return;
-          }
-        }
-        $scope.currentPage = page;
-      };
-      
-      // Функція відправки заявки
-      $scope.submit = function() {
-        if(!$scope.formData.selectedCurrency || !$scope.formData.selectedForm || !$scope.formData.selectedPaytype) {
-          alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
-          return;
-        }
-        
-        var userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : 1124775269;
-        var payload = {
-          user_id: userId,
-          fgh_name: $scope.formData.fghName,
-          edrpou: $scope.formData.edrpou,
-          region: $scope.formData.selectedRegion,
-          district: $scope.formData.selectedDistrict,
-          city: $scope.formData.selectedCity,
-          culture: $scope.formData.selectedCulture,
-          group: $scope.formData.selectedGroup,
-          quantity: $scope.formData.quantity,
-          price: $scope.formData.price,
-          currency: $scope.formData.selectedCurrency,
-          form: $scope.formData.selectedForm,
-          paytype: $scope.formData.selectedPaytype
-        };
-        
-        console.log("Заявка заповнена. Payload:", payload);
-        
-        Telegram.WebApp.sendData(JSON.stringify(payload));
-        
-        fetch("https://agro-api-url.onrender.com/api/webapp_data", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        })
-        .then(function(response) { return response.json(); })
-        .then(function(data) {
-          console.log("Отримано відповідь від API:", data);
-          if(data.status === "ok" || data.status === "preview") {
-            $timeout(function() {
-              Telegram.WebApp.close();
-            }, 1000);
-          } else {
-            alert("Сталася помилка. Спробуйте ще раз.");
-          }
-        })
-        .catch(function(error) {
-          console.error("Помилка при відправленні даних:", error);
-          alert("Помилка при відправленні даних. Спробуйте ще раз.");
+    }
+    
+    function updateDistricts() {
+      const regionInput = document.getElementById("region").value;
+      const districtList = document.getElementById("districtList");
+      districtList.innerHTML = "";
+      if(locationsData[regionInput]) {
+        Object.keys(locationsData[regionInput]).forEach(district => {
+          const option = document.createElement("option");
+          option.value = district;
+          districtList.appendChild(option);
         });
+      }
+      // Очищуємо місто
+      document.getElementById("city").value = "";
+      document.getElementById("cityList").innerHTML = "";
+    }
+    
+    function updateCities() {
+      const regionInput = document.getElementById("region").value;
+      const districtInput = document.getElementById("district").value;
+      const cityList = document.getElementById("cityList");
+      cityList.innerHTML = "";
+      if(locationsData[regionInput] && locationsData[regionInput][districtInput]) {
+        locationsData[regionInput][districtInput].forEach(city => {
+          const option = document.createElement("option");
+          option.value = city;
+          cityList.appendChild(option);
+        });
+      }
+    }
+    
+    loadRegions();
+    
+    document.getElementById("region").addEventListener("change", updateDistricts);
+    document.getElementById("district").addEventListener("change", updateCities);
+    
+    /* ====== Обмеження для поля Код ЄДРПОУ ====== */
+    document.getElementById("edrpou").addEventListener("input", function() {
+      this.value = this.value.replace(/\D/g, "");
+    });
+    
+    /* ====== Заповнення груп для вибраної культури ====== */
+    document.getElementById("culture").addEventListener("change", function() {
+      const culture = this.value;
+      const groupSelect = document.getElementById("group");
+      groupSelect.innerHTML = '<option value="">Оберіть групу</option>';
+      if(cultureGroups[culture]) {
+        cultureGroups[culture].forEach(group => {
+          const option = document.createElement("option");
+          option.value = group;
+          option.textContent = group;
+          groupSelect.appendChild(option);
+        });
+      }
+    });
+    
+    /* ====== Оновлення форм і типу оплати ====== */
+    document.getElementById("currency").addEventListener("change", function() {
+      const currency = this.value;
+      const formSelect = document.getElementById("form");
+      formSelect.innerHTML = '<option value="">Оберіть форму</option>';
+      if(formsData[currency]) {
+        formsData[currency].forEach(form => {
+          const option = document.createElement("option");
+          option.value = form;
+          option.textContent = form;
+          formSelect.appendChild(option);
+        });
+      }
+      // Очищуємо тип оплати
+      document.getElementById("paytype").innerHTML = '<option value="">Оберіть тип оплати</option>';
+    });
+    
+    document.getElementById("form").addEventListener("change", function() {
+      const currency = document.getElementById("currency").value;
+      const form = this.value;
+      const paytypeSelect = document.getElementById("paytype");
+      paytypeSelect.innerHTML = '<option value="">Оберіть тип оплати</option>';
+      const types = getPaytypes(currency, form);
+      types.forEach(type => {
+        const option = document.createElement("option");
+        option.value = type;
+        option.textContent = type;
+        paytypeSelect.appendChild(option);
+      });
+    });
+    
+    /* ====== Обмеження для поля Бажана ціна ====== */
+    document.getElementById("price").addEventListener("input", function() {
+      this.value = this.value.replace(/\D/g, "");
+    });
+    
+    /* ====== Перехід між кроками ====== */
+    document.getElementById("nextBtn1").addEventListener("click", function() {
+      // Якщо код ЄДРПОУ не порожній, перевіряємо, що містить рівно 8 цифр
+      const edrpou = document.getElementById("edrpou").value;
+      if(edrpou && edrpou.length !== 8) {
+        alert("Код ЄДРПОУ повинен містити 8 цифр або бути порожнім.");
+        return;
+      }
+      if(!document.getElementById("region").value || !document.getElementById("district").value || !document.getElementById("city").value) {
+        alert("Будь ласка, оберіть усі обов'язкові поля для локації!");
+        return;
+      }
+      document.getElementById("page1").classList.add("hidden");
+      document.getElementById("page2").classList.remove("hidden");
+    });
+    
+    document.getElementById("nextBtn2").addEventListener("click", function() {
+      if(!document.getElementById("culture").value || !document.getElementById("group").value || !document.getElementById("quantity").value) {
+        alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
+        return;
+      }
+      document.getElementById("page2").classList.add("hidden");
+      document.getElementById("page3").classList.remove("hidden");
+    });
+    
+    /* ====== Фінальна відправка ====== */
+    document.getElementById("submitBtn").addEventListener("click", function() {
+      if(!document.getElementById("currency").value || !document.getElementById("form").value || !document.getElementById("paytype").value) {
+        alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
+        return;
+      }
+      
+      const fghName   = document.getElementById("fghName").value.trim();
+      const edrpou    = document.getElementById("edrpou").value.trim();
+      const region    = document.getElementById("region").value;
+      const district  = document.getElementById("district").value;
+      const city      = document.getElementById("city").value;
+      const culture   = document.getElementById("culture").value;
+      const group     = document.getElementById("group").value;
+      const quantity  = document.getElementById("quantity").value.trim();
+      const price     = document.getElementById("price").value.trim();
+      const currency  = document.getElementById("currency").value;
+      const form      = document.getElementById("form").value;
+      const paytype   = document.getElementById("paytype").value;
+      
+      let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : null;
+      if(userId === null) {
+        userId = 1124775269;
+        console.log("userId не отримано, встановлено дефолтне значення:", userId);
+      }
+      
+      const payload = {
+        user_id: userId,
+        fgh_name: fghName,
+        edrpou: edrpou,
+        region: region,
+        district: district,
+        city: city,
+        culture: culture,
+        group: group,
+        quantity: quantity,
+        price: price,
+        currency: currency,
+        form: form,
+        paytype: paytype
       };
       
-      // Ініціалізація Telegram WebApp
-      Telegram.WebApp.ready();
-      console.log("WebApp готовий.");
-    }]);
+      console.log("Заявка заповнена. Payload:", payload);
+      
+      // Відправка даних до бота
+      Telegram.WebApp.sendData(JSON.stringify(payload));
+      
+      // Надсилання даних до API (за потребою)
+      fetch("https://agro-api-url.onrender.com/api/webapp_data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Отримано відповідь від API:", data);
+        if(data.status === "ok" || data.status === "preview") {
+          setTimeout(() => {
+            Telegram.WebApp.close();
+          }, 1000);
+        } else {
+          alert("Сталася помилка. Спробуйте ще раз.");
+        }
+      })
+      .catch(error => {
+        console.error("Помилка при відправленні даних:", error);
+        alert("Помилка при відправленні даних. Спробуйте ще раз.");
+      });
+    });
+    
+    /* ====== Попереднє заповнення форми (якщо є параметр data) ====== */
+    function prefillForm(prefillData) {
+      document.getElementById("fghName").value = prefillData.fgh_name || "";
+      document.getElementById("edrpou").value = prefillData.edrpou || "";
+      document.getElementById("region").value = prefillData.region || "";
+      updateDistricts();
+      setTimeout(() => {
+        document.getElementById("district").value = prefillData.district || "";
+        updateCities();
+        setTimeout(() => {
+          document.getElementById("city").value = prefillData.city || "";
+        }, 300);
+      }, 300);
+      document.getElementById("culture").value = prefillData.culture || "";
+      document.getElementById("culture").dispatchEvent(new Event('change'));
+      setTimeout(() => {
+        document.getElementById("group").value = prefillData.group || "";
+      }, 300);
+      document.getElementById("quantity").value = prefillData.quantity || "";
+      document.getElementById("price").value = prefillData.price || "";
+      document.getElementById("currency").value = prefillData.currency || "";
+      document.getElementById("currency").dispatchEvent(new Event('change'));
+      setTimeout(() => {
+        document.getElementById("form").value = prefillData.form || "";
+        document.getElementById("form").dispatchEvent(new Event('change'));
+        setTimeout(() => {
+          document.getElementById("paytype").value = prefillData.paytype || "";
+          // Відображаємо останній крок
+          document.getElementById("page1").classList.add("hidden");
+          document.getElementById("page2").classList.add("hidden");
+          document.getElementById("page3").classList.remove("hidden");
+        }, 300);
+      }, 300);
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const prefill = urlParams.get("data");
+    if(prefill) {
+      try {
+        const dataObj = JSON.parse(decodeURIComponent(prefill));
+        prefillForm(dataObj);
+      } catch(e) {
+        console.error("Помилка при розборі prefill даних:", e);
+      }
+    }
+    
+    Telegram.WebApp.ready();
+    console.log("WebApp готовий.");
   </script>
 </body>
 </html>
