@@ -117,9 +117,8 @@
         <input type="text" ng-model="formData.fghName" placeholder="Введіть назву ФГ">
         
         <label>Код ЄДРПОУ (8 цифр, не обов’язково):</label>
-        <input type="text" ng-model="formData.edrpou" placeholder="Введіть код ЄДРПОУ"
-               ng-change="formData.edrpou = formData.edrpou.replace(/\D/g, '')"
-               ng-pattern="/^(\d{8})?$/">
+        <input type="number" ng-model="formData.edrpou" placeholder="Введіть код ЄДРПОУ"
+               min="10000000" max="99999999">
         
         <label>Область:</label>
         <dropdown-list data-items-list="regions" data-placeholder="Оберіть область" model="formData.region"></dropdown-list>
@@ -152,9 +151,7 @@
       <div ng-show="currentStep === 3">
         <h2>Крок 3: Оплата</h2>
         <label>Бажана ціна (не обов’язково):</label>
-        <input type="text" ng-model="formData.price" placeholder="Введіть бажану ціну"
-               ng-change="formData.price = formData.price.replace(/\D/g, '')"
-               ng-pattern="/^\d*$/">
+        <input type="number" ng-model="formData.price" placeholder="Введіть бажану ціну">
         
         <label>Вибір валюти:</label>
         <simple-dropdown data-items-list="currencies" data-placeholder="Оберіть валюту" model="formData.currency"></simple-dropdown>
@@ -209,7 +206,6 @@
             scope.isOpen = false;
           };
           
-          // Закриття випадаючого меню при кліку поза його областю
           function handleClick(event) {
             if (!element[0].contains(event.target)) {
               scope.$apply(function() {
@@ -219,7 +215,6 @@
           }
           
           $document.on('click', handleClick);
-          
           scope.$on('$destroy', function() {
             $document.off('click', handleClick);
           });
@@ -245,7 +240,6 @@
     });
     
     app.controller('mainCtrl', function($scope) {
-      // Дані для локацій
       $scope.locationsData = {
         "Київська область": {
           "Біла Церква": ["Біла Церква", "Сквира", "Кагарлик"],
@@ -264,11 +258,9 @@
         }
       };
       
-      // Ініціалізація списку областей, районів та населених пунктів
       $scope.regions = Object.keys($scope.locationsData);
       $scope.districts = [];
       $scope.cities = [];
-      
       $scope.formData = {};
       
       $scope.$watch('formData.region', function(newVal) {
@@ -292,7 +284,6 @@
         }
       });
       
-      // Дані для культур та груп
       $scope.cultures = ["Зернова", "Олійна", "Бобові", "Продукти переробки", "Нішеві культури"];
       $scope.cultureGroups = {
         "Зернова": [
@@ -328,7 +319,6 @@
         }
       });
       
-      // Дані для оплати
       $scope.currencies = ["Грн", "Долар", "Євро"];
       $scope.formsData = {
         "Грн": ["Ф1", "Ф2", "Ф3"],
@@ -375,12 +365,11 @@
         }
       });
       
-      // Логіка переходу між кроками
       $scope.currentStep = 1;
       
       $scope.nextStep = function() {
         if($scope.currentStep === 1) {
-          if($scope.formData.edrpou && $scope.formData.edrpou.toString().length !== 8) {
+          if($scope.formData.edrpou && ($scope.formData.edrpou.toString().length !== 8)) {
             alert("Код ЄДРПОУ повинен містити рівно 8 цифр або бути порожнім.");
             return;
           }
@@ -403,13 +392,8 @@
           alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
           return;
         }
-        if($scope.formData.price) {
-          $scope.formData.price = $scope.formData.price.replace(/\D/g, '');
-        }
-        
-        var userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : 1124775269;
         var payload = {
-          user_id: userId,
+          user_id: Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : 1124775269,
           fgh_name: $scope.formData.fghName || "",
           edrpou: $scope.formData.edrpou || "",
           region: $scope.formData.region,
@@ -450,7 +434,6 @@
         });
       };
       
-      // Попереднє заповнення форми за даними з URL (якщо є параметр data)
       var urlParams = new URLSearchParams(window.location.search);
       var prefill = urlParams.get("data");
       if(prefill) {
