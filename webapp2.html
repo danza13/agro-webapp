@@ -84,7 +84,7 @@
         <input type="text" id="fghName" placeholder="Введіть назву ФГ">
         
         <label for="edrpou">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
-        <!-- Змінено pattern: дозволяються 8 або 10 цифр -->
+        <!-- Дозволено 8 або 10 цифр -->
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$">
         
         <!-- Поля локації через AngularJS з директивою dropdownList -->
@@ -105,15 +105,14 @@
       <!-- Крок 2: Деталі заявки -->
       <div id="page2" class="hidden" ng-controller="step2Ctrl">
         <h2>Крок 2: Деталі заявки</h2>
-        <!-- Тепер цей блок відповідає за вибір групи -->
+        <!-- Вибір групи: це ключі об'єкта cultureGroups -->
         <label for="groupSelect">Вибір групи:</label>
         <select id="groupSelect" ng-model="selectedGroup" required>
           <option value="">Оберіть групу</option>
-          <!-- Використовуємо allGroups, який обчислено у контролері -->
-          <option ng-repeat="group in allGroups" value="{{group}}">{{group}}</option>
+          <option ng-repeat="group in groups" value="{{group}}">{{group}}</option>
         </select>
         
-        <!-- А цей блок тепер для вибору культури -->
+        <!-- Вибір культури: після вибору групи з'являється перелік культур -->
         <label>Вибір культури:</label>
         <dropdown-list data-items-list="cultures" data-placeholder="Оберіть культуру" ng-model="selectedCulture"></dropdown-list>
         
@@ -239,27 +238,23 @@
           }
         });
       }])
-      // Контролер для кроку 2: вибір групи та культури (елементи поміняні місцями)
+      // Контролер для кроку 2: вибір групи та культур
       .controller('step2Ctrl', ['$scope', function($scope) {
-        // Раніше selectedCulture і selectedGroup були іншими – тепер їх місцями
-        $scope.selectedGroup = "";
-        $scope.selectedCulture = "";
-  
-        // Об'єкт, що містить відповідність: культура -> список груп
+        // Об'єкт, що містить відповідність: група -> список культур
         const cultureGroups = {
           "Зернова": [
-            "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "жито", "кукурудза кремніста",
-            "Пшениця тверда", "Тритикале", "Кукурудза фуражна", "Овес голозерний", "Кукурудза бита", "кукурудза Зерноотход",
-            "кукурудза з підвищ. зерна", "Пшениця бита", "Пшениця спельта", "Пшениця неконд."
+            "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "Жито", "Кукурудза кремніста",
+            "Пшениця тверда", "Тритикале", "Кукурудза фуражна", "Овес голозерний", "Кукурудза бита", "Кукурудза Зерноотход",
+            "Кукурудза з підвищ. зерна", "Пшениця бита", "Пшениця спельта", "Пшениця неконд."
           ],
           "Олійна": [
             "Соняшник", "Соняшник високоолеїновий", "Ріпак", "Ріпак технічний", "Ріпак з ГМО"
           ],
           "Бобові": [
-            "Соя", "Гороох жовтий", "Боби", "Горох зелений", "Горох", "Соя без ГМО"
+            "Соя", "Горох жовтий", "Боби", "Горох зелений", "Горох", "Соя без ГМО"
           ],
           "Продукти переробки": [
-            "Олія соняшникова", "Макуха соняшникова високопрот.", "Шрот соняшник високопрот.", "Шрот соняшник. низькопрот.",
+            "Олія соняшникова", "Макуха соняшникова високопрот.", "Шрот соняшник високопрот.", "Шрот соняшник низькопрот.",
             "Шрот соєвий", "Шрот ріпаку", "Отруби пшен. гран.", "Олія соєва", "Висівки пшеничні", "Макуха соєва",
             "Макуха ріпакова", "Цукор", "Олія ріпакова", "Шрот соняшн."
           ],
@@ -270,29 +265,22 @@
           ]
         };
   
-        // Обчислення переліку культур (ключі об'єкта cultureGroups)
-        $scope.cultures = Object.keys(cultureGroups);
+        // Групи – це ключі об'єкта cultureGroups
+        $scope.groups = Object.keys(cultureGroups);
+        $scope.selectedGroup = "";
+        // Список культур оновиться при виборі групи
+        $scope.cultures = [];
+        $scope.selectedCulture = "";
   
-        // Обчислення "злитого" списку груп (усіх значень з cultureGroups)
-        $scope.allGroups = [];
-        angular.forEach(cultureGroups, function(groups) {
-          $scope.allGroups = $scope.allGroups.concat(groups);
-        });
-  
-        // Якщо необхідно, можна додати логіку для синхронізації вибору
-        // Наприклад: якщо вибрана група належить певній культурі – автоматично встановити selectedCulture
+        // Слідкуємо за зміною вибраної групи
         $scope.$watch('selectedGroup', function(newVal) {
           if(newVal){
-            angular.forEach(cultureGroups, function(groups, culture) {
-              if(groups.indexOf(newVal) !== -1){
-                $scope.selectedCulture = culture;
-              }
-            });
+            $scope.cultures = cultureGroups[newVal];
           } else {
+            $scope.cultures = [];
             $scope.selectedCulture = "";
           }
         });
-  
       }]);
   </script>
   
@@ -367,7 +355,7 @@
     
     document.getElementById("nextBtn1").addEventListener("click", function() {
       const edrpou = document.getElementById("edrpou").value;
-      // Перевірка: якщо поле не порожнє, довжина має бути 8 або 10 цифр
+      // Якщо поле не порожнє, його довжина має бути 8 або 10 цифр
       if(edrpou && !(edrpou.length === 8 || edrpou.length === 10)) {
         alert("Код ЄДРПОУ повинен містити 8 або 10 цифр або бути порожнім.");
         return;
@@ -383,7 +371,7 @@
     
     document.getElementById("nextBtn2").addEventListener("click", function() {
       var scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
-      // Перевірка обов'язкових полів: тепер selectedGroup та selectedCulture
+      // Перевірка: мають бути обрані група, культура та кількість
       if(!scope.selectedGroup || !scope.selectedCulture || !document.getElementById("quantity").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
@@ -405,8 +393,7 @@
       const district  = locScope.selectedDistrict;
       const city      = locScope.selectedCity;
       
-      // У кроці 2 тепер дані змінено місцями:
-      // selectedGroup – вибрана група, selectedCulture – вибрана культура
+      // Дані з кроку 2: група та культура
       var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
       const group     = step2Scope.selectedGroup;
       const culture   = step2Scope.selectedCulture;
@@ -426,9 +413,8 @@
         region: region,
         district: district,
         city: city,
-        // Передаємо тепер групу і культуру згідно з новим порядком
-        group: group,
-        culture: culture,
+        group: group,         // Група (наприклад, "Зернова", "Олійна" тощо)
+        culture: culture,     // Культура (наприклад, "Пшениця 2 кл.", "Соняшник" тощо)
         quantity: quantity,
         price: price,
         currency: currency,
