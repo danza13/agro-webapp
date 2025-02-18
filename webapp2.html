@@ -117,8 +117,9 @@
         <input type="text" ng-model="formData.fghName" placeholder="Введіть назву ФГ">
         
         <label>Код ЄДРПОУ (8 цифр, не обов’язково):</label>
-        <input type="text" ng-model="formData.edrpou" placeholder="Введіть код ЄДРПОУ" 
-               ng-change="formData.edrpou = formData.edrpou.replace(/\D/g, '')">
+        <input type="text" ng-model="formData.edrpou" placeholder="Введіть код ЄДРПОУ"
+               ng-change="formData.edrpou = formData.edrpou.replace(/\D/g, '')"
+               ng-pattern="/^(\d{8})?$/">
         
         <label>Область:</label>
         <dropdown-list data-items-list="regions" data-placeholder="Оберіть область" model="formData.region"></dropdown-list>
@@ -151,8 +152,9 @@
       <div ng-show="currentStep === 3">
         <h2>Крок 3: Оплата</h2>
         <label>Бажана ціна (не обов’язково):</label>
-        <input type="text" ng-model="formData.price" placeholder="Введіть бажану ціну" 
-               ng-change="formData.price = formData.price.replace(/\D/g, '')">
+        <input type="text" ng-model="formData.price" placeholder="Введіть бажану ціну"
+               ng-change="formData.price = formData.price.replace(/\D/g, '')"
+               ng-pattern="/^\d*$/">
         
         <label>Вибір валюти:</label>
         <simple-dropdown data-items-list="currencies" data-placeholder="Оберіть валюту" model="formData.currency"></simple-dropdown>
@@ -379,7 +381,7 @@
       $scope.nextStep = function() {
         if($scope.currentStep === 1) {
           if($scope.formData.edrpou && $scope.formData.edrpou.toString().length !== 8) {
-            alert("Код ЄДРПОУ повинен містити 8 цифр або бути порожнім.");
+            alert("Код ЄДРПОУ повинен містити рівно 8 цифр або бути порожнім.");
             return;
           }
           if(!$scope.formData.region || !$scope.formData.district || !$scope.formData.city) {
