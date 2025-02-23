@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Заповнення заявки – кроки</title>
-  <!-- Підключення AngularJS -->
+  <!-- AngularJS -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
   <style>
     body, html {
@@ -12,7 +12,8 @@
       padding: 0;
       min-height: 100vh;
       font-family: sans-serif;
-      background: url('https://images.pexels.com/photos/730897/pexels-photo-730897.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940') no-repeat center center fixed;
+      background: url('https://images.pexels.com/photos/730897/pexels-photo-730897.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940')
+        no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       text-align: center;
@@ -35,26 +36,30 @@
       box-sizing: border-box;
     }
     h2 { margin-bottom: 15px; }
-    label { display: block; text-align: left; font-weight: bold; margin: 10px 0 5px; }
+    label {
+      display: block;
+      text-align: left;
+      font-weight: bold;
+      margin: 10px 0 5px;
+    }
     input, select, textarea, button {
-      width: 100%; 
-      padding: 10px; 
-      margin-bottom: 10px; 
-      border-radius: 5px; 
-      border: none; 
-      box-sizing: border-box; 
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+      box-sizing: border-box;
       font-size: 16px;
     }
-    button { 
-      background: #007bff; 
-      color: #fff; 
-      cursor: pointer; 
+    button {
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
       transition: background 0.3s ease;
       border: none;
     }
     button:hover { background: #0056b3; }
     .hidden { display: none; }
-    /* Контейнер для кнопок */
     .button-container {
       display: flex;
       justify-content: space-between;
@@ -62,8 +67,6 @@
     .button-container button {
       width: 48%;
     }
-    
-    /* Стилі для директиви dropdownList (для локації) */
     .dropdown-container {
       position: relative;
       text-align: left;
@@ -91,7 +94,6 @@
     .dropdown-list div:hover {
       background: #f0f0f0;
     }
-    /* Стилі для placeholder */
     input::placeholder {
       color: rgba(0,0,0,0.5);
     }
@@ -142,9 +144,8 @@
           <option ng-repeat="culture in cultures" value="{{culture}}">{{culture}}</option>
         </select>
         
-        <!-- Блок додаткових полів (з'являється залежно від вибраної культури) -->
+        <!-- Додаткові поля (з'являються залежно від вибраної культури) -->
         <div ng-if="selectedCulture">
-          <!-- Якщо обрано будь-яку з пшениць -->
           <div ng-if="selectedCulture.indexOf('Пшениця') !== -1">
             <label for="natura">Натура (Не обов'язково):</label>
             <input type="text" id="natura" ng-model="extraFields.natura" format-decimal placeholder="Наприклад, 12.3">
@@ -159,7 +160,6 @@
             <label for="sazhkov">Сажкові зерна (Не обов'язково):</label>
             <input type="text" id="sazhkov" ng-model="extraFields.sazhkov" format-decimal placeholder="Наприклад, 12.3">
           </div>
-          <!-- Якщо обрано будь-який ячмінь -->
           <div ng-if="selectedCulture.indexOf('Ячмінь') !== -1">
             <label for="natura_ya">Натура (Не обов'язково):</label>
             <input type="text" id="natura_ya" ng-model="extraFields.natura" format-decimal placeholder="Наприклад, 12.3">
@@ -168,7 +168,6 @@
             <label for="smitteva_ya">Сміттєва домішка (Не обов'язково):</label>
             <input type="text" id="smitteva_ya" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3">
           </div>
-          <!-- Якщо обрано будь-яку з кукурудз (без врахування регістру) -->
           <div ng-if="selectedCulture.toLowerCase().indexOf('кукуруд') !== -1">
             <label for="vologhist_k">Вологість (Не обов'язково):</label>
             <input type="text" id="vologhist_k" ng-model="extraFields.vologhist" format-decimal placeholder="Наприклад, 12.3">
@@ -181,7 +180,6 @@
             <label for="zipsovani">Зіпсовані зерна (Не обов'язково):</label>
             <input type="text" id="zipsovani" ng-model="extraFields.zipsovani" format-decimal placeholder="Наприклад, 12.3">
           </div>
-          <!-- Якщо обрано будь-який соняшник -->
           <div ng-if="selectedCulture.indexOf('Соняшник') !== -1">
             <label for="olijnist_na_suhu">Олійність на суху (Не обов'язково):</label>
             <input type="text" id="olijnist_na_suhu" ng-model="extraFields.olijnist_na_suhu" format-decimal placeholder="Наприклад, 12.3">
@@ -192,7 +190,6 @@
             <label for="kislotne">Кислотне число (Не обов'язково):</label>
             <input type="text" id="kislotne" ng-model="extraFields.kislotne" format-decimal placeholder="Наприклад, 12.3">
           </div>
-          <!-- Якщо обрано Ріпак -->
           <div ng-if="selectedCulture == 'Ріпак'">
             <label for="olijnist_na_siru">Олійність на сиру (Не обов'язково):</label>
             <input type="text" id="olijnist_na_siru" ng-model="extraFields.olijnist_na_siru" format-decimal placeholder="Наприклад, 12.3">
@@ -203,7 +200,6 @@
             <label for="smitteva_ripak">Сміттєва домішка (Не обов'язково):</label>
             <input type="text" id="smitteva_ripak" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3">
           </div>
-          <!-- Якщо обрано Соя -->
           <div ng-if="selectedCulture == 'Соя'">
             <label for="bilok_na_siru">Білок на сиру (Не обов'язково):</label>
             <input type="text" id="bilok_na_siru" ng-model="extraFields.bilok_na_siru" format-decimal placeholder="Наприклад, 12.3">
@@ -221,16 +217,15 @@
         <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
         
-        <!-- Контейнер кнопок: Назад і Далі -->
         <div class="button-container">
           <button id="backBtn2" type="button">Назад</button>
           <button id="nextBtn2" type="button">Далі</button>
         </div>
       </div>
       
-      <!-- Крок 3: Оплата -->
+      <!-- Крок 3: Ціна -->
       <div id="page3" class="hidden">
-        <h2>Крок 3: Оплата</h2>
+        <h2>Крок 3: Ціна</h2>
         <label for="price">Бажана ціна (не обов’язково):</label>
         <input type="text" id="price" placeholder="Введіть бажану ціну">
         
@@ -247,7 +242,6 @@
           <option value="">Оберіть форму оплати</option>
         </select>
         
-        <!-- Контейнер кнопок: Назад і Підтвердити заявку -->
         <div class="button-container">
           <button id="backBtn3" type="button">Назад</button>
           <button id="submitBtn" type="button">Підтвердити заявку</button>
@@ -259,7 +253,7 @@
   <!-- AngularJS: модуль, контролери, директиви -->
   <script>
     angular.module('app', [])
-      // Директива dropdownList для локації (без змін)
+      // Директива dropdownList (для вибору регіону/району/міста)
       .directive('dropdownList', function() {
         return {
           restrict: 'E',
@@ -280,7 +274,7 @@
               </div>
             </div>
           `,
-          link: function(scope, element, attrs) {
+          link: function(scope, element) {
             scope.listVisible = false;
             scope.searchText = scope.ngModel || '';
   
@@ -304,32 +298,30 @@
           }
         };
       })
-      // Директива formatDecimal для додаткових полів
+      // Директива formatDecimal (для обмеження на числовий формат XX.X)
       .directive('formatDecimal', function() {
         return {
           require: 'ngModel',
           link: function(scope, element, attrs, ngModel) {
-            var decimalRegex = /^\d+(?:[.,]\d)?$/; // дозволяє тільки число з необов'язковою однією десятковою цифрою
-            // Блокуємо введення недопустимих символів і надлишкових цифр після роздільника
+            var decimalRegex = /^\d+(?:[.,]\d)?$/;
             element.on('keypress', function(e) {
               var char = String.fromCharCode(e.which);
-              // Дозволяємо лише цифри, крапку або кому
               if (!/[0-9\.,]/.test(char)) {
                 e.preventDefault();
                 return false;
               }
               var currentVal = element.val();
               var selectionStart = element[0].selectionStart;
-              // Якщо символ – крапка або кома, і вже є роздільник, забороняємо
+  
+              // Не даємо вдруге вводити крапку/кому
               if ((char === '.' || char === ',') && (currentVal.indexOf('.') !== -1 || currentVal.indexOf(',') !== -1)) {
                 e.preventDefault();
                 return false;
               }
-              // Якщо вже є десяткова частина і курсор після роздільника, забороняємо введення більше однієї цифри
+              // Лише одна цифра після крапки/коми
               var decIndex = currentVal.indexOf('.') !== -1 ? currentVal.indexOf('.') : currentVal.indexOf(',');
               if(decIndex !== -1 && selectionStart > decIndex) {
                 var digitsAfter = currentVal.substring(decIndex + 1).length;
-                // Якщо нічого не виділено, і вже введено одна цифра після роздільника – блокуємо
                 var selectionEnd = element[0].selectionEnd;
                 if(digitsAfter >= 1 && (selectionEnd - selectionStart) === 0) {
                   e.preventDefault();
@@ -338,21 +330,21 @@
               }
             });
   
-            // Валідатор – перевіряє формат
+            // Валідатор
             ngModel.$validators.decimal = function(modelValue, viewValue) {
               var value = modelValue || viewValue;
-              if (!value) return true; // пусте значення допустиме
+              if (!value) return true; // пусто -> ок
               value = value.toString().replace(',', '.');
               return decimalRegex.test(value);
             };
   
-            // Парсер: замінюємо кому на крапку
+            // Парсер: кому -> крапку
             ngModel.$parsers.push(function(value) {
               if (!value) return value;
               return value.replace(',', '.');
             });
   
-            // Форматер: якщо немає десяткової частини – додаємо ".0"
+            // Форматер: додаємо ".0" якщо ввели лише ціле
             ngModel.$formatters.push(function(value) {
               if (value === undefined || value === null || value === '') return value;
               value = value.toString().replace(',', '.');
@@ -362,6 +354,7 @@
               return value;
             });
   
+            // При втраті фокусу (blur) додаємо ".0" якщо було ціле
             element.on('blur', function() {
               var value = ngModel.$modelValue;
               if (value && value.toString().indexOf('.') === -1) {
@@ -372,7 +365,7 @@
           }
         };
       })
-      // Контролер для локації
+      // Контролер для завантаження локації
       .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
         $scope.selectedRegion = "";
         $scope.selectedDistrict = "";
@@ -380,6 +373,7 @@
         $scope.districts = [];
         $scope.cities = [];
   
+        // Приклад завантаження data.json
         $http.get('data.json')
           .then(function(response) {
             $scope.locationsData = response.data;
@@ -408,7 +402,7 @@
           }
         });
       }])
-      // Контролер для кроку 2: вибір групи, культур та додаткових полів
+      // Контролер кроку 2 (групи, культури...)
       .controller('step2Ctrl', ['$scope', function($scope) {
         const cultureGroups = {
           "Зернова": [
@@ -417,10 +411,10 @@
             "Кукурудза з підвищ. зерна", "Пшениця бита", "Пшениця спельта", "Пшениця неконд."
           ],
           "Олійна": [
-            "Соняшник", "Соняшник високоолеїновий", "Ріпак", "Ріпак технічний", "Ріпак з ГМО"
+            "Соняшник", "Соняшник високоолеїновий", "Ріпак", "Ріпак технічний", "Ріпак з ГМО", "Рапс ГМО"
           ],
           "Бобові": [
-            "Соя", "Горох жовтий", "Боби", "Горох зелений", "Горох", "Соя без ГМО"
+            "Соя з ГМО", "Горох жовтий", "Боби", "Горох зелений", "Соя без ГМО"
           ],
           "Продукти переробки": [
             "Олія соняшникова", "Макуха соняшникова високопрот.", "Шрот соняшник високопрот.", "Шрот соняшник низькопрот.",
@@ -438,7 +432,7 @@
         $scope.selectedGroup = "";
         $scope.cultures = [];
         $scope.selectedCulture = "";
-        $scope.extraFields = {}; // об'єкт для додаткових полів
+        $scope.extraFields = {};
   
         $scope.$watch('selectedGroup', function(newVal) {
           if(newVal){
@@ -451,9 +445,9 @@
       }]);
   </script>
   
-  <!-- Логіка для кроку 3 та перевірка додаткових полів -->
+  <!-- Основна логіка кроків + відправка -->
   <script>
-    /* --- Крок 3: Робота з оплатою --- */
+    // Форми оплати залежно від обраної валюти
     const paymentForms = {
       "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
       "Долар": ["Валютний контракт", "Готівка"],
@@ -474,17 +468,17 @@
       }
     });
   
-    // Фільтрація вводу для ЄДРПОУ
+    // Поле ЄДРПОУ: лише цифри
     document.getElementById("edrpou").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
     
-    // Фільтрація вводу для бажаної ціни
+    // Поле "Бажана ціна": лише цифри
     document.getElementById("price").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
     
-    // Перехід з кроку 1 до кроку 2
+    // КРОК 1 -> КРОК 2
     document.getElementById("nextBtn1").addEventListener("click", function() {
       const edrpou = document.getElementById("edrpou").value;
       if(edrpou && !(edrpou.length === 8 || edrpou.length === 10)) {
@@ -493,7 +487,7 @@
       }
       var scope = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
       if(!scope.selectedRegion || !scope.selectedDistrict || !scope.selectedCity) {
-        alert("Будь ласка, оберіть усі обов'язкові поля для локації!");
+        alert("Будь ласка, оберіть усі поля локації (область, район, населений пункт)!");
         return;
       }
       document.getElementById("page1").classList.add("hidden");
@@ -506,21 +500,21 @@
       document.getElementById("page1").classList.remove("hidden");
     });
     
-    // Перехід з кроку 2 до кроку 3 із валідацією додаткових полів
+    // КРОК 2 -> КРОК 3
     document.getElementById("nextBtn2").addEventListener("click", function() {
       var scope2 = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
       if(!scope2.selectedGroup || !scope2.selectedCulture || !document.getElementById("quantity").value) {
-        alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
+        alert("Будь ласка, заповніть обов'язкові поля (Група, Культура, Кількість)!");
         return;
       }
-      // Перевірка кожного з додаткових полів (якщо значення введено)
+      // Перевірка форматів додаткових полів
       var extra = scope2.extraFields;
       var regex = /^\d+(?:[.,]\d)?$/;
       for(var key in extra) {
         if(extra.hasOwnProperty(key) && extra[key]) {
           var val = extra[key].toString().replace(',', '.');
           if(!regex.test(val)) {
-            alert("Некоректний формат у полі '" + key + "'. Будь ласка, введіть число у форматі XX.X (одна десяткова цифра).");
+            alert("Некоректний формат у полі '" + key + "'. Приклад: 12.3");
             return;
           }
         }
@@ -535,16 +529,17 @@
       document.getElementById("page2").classList.remove("hidden");
     });
     
-    // Відправка заявки
+    // Кнопка "Підтвердити заявку" -> надсилання через fetch()
     document.getElementById("submitBtn").addEventListener("click", function() {
       if(!document.getElementById("currency").value || !document.getElementById("paymentForm").value) {
-        alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
+        alert("Будь ласка, виберіть валюту і форму оплати!");
         return;
       }
       
+      // Збір даних
       const fghName  = document.getElementById("fghName").value.trim();
       const edrpou   = document.getElementById("edrpou").value.trim();
-      var locScope = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
+      var locScope   = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
       const region   = locScope.selectedRegion;
       const district = locScope.selectedDistrict;
       const city     = locScope.selectedCity;
@@ -558,7 +553,10 @@
       const currency    = document.getElementById("currency").value;
       const paymentForm = document.getElementById("paymentForm").value;
       
-      let userId = Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user.id : 1124775269;
+      // Отримаємо user_id з Telegram WebApp (або заглушку при тестуванні)
+      let userId = Telegram.WebApp.initDataUnsafe.user
+        ? Telegram.WebApp.initDataUnsafe.user.id
+        : 999999999;
       
       const payload = {
         user_id: userId,
@@ -576,34 +574,50 @@
         extra_fields: step2Scope.extraFields
       };
       
-      console.log("Заявка заповнена. Payload:", payload);
+      console.log("Заявка:", payload);
       
-      Telegram.WebApp.sendData(JSON.stringify(payload));
-      
-      fetch("https://agro-api-url.onrender.com/api/webapp_data", {
+      // Відправляємо лише через fetch() (Без Telegram.WebApp.sendData)
+      // Потрібно вказати ваш реальний URL API
+      fetch("https://bddc-46-173-155-66.ngrok-free.app/api/webapp_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       })
       .then(response => response.json())
       .then(data => {
-        console.log("Отримано відповідь від API:", data);
+        console.log("Відповідь від API:", data);
         if(data.status === "ok" || data.status === "preview") {
+          alert("Ваша заявка успішно відправлена!");
+          // Закриємо WebApp (якщо потрібно)
           setTimeout(() => {
             Telegram.WebApp.close();
-          }, 1000);
+          }, 800);
         } else {
-          alert("Сталася помилка. Спробуйте ще раз.");
+          alert("Сталася помилка. Спробуйте ще раз або зверніться до адміністратора.");
         }
       })
       .catch(error => {
-        console.error("Помилка при відправленні даних:", error);
-        alert("Помилка при відправленні даних. Спробуйте ще раз.");
+        console.error("Помилка надсилання:", error);
+        alert("Помилка з'єднання. Спробуйте пізніше.");
       });
     });
     
+    // При використанні Telegram WebApp (автоматичне коригування інтерфейсу)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        console.log(
+          'visualViewport змінено:',
+          'width=', window.visualViewport.width,
+          'height=', window.visualViewport.height,
+          'offsetTop=', window.visualViewport.offsetTop,
+          'offsetLeft=', window.visualViewport.offsetLeft
+        );
+      });
+    }
+    
+    // Ініціалізація WebApp
     Telegram.WebApp.ready();
-    console.log("WebApp готовий.");
+    console.log("WebApp готовий (через fetch).");
   </script>
 </body>
 </html>
