@@ -103,7 +103,7 @@
 <body>
   <div class="overlay">
     <div class="container">
-      <!-- Крок 1: Основні дані -->
+      <!-- Крок 1 -->
       <div id="page1">
         <h2>Крок 1: Основні дані</h2>
         <label for="fghName">Назва ФГ (не обов’язково):</label>
@@ -112,7 +112,6 @@
         <label for="edrpou">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$">
         
-        <!-- Поля локації через AngularJS -->
         <div ng-controller="mainCtrl">
           <label>Область:</label>
           <dropdown-list data-items-list="regions" data-placeholder="Оберіть область" ng-model="selectedRegion"></dropdown-list>
@@ -127,17 +126,15 @@
         <button id="nextBtn1">Далі</button>
       </div>
       
-      <!-- Крок 2: Деталі заявки -->
+      <!-- Крок 2 -->
       <div id="page2" class="hidden" ng-controller="step2Ctrl">
         <h2>Крок 2: Деталі заявки</h2>
-        <!-- Вибір групи -->
         <label for="groupSelect">Вибір групи:</label>
         <select id="groupSelect" ng-model="selectedGroup" required>
           <option value="">Оберіть групу</option>
           <option ng-repeat="group in groups" value="{{group}}">{{group}}</option>
         </select>
         
-        <!-- Вибір культури -->
         <label for="cultureSelect">Вибір культури:</label>
         <select id="cultureSelect" ng-model="selectedCulture" required>
           <option value="">Оберіть культуру</option>
@@ -223,7 +220,7 @@
         </div>
       </div>
       
-      <!-- Крок 3: Ціна -->
+      <!-- Крок 3 -->
       <div id="page3" class="hidden">
         <h2>Крок 3: Ціна</h2>
         <label for="price">Бажана ціна (не обов’язково):</label>
@@ -250,10 +247,9 @@
     </div>
   </div>
   
-  <!-- AngularJS: модуль, контролери, директиви -->
+  <!-- AngularJS: модуль та директиви (не змінено суттєво) -->
   <script>
     angular.module('app', [])
-      // Директива dropdownList (для вибору регіону/району/міста)
       .directive('dropdownList', function() {
         return {
           restrict: 'E',
@@ -298,7 +294,6 @@
           }
         };
       })
-      // Директива formatDecimal (для обмеження на числовий формат XX.X)
       .directive('formatDecimal', function() {
         return {
           require: 'ngModel',
@@ -313,12 +308,10 @@
               var currentVal = element.val();
               var selectionStart = element[0].selectionStart;
   
-              // Не даємо вдруге вводити крапку/кому
               if ((char === '.' || char === ',') && (currentVal.indexOf('.') !== -1 || currentVal.indexOf(',') !== -1)) {
                 e.preventDefault();
                 return false;
               }
-              // Лише одна цифра після крапки/коми
               var decIndex = currentVal.indexOf('.') !== -1 ? currentVal.indexOf('.') : currentVal.indexOf(',');
               if(decIndex !== -1 && selectionStart > decIndex) {
                 var digitsAfter = currentVal.substring(decIndex + 1).length;
@@ -330,21 +323,18 @@
               }
             });
   
-            // Валідатор
             ngModel.$validators.decimal = function(modelValue, viewValue) {
               var value = modelValue || viewValue;
-              if (!value) return true; // пусто -> ок
+              if (!value) return true;
               value = value.toString().replace(',', '.');
               return decimalRegex.test(value);
             };
   
-            // Парсер: кому -> крапку
             ngModel.$parsers.push(function(value) {
               if (!value) return value;
               return value.replace(',', '.');
             });
   
-            // Форматер: додаємо ".0" якщо ввели лише ціле
             ngModel.$formatters.push(function(value) {
               if (value === undefined || value === null || value === '') return value;
               value = value.toString().replace(',', '.');
@@ -354,7 +344,6 @@
               return value;
             });
   
-            // При втраті фокусу (blur) додаємо ".0" якщо було ціле
             element.on('blur', function() {
               var value = ngModel.$modelValue;
               if (value && value.toString().indexOf('.') === -1) {
@@ -365,7 +354,6 @@
           }
         };
       })
-      // Контролер для завантаження локації
       .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
         $scope.selectedRegion = "";
         $scope.selectedDistrict = "";
@@ -373,7 +361,6 @@
         $scope.districts = [];
         $scope.cities = [];
   
-        // Приклад завантаження data.json
         $http.get('data.json')
           .then(function(response) {
             $scope.locationsData = response.data;
@@ -402,8 +389,8 @@
           }
         });
       }])
-      // Контролер кроку 2 (групи, культури...)
       .controller('step2Ctrl', ['$scope', function($scope) {
+        // Групи / культури (без змін)
         const cultureGroups = {
           "Зернова": [
             "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "Жито", "Кукурудза кремніста",
@@ -445,9 +432,8 @@
       }]);
   </script>
   
-  <!-- Основна логіка кроків + відправка -->
+  <!-- Основний скрипт кроків + fetch (без змін, окрім URL) -->
   <script>
-    // Форми оплати залежно від обраної валюти
     const paymentForms = {
       "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
       "Долар": ["Валютний контракт", "Готівка"],
@@ -468,12 +454,10 @@
       }
     });
   
-    // Поле ЄДРПОУ: лише цифри
     document.getElementById("edrpou").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
     
-    // Поле "Бажана ціна": лише цифри
     document.getElementById("price").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
@@ -482,39 +466,36 @@
     document.getElementById("nextBtn1").addEventListener("click", function() {
       const edrpou = document.getElementById("edrpou").value;
       if(edrpou && !(edrpou.length === 8 || edrpou.length === 10)) {
-        alert("Код ЄДРПОУ повинен містити 8 або 10 цифр або бути порожнім.");
+        alert("Код ЄДРПОУ повинен містити 8 або 10 цифр чи бути порожнім.");
         return;
       }
       var scope = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
       if(!scope.selectedRegion || !scope.selectedDistrict || !scope.selectedCity) {
-        alert("Будь ласка, оберіть усі поля локації (область, район, населений пункт)!");
+        alert("Будь ласка, оберіть поля локації (область/район/місто)!");
         return;
       }
       document.getElementById("page1").classList.add("hidden");
       document.getElementById("page2").classList.remove("hidden");
     });
     
-    // Кнопка "Назад" на кроці 2
     document.getElementById("backBtn2").addEventListener("click", function() {
       document.getElementById("page2").classList.add("hidden");
       document.getElementById("page1").classList.remove("hidden");
     });
     
-    // КРОК 2 -> КРОК 3
     document.getElementById("nextBtn2").addEventListener("click", function() {
       var scope2 = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
       if(!scope2.selectedGroup || !scope2.selectedCulture || !document.getElementById("quantity").value) {
-        alert("Будь ласка, заповніть обов'язкові поля (Група, Культура, Кількість)!");
+        alert("Будь ласка, заповніть обов'язкові поля (Група, Культура, Кількість).");
         return;
       }
-      // Перевірка форматів додаткових полів
       var extra = scope2.extraFields;
       var regex = /^\d+(?:[.,]\d)?$/;
       for(var key in extra) {
-        if(extra.hasOwnProperty(key) && extra[key]) {
+        if(extra[key]) {
           var val = extra[key].toString().replace(',', '.');
           if(!regex.test(val)) {
-            alert("Некоректний формат у полі '" + key + "'. Приклад: 12.3");
+            alert("Некоректний формат у полі '" + key + "'. (Приклад: 12.3)");
             return;
           }
         }
@@ -523,20 +504,18 @@
       document.getElementById("page3").classList.remove("hidden");
     });
     
-    // Кнопка "Назад" на кроці 3
     document.getElementById("backBtn3").addEventListener("click", function() {
       document.getElementById("page3").classList.add("hidden");
       document.getElementById("page2").classList.remove("hidden");
     });
     
-    // Кнопка "Підтвердити заявку" -> надсилання через fetch()
+    // Надсилання заявки
     document.getElementById("submitBtn").addEventListener("click", function() {
       if(!document.getElementById("currency").value || !document.getElementById("paymentForm").value) {
-        alert("Будь ласка, виберіть валюту і форму оплати!");
+        alert("Будь ласка, заповніть валюту і форму оплати!");
         return;
       }
       
-      // Збір даних
       const fghName  = document.getElementById("fghName").value.trim();
       const edrpou   = document.getElementById("edrpou").value.trim();
       var locScope   = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
@@ -553,7 +532,7 @@
       const currency    = document.getElementById("currency").value;
       const paymentForm = document.getElementById("paymentForm").value;
       
-      // Отримаємо user_id з Telegram WebApp (або заглушку при тестуванні)
+      // user_id із Telegram WebApp (або фіксований для тесту)
       let userId = Telegram.WebApp.initDataUnsafe.user
         ? Telegram.WebApp.initDataUnsafe.user.id
         : 999999999;
@@ -574,10 +553,9 @@
         extra_fields: step2Scope.extraFields
       };
       
-      console.log("Заявка:", payload);
+      console.log("Надсилаємо заявку:", payload);
       
-      // Відправляємо лише через fetch() (Без Telegram.WebApp.sendData)
-      // Потрібно вказати ваш реальний URL API
+      // Підставте свій URL до api_server
       fetch("https://bddc-46-173-155-66.ngrok-free.app/api/webapp_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -587,8 +565,7 @@
       .then(data => {
         console.log("Відповідь від API:", data);
         if(data.status === "ok" || data.status === "preview") {
-          alert("Ваша заявка успішно відправлена!");
-          // Закриємо WebApp (якщо потрібно)
+          alert("Заявка успішно відправлена! У Telegram-боті буде попередній перегляд.");
           setTimeout(() => {
             Telegram.WebApp.close();
           }, 800);
@@ -598,11 +575,10 @@
       })
       .catch(error => {
         console.error("Помилка надсилання:", error);
-        alert("Помилка з'єднання. Спробуйте пізніше.");
+        alert("Помилка мережі. Спробуйте пізніше.");
       });
     });
     
-    // При використанні Telegram WebApp (автоматичне коригування інтерфейсу)
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => {
         console.log(
@@ -615,9 +591,8 @@
       });
     }
     
-    // Ініціалізація WebApp
     Telegram.WebApp.ready();
-    console.log("WebApp готовий (через fetch).");
+    console.log("WebApp готовий до роботи (через fetch).");
   </script>
 </body>
 </html>
