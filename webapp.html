@@ -548,75 +548,71 @@
     });
     
     // Відправка заявки
-    document.getElementById("submitBtn").addEventListener("click", function() {
-      if(!document.getElementById("currency").value || !document.getElementById("paymentForm").value) {
-        alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
-        return;
-      }
-      
-      const fghName  = document.getElementById("fghName").value.trim();
-      const edrpou   = document.getElementById("edrpou").value.trim();
-      var locScope   = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
-      const region   = locScope.selectedRegion;
-      const district = locScope.selectedDistrict;
-      const city     = locScope.selectedCity;
-      
-      var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
-      const group    = step2Scope.selectedGroup;
-      const culture  = step2Scope.selectedCulture;
-      const quantity = document.getElementById("quantity").value.trim();
-      
-      const price       = document.getElementById("price").value.trim();
-      const currency    = document.getElementById("currency").value;
-      const paymentForm = document.getElementById("paymentForm").value;
-      
-      let userId = Telegram.WebApp.initDataUnsafe.user
-        ? Telegram.WebApp.initDataUnsafe.user.id
-        : 1124775269;
-      
-      const payload = {
-        user_id: userId,
-        fgh_name: fghName,
-        edrpou: edrpou,
-        region: region,
-        district: district,
-        city: city,
-        group: group,
-        culture: culture,
-        quantity: quantity,
-        price: price,
-        currency: currency,
-        payment_form: paymentForm,
-        extra_fields: step2Scope.extraFields
-      };
-      
-      console.log("Заявка заповнена. Payload:", payload);
-      
-      // Відправка в Telegram
-      Telegram.WebApp.sendData(JSON.stringify(payload));
-      
-      // Відправка на API
-      fetch("https://agro-api-url.onrender.com/api/webapp_data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log("Отримано відповідь від API:", data);
-        if(data.status === "ok" || data.status === "preview") {
-          setTimeout(() => {
-            Telegram.WebApp.close();
-          }, 1000);
-        } else {
-          alert("Сталася помилка. Спробуйте ще раз.");
-        }
-      })
-      .catch(error => {
-        console.error("Помилка при відправленні даних:", error);
-        alert("Помилка при відправленні даних. Спробуйте ще раз.");
-      });
-    });
+	document.getElementById("submitBtn").addEventListener("click", function() {
+	  // Формуємо payload з даними заявки:
+	  const fghName  = document.getElementById("fghName").value.trim();
+	  const edrpou   = document.getElementById("edrpou").value.trim();
+	  // Отримання локаційних даних через AngularJS:
+	  var locScope   = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
+	  const region   = locScope.selectedRegion;
+	  const district = locScope.selectedDistrict;
+	  const city     = locScope.selectedCity;
+	  
+	  var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
+	  const group    = step2Scope.selectedGroup;
+	  const culture  = step2Scope.selectedCulture;
+	  const quantity = document.getElementById("quantity").value.trim();
+	  
+	  const price       = document.getElementById("price").value.trim();
+	  const currency    = document.getElementById("currency").value;
+	  const paymentForm = document.getElementById("paymentForm").value;
+	  
+	  let userId = Telegram.WebApp.initDataUnsafe.user
+		? Telegram.WebApp.initDataUnsafe.user.id
+		: 1124775269;
+	  
+	  const payload = {
+		user_id: userId,
+		fgh_name: fghName,
+		edrpou: edrpou,
+		region: region,
+		district: district,
+		city: city,
+		group: group,
+		culture: culture,
+		quantity: quantity,
+		price: price,
+		currency: currency,
+		payment_form: paymentForm,
+		extra_fields: step2Scope.extraFields
+	  };
+
+	  // Надсилання через Telegram.WebApp.sendData:
+	  Telegram.WebApp.sendData(JSON.stringify(payload));
+
+	  // Подвійне надсилання через fetch:
+	  fetch("https://agro-api-url.onrender.com/api/webapp_data", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload)
+	  })
+	  .then(response => response.json())
+	  .then(data => {
+		console.log("Отримано відповідь від API:", data);
+		// За потреби закриваємо WebApp після успішного надсилання
+		if(data.status === "ok" || data.status === "preview") {
+		  setTimeout(() => {
+			Telegram.WebApp.close();
+		  }, 1000);
+		} else {
+		  alert("Сталася помилка. Спробуйте ще раз.");
+		}
+	  })
+	  .catch(error => {
+		console.error("Помилка при відправленні даних:", error);
+		alert("Помилка при відправленні даних. Спробуйте ще раз.");
+	  });
+	});
     
     /* ---------------- Використовуємо window.visualViewport ---------------- */
     if (window.visualViewport) {
