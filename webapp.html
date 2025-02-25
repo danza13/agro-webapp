@@ -587,9 +587,6 @@
 		extra_fields: step2Scope.extraFields
 	  };
 
-	  // Надсилання через Telegram.WebApp.sendData:
-	  Telegram.WebApp.sendData(JSON.stringify(payload));
-
 	  // Подвійне надсилання через fetch:
 	  fetch("https://agro-api-url.onrender.com/api/webapp_data", {
 		method: "POST",
