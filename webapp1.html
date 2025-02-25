@@ -591,10 +591,7 @@
       };
       
       console.log("Заявка заповнена. Payload:", payload);
-      
-      // Відправка в Telegram
-      Telegram.WebApp.sendData(JSON.stringify(payload));
-      
+
       // Відправка на API
       fetch("https://agro-api-url.onrender.com/api/webapp_data", {
         method: "POST",
