@@ -117,20 +117,35 @@
     }
     
     // Функція для встановлення значень у поля, що не керуються AngularJS
-    function prefillStaticFields(prefill) {
-      if(prefill.fgh_name) {
-        document.getElementById("fghName").value = prefill.fgh_name;
-      }
-      if(prefill.edrpou) {
-        document.getElementById("edrpou").value = prefill.edrpou;
-      }
-      if(prefill.price) {
-        document.getElementById("price").value = prefill.price;
-      }
-      if(prefill.quantity) {
-        document.getElementById("quantity").value = prefill.quantity;
-      }
-    }
+	function prefillStaticFields(prefill) {
+	  if (prefill.fgh_name) {
+		document.getElementById("fghName").value = prefill.fgh_name;
+	  }
+	  if (prefill.edrpou) {
+		document.getElementById("edrpou").value = prefill.edrpou;
+	  }
+	  if (prefill.price) {
+		document.getElementById("price").value = prefill.price;
+	  }
+	  if (prefill.quantity) {
+		document.getElementById("quantity").value = prefill.quantity;
+	  }
+	  // Додано для валюти
+	  if (prefill.currency) {
+		let currencyEl = document.getElementById("currency");
+		currencyEl.value = prefill.currency;
+		// Викликаємо подію "change", щоб оновити список форм оплати
+		let event = new Event("change");
+		currencyEl.dispatchEvent(event);
+	  }
+	  // Додано для форми оплати
+	  if (prefill.payment_form) {
+		// Затримка потрібна, щоб спочатку оновився список опцій для форми оплати
+		setTimeout(function() {
+		  document.getElementById("paymentForm").value = prefill.payment_form;
+		}, 100);
+	  }
+	}
     
     // При завантаженні сторінки встановлюємо значення для статичних полів
     window.addEventListener("load", function() {
