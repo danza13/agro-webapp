@@ -115,6 +115,28 @@
       }
       return {};
     }
+    
+    // Функція для встановлення значень у поля, що не керуються AngularJS
+    function prefillStaticFields(prefill) {
+      if(prefill.fgh_name) {
+        document.getElementById("fghName").value = prefill.fgh_name;
+      }
+      if(prefill.edrpou) {
+        document.getElementById("edrpou").value = prefill.edrpou;
+      }
+      if(prefill.price) {
+        document.getElementById("price").value = prefill.price;
+      }
+      if(prefill.quantity) {
+        document.getElementById("quantity").value = prefill.quantity;
+      }
+    }
+    
+    // При завантаженні сторінки встановлюємо значення для статичних полів
+    window.addEventListener("load", function() {
+      var prefill = getPrefillData();
+      prefillStaticFields(prefill);
+    });
   </script>
 </head>
 <body>
@@ -319,7 +341,7 @@
           }
         };
       })
-      // Директива formatDecimal (додаткові поля)
+      // Директива formatDecimal (для додаткових полів)
       .directive('formatDecimal', function() {
         return {
           require: 'ngModel',
@@ -381,7 +403,6 @@
       })
       // Контролер для локації з попереднім заповненням
       .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
-        // Отримання даних для попереднього заповнення з URL
         var prefill = getPrefillData();
         $scope.selectedRegion = prefill.region || "";
         $scope.selectedDistrict = prefill.district || "";
@@ -461,7 +482,7 @@
       }]);
   </script>
   
-  <!-- Основна логіка (кроки 1-3) + відправка -->
+  <!-- Основна логіка переходів та відправки даних -->
   <script>
     const paymentForms = {
       "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
