@@ -281,7 +281,7 @@
             placeholder: '@',
             ngModel: '='
           },
-          template: 
+          template: `
             <div class="dropdown-container">
               <input type="text" ng-model="searchText" placeholder="{{placeholder}}" ng-click="toggleList()" ng-focus="toggleList()" />
               <div class="dropdown-list" ng-show="listVisible">
@@ -291,7 +291,7 @@
                 <div ng-if="(itemsList | filter:searchText).length === 0" style="padding:8px;">Нічого не знайдено</div>
               </div>
             </div>
-          ,
+          `,
           link: function(scope, element) {
             scope.listVisible = false;
             scope.searchText = scope.ngModel || '';
@@ -591,10 +591,10 @@
       };
       
       console.log("Заявка заповнена. Payload:", payload);
-      
+
       // Відправка в Telegram
       Telegram.WebApp.sendData(JSON.stringify(payload));
-      
+
       // Відправка на API
       fetch("https://agro-api-url.onrender.com/api/webapp_data", {
         method: "POST",
