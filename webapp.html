@@ -258,7 +258,7 @@
             <input type="text" id="smitteva_ripak" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3">
           </div>
           <!-- Якщо обрано Соя -->
-          <div ng-if="selectedCulture == 'Соя'">
+          <div ng-if="selectedCulture.indexOf('Соя') !== -1">
             <label for="bilok_na_siru">Білок на сиру (Не обов'язково):</label>
             <input type="text" id="bilok_na_siru" ng-model="extraFields.bilok_na_siru" format-decimal placeholder="Наприклад, 12.3">
             <label for="vologhist_soya">Вологість (Не обов'язково):</label>
