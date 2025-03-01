@@ -423,13 +423,48 @@
         };
       })
       // Контролер для локації з попереднім заповненням
-      .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
-        var prefill = getPrefillData();
-        $scope.selectedRegion = prefill.region || "";
-        $scope.selectedDistrict = prefill.district || "";
-        $scope.selectedCity = prefill.city || "";
-        $scope.districts = [];
-        $scope.cities = [];
+		.controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
+		  var prefill = getPrefillData();
+		  $scope.selectedRegion = prefill.region || "";
+		  $scope.selectedDistrict = prefill.district || "";
+		  $scope.selectedCity = prefill.city || "";
+		  $scope.districts = [];
+		  $scope.cities = [];
+
+		  $http.get('data.json')
+			.then(function(response) {
+			  $scope.locationsData = response.data;
+			  $scope.regions = Object.keys($scope.locationsData);
+			}, function(error) {
+			  console.error("Помилка завантаження даних:", error);
+			});
+
+		  // Коли змінюється область, скиньте район та населений пункт
+		  $scope.$watch('selectedRegion', function(newVal, oldVal) {
+			if(newVal !== oldVal) {
+			  $scope.selectedDistrict = "";
+			  $scope.selectedCity = "";
+			}
+			if(newVal && $scope.locationsData[newVal]) {
+			  $scope.districts = Object.keys($scope.locationsData[newVal]);
+			} else {
+			  $scope.districts = [];
+			  $scope.cities = [];
+			}
+		  });
+
+		  // Коли змінюється район, скиньте населений пункт
+		  $scope.$watch('selectedDistrict', function(newVal, oldVal) {
+			if(newVal !== oldVal) {
+			  $scope.selectedCity = "";
+			}
+			if(newVal && $scope.selectedRegion && $scope.locationsData[$scope.selectedRegion][newVal]) {
+			  $scope.cities = $scope.locationsData[$scope.selectedRegion][newVal];
+			} else {
+			  $scope.cities = [];
+			}
+		  });
+		}])
   
         $http.get('data.json')
           .then(function(response) {
