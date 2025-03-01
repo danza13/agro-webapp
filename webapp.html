@@ -168,15 +168,17 @@
         
 		<!-- Поля локації через AngularJS -->
 		<div ng-controller="mainCtrl">
-		<label>Область:</label>
-		<select ng-model="selectedRegion" ng-options="region for region in regions">
-		  <option value="" disabled>Оберіть область</option>
-		</select>
+			<label>Область:</label>
+			<select ng-model="selectedRegion" required>
+			  <option value="">Оберіть область</option>
+			  <option ng-repeat="region in regions" value="{{region}}">{{region}}</option>
+			</select>
 
-		<label>Район:</label>
-		<select ng-model="selectedDistrict" ng-options="district for district in districts">
-			<option value="" disabled>Оберіть район</option>
-		</select>
+			<label>Район:</label>
+			<select ng-model="selectedDistrict" required>
+			  <option value="">Оберіть район</option>
+			  <option ng-repeat="district in districts" value="{{district}}">{{district}}</option>
+			</select>
 		  
 			<label>Населений пункт:</label>
 			<dropdown-list data-items-list="cities" data-placeholder="Оберіть місто" ng-model="selectedCity"></dropdown-list>
