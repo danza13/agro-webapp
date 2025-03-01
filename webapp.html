@@ -166,17 +166,21 @@
         <label for="edrpou">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$">
         
-        <!-- Поля локації через AngularJS -->
-        <div ng-controller="mainCtrl">
-          <label>Область:</label>
-          <dropdown-list data-items-list="regions" data-placeholder="Оберіть область" ng-model="selectedRegion"></dropdown-list>
-          
-          <label>Район:</label>
-          <dropdown-list data-items-list="districts" data-placeholder="Оберіть район" ng-model="selectedDistrict"></dropdown-list>
-          
-          <label>Населений пункт:</label>
-          <dropdown-list data-items-list="cities" data-placeholder="Оберіть місто" ng-model="selectedCity"></dropdown-list>
-        </div>
+       <!-- Поля локації через AngularJS -->
+		<div ng-controller="mainCtrl">
+		  <label>Область:</label>
+		  <select ng-model="selectedRegion" ng-options="region for region in regions">
+			<option value="">Оберіть область</option>
+		  </select>
+		  
+		  <label>Район:</label>
+		  <select ng-model="selectedDistrict" ng-options="district for district in districts">
+			<option value="">Оберіть район</option>
+		  </select>
+		  
+		  <label>Населений пункт:</label>
+		  <dropdown-list data-items-list="cities" data-placeholder="Оберіть місто" ng-model="selectedCity"></dropdown-list>
+		</div>
         
         <button id="nextBtn1">Далі</button>
       </div>
@@ -463,7 +467,7 @@
             "Кукурудза з підвищ. зерна", "Пшениця бита", "Пшениця спельта", "Пшениця неконд."
           ],
           "Олійна": [
-            "Соняшник", "Соняшник високоолеїновий", "Ріпак", "Ріпак технічний", "Ріпак з ГМО", "Рапс ГМО"
+            "Соняшник", "Соняшник високоолеїновий", "Ріпак без ГМО", "Ріпак технічний", "Ріпак з ГМО"
           ],
           "Бобові": [
             "Соя з ГМО", "Горох жовтий", "Боби", "Горох зелений", "Соя без ГМО"
