@@ -439,13 +439,13 @@
 			  console.error("Помилка завантаження даних:", error);
 			});
 
-		  // Коли змінюється область, скиньте район та населений пункт
+		  // При зміні області скидаємо район та місто
 		  $scope.$watch('selectedRegion', function(newVal, oldVal) {
-			if(newVal !== oldVal) {
+			if (newVal !== oldVal) {
 			  $scope.selectedDistrict = "";
 			  $scope.selectedCity = "";
 			}
-			if(newVal && $scope.locationsData[newVal]) {
+			if (newVal && $scope.locationsData[newVal]) {
 			  $scope.districts = Object.keys($scope.locationsData[newVal]);
 			} else {
 			  $scope.districts = [];
@@ -453,47 +453,18 @@
 			}
 		  });
 
-		  // Коли змінюється район, скиньте населений пункт
+		  // При зміні району скидаємо місто
 		  $scope.$watch('selectedDistrict', function(newVal, oldVal) {
-			if(newVal !== oldVal) {
+			if (newVal !== oldVal) {
 			  $scope.selectedCity = "";
 			}
-			if(newVal && $scope.selectedRegion && $scope.locationsData[$scope.selectedRegion][newVal]) {
+			if (newVal && $scope.selectedRegion && $scope.locationsData[$scope.selectedRegion][newVal]) {
 			  $scope.cities = $scope.locationsData[$scope.selectedRegion][newVal];
 			} else {
 			  $scope.cities = [];
 			}
 		  });
 		}])
-  
-        $http.get('data.json')
-          .then(function(response) {
-            $scope.locationsData = response.data;
-            $scope.regions = Object.keys($scope.locationsData);
-          }, function(error) {
-            console.error("Помилка завантаження даних:", error);
-          });
-  
-        $scope.$watch('selectedRegion', function(newVal) {
-          if(newVal && $scope.locationsData[newVal]) {
-            $scope.districts = Object.keys($scope.locationsData[newVal]);
-          } else {
-            $scope.districts = [];
-            $scope.selectedDistrict = "";
-            $scope.cities = [];
-            $scope.selectedCity = "";
-          }
-        });
-  
-        $scope.$watch('selectedDistrict', function(newVal) {
-          if(newVal && $scope.selectedRegion && $scope.locationsData[$scope.selectedRegion][newVal]) {
-            $scope.cities = $scope.locationsData[$scope.selectedRegion][newVal];
-          } else {
-            $scope.cities = [];
-            $scope.selectedCity = "";
-          }
-        });
-      }])
       // Контролер для кроку 2 з попереднім заповненням
       .controller('step2Ctrl', ['$scope', function($scope) {
         var prefill = getPrefillData();
