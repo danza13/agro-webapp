@@ -117,35 +117,35 @@
     }
     
     // Функція для встановлення значень у поля, що не керуються AngularJS
-	function prefillStaticFields(prefill) {
-	  if (prefill.fgh_name) {
-		document.getElementById("fghName").value = prefill.fgh_name;
-	  }
-	  if (prefill.edrpou) {
-		document.getElementById("edrpou").value = prefill.edrpou;
-	  }
-	  if (prefill.price) {
-		document.getElementById("price").value = prefill.price;
-	  }
-	  if (prefill.quantity) {
-		document.getElementById("quantity").value = prefill.quantity;
-	  }
-	  // Додано для валюти
-	  if (prefill.currency) {
-		let currencyEl = document.getElementById("currency");
-		currencyEl.value = prefill.currency;
-		// Викликаємо подію "change", щоб оновити список форм оплати
-		let event = new Event("change");
-		currencyEl.dispatchEvent(event);
-	  }
-	  // Додано для форми оплати
-	  if (prefill.payment_form) {
-		// Затримка потрібна, щоб спочатку оновився список опцій для форми оплати
-		setTimeout(function() {
-		  document.getElementById("paymentForm").value = prefill.payment_form;
-		}, 100);
-	  }
-	}
+    function prefillStaticFields(prefill) {
+      if (prefill.fgh_name) {
+        document.getElementById("fghName").value = prefill.fgh_name;
+      }
+      if (prefill.edrpou) {
+        document.getElementById("edrpou").value = prefill.edrpou;
+      }
+      if (prefill.price) {
+        document.getElementById("price").value = prefill.price;
+      }
+      if (prefill.quantity) {
+        document.getElementById("quantity").value = prefill.quantity;
+      }
+      // Додано для валюти
+      if (prefill.currency) {
+        let currencyEl = document.getElementById("currency");
+        currencyEl.value = prefill.currency;
+        // Викликаємо подію "change", щоб оновити список форм оплати
+        let event = new Event("change");
+        currencyEl.dispatchEvent(event);
+      }
+      // Додано для форми оплати
+      if (prefill.payment_form) {
+        // Затримка потрібна, щоб спочатку оновився список опцій для форми оплати
+        setTimeout(function() {
+          document.getElementById("paymentForm").value = prefill.payment_form;
+        }, 100);
+      }
+    }
     
     // При завантаженні сторінки встановлюємо значення для статичних полів
     window.addEventListener("load", function() {
@@ -169,11 +169,17 @@
         <!-- Поля локації через AngularJS -->
         <div ng-controller="mainCtrl">
           <label>Область:</label>
-          <dropdown-list data-items-list="regions" data-placeholder="Оберіть область" ng-model="selectedRegion"></dropdown-list>
-          
+          <select ng-model="selectedRegion" required>
+            <option value="">Оберіть область</option>
+            <option ng-repeat="region in regions" value="{{region}}">{{region}}</option>
+          </select>
+
           <label>Район:</label>
-          <dropdown-list data-items-list="districts" data-placeholder="Оберіть район" ng-model="selectedDistrict"></dropdown-list>
-          
+          <select ng-model="selectedDistrict" required>
+            <option value="">Оберіть район</option>
+            <option ng-repeat="district in districts" value="{{district}}">{{district}}</option>
+          </select>
+        
           <label>Населений пункт:</label>
           <dropdown-list data-items-list="cities" data-placeholder="Оберіть місто" ng-model="selectedCity"></dropdown-list>
         </div>
@@ -322,7 +328,7 @@
   <!-- AngularJS: модуль, контролери, директиви -->
   <script>
     angular.module('app', [])
-      // Директива dropdownList (випадаючий список)
+      // Директива dropdownList (випадаючий список із пошуком)
       .directive('dropdownList', function() {
         return {
           restrict: 'E',
@@ -346,17 +352,17 @@
           link: function(scope, element) {
             scope.listVisible = false;
             scope.searchText = scope.ngModel || '';
-  
+
             scope.toggleList = function() {
               scope.listVisible = true;
             };
-  
+
             scope.selectItem = function(item) {
               scope.ngModel = item;
               scope.searchText = item;
               scope.listVisible = false;
             };
-  
+
             document.addEventListener('click', function(e) {
               if (!element[0].contains(e.target)) {
                 scope.$apply(function() {
@@ -367,7 +373,7 @@
           }
         };
       })
-      // Директива formatDecimal (для додаткових полів)
+      // Директива formatDecimal (для додаткових полів із дробовим числом, макс 1 знак після крапки/коми)
       .directive('formatDecimal', function() {
         return {
           require: 'ngModel',
@@ -395,19 +401,19 @@
                 }
               }
             });
-  
+
             ngModel.$validators.decimal = function(modelValue, viewValue) {
               var value = modelValue || viewValue;
               if (!value) return true;
               value = value.toString().replace(',', '.');
               return decimalRegex.test(value);
             };
-  
+
             ngModel.$parsers.push(function(value) {
               if (!value) return value;
               return value.replace(',', '.');
             });
-  
+
             ngModel.$formatters.push(function(value) {
               if (value === undefined || value === null || value === '') return value;
               value = value.toString().replace(',', '.');
@@ -416,7 +422,7 @@
               }
               return value;
             });
-  
+
             element.on('blur', function() {
               var value = ngModel.$modelValue;
               if (value && value.toString().indexOf('.') === -1) {
@@ -435,7 +441,7 @@
         $scope.selectedCity = prefill.city || "";
         $scope.districts = [];
         $scope.cities = [];
-  
+
         $http.get('data.json')
           .then(function(response) {
             $scope.locationsData = response.data;
@@ -443,24 +449,30 @@
           }, function(error) {
             console.error("Помилка завантаження даних:", error);
           });
-  
-        $scope.$watch('selectedRegion', function(newVal) {
-          if(newVal && $scope.locationsData[newVal]) {
+
+        // При зміні області скидаємо район та місто
+        $scope.$watch('selectedRegion', function(newVal, oldVal) {
+          if (newVal !== oldVal) {
+            $scope.selectedDistrict = "";
+            $scope.selectedCity = "";
+          }
+          if (newVal && $scope.locationsData[newVal]) {
             $scope.districts = Object.keys($scope.locationsData[newVal]);
           } else {
             $scope.districts = [];
-            $scope.selectedDistrict = "";
             $scope.cities = [];
-            $scope.selectedCity = "";
           }
         });
-  
-        $scope.$watch('selectedDistrict', function(newVal) {
-          if(newVal && $scope.selectedRegion && $scope.locationsData[$scope.selectedRegion][newVal]) {
+
+        // При зміні району скидаємо місто
+        $scope.$watch('selectedDistrict', function(newVal, oldVal) {
+          if (newVal !== oldVal) {
+            $scope.selectedCity = "";
+          }
+          if (newVal && $scope.selectedRegion && $scope.locationsData[$scope.selectedRegion][newVal]) {
             $scope.cities = $scope.locationsData[$scope.selectedRegion][newVal];
           } else {
             $scope.cities = [];
-            $scope.selectedCity = "";
           }
         });
       }])
@@ -474,7 +486,7 @@
             "Кукурудза з підвищ. зерна", "Пшениця бита", "Пшениця спельта", "Пшениця неконд."
           ],
           "Олійна": [
-            "Соняшник", "Соняшник високоолеїновий", "Ріпак", "Ріпак технічний", "Ріпак з ГМО", "Рапс ГМО"
+            "Соняшник", "Соняшник високоолеїновий", "Ріпак без ГМО", "Ріпак технічний", "Ріпак з ГМО"
           ],
           "Бобові": [
             "Соя з ГМО", "Горох жовтий", "Боби", "Горох зелений", "Соя без ГМО"
@@ -490,15 +502,16 @@
             "Льон золотистий", "Льон коричневий", "Просо чорне"
           ]
         };
-  
+
         $scope.groups = Object.keys(cultureGroups).sort();
         $scope.selectedGroup = prefill.group || "";
         $scope.cultures = $scope.selectedGroup ? cultureGroups[$scope.selectedGroup].slice().sort() : [];
         $scope.selectedCulture = prefill.culture || "";
         $scope.extraFields = prefill.extra_fields || {};
-  
+
+        // При зміні групи оновлюємо список культур
         $scope.$watch('selectedGroup', function(newVal) {
-          if(newVal){
+          if(newVal) {
             $scope.cultures = cultureGroups[newVal].slice().sort();
           } else {
             $scope.cultures = [];
@@ -515,7 +528,7 @@
       "Долар": ["Валютний контракт", "Готівка"],
       "Євро": ["Валютний контракт"]
     };
-  
+
     document.getElementById("currency").addEventListener("change", function() {
       const currency = this.value;
       const paymentSelect = document.getElementById("paymentForm");
@@ -529,12 +542,14 @@
         });
       }
     });
-  
+
     document.getElementById("edrpou").addEventListener("input", function() {
+      // Дозволити лише цифри
       this.value = this.value.replace(/\D/g, "");
     });
     
     document.getElementById("price").addEventListener("input", function() {
+      // Дозволити лише цифри (без крапки)
       this.value = this.value.replace(/\D/g, "");
     });
     
@@ -564,6 +579,7 @@
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
+      // Перевірка додаткових полів
       var extra = scope2.extraFields;
       var regex = /^\d+(?:[.,]\d)?$/;
       for(var key in extra) {
@@ -606,6 +622,7 @@
       const currency    = document.getElementById("currency").value;
       const paymentForm = document.getElementById("paymentForm").value;
       
+      // Якщо у вас нема userId у telegram initData, використайте умовний (наприклад, 1124775269)
       let userId = Telegram.WebApp.initDataUnsafe.user
         ? Telegram.WebApp.initDataUnsafe.user.id
         : 1124775269;
@@ -628,8 +645,10 @@
       
       console.log("Заявка заповнена. Payload:", payload);
   
+      // Відправка даних у Bot через WebApp.sendData
       Telegram.WebApp.sendData(JSON.stringify(payload));
   
+      // Приклад відправки на ваш API
       fetch("https://agro-api-url.onrender.com/api/webapp_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -667,7 +686,7 @@
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
   </script>
-	  <script>
+  	  <script>
 	  // Додаємо обробники фокуса для всіх полів вводу
 	  document.querySelectorAll('input').forEach(function(input) {
 		input.addEventListener('focus', function() {
@@ -678,6 +697,5 @@
 		});
 	  });
 	</script>
-
 </body>
 </html>
