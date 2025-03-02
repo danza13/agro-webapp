@@ -116,7 +116,7 @@
       }
       return {};
     }
-    
+
     // Функція для встановлення значень у поля, що не керуються AngularJS
     function prefillStaticFields(prefill) {
       if (prefill.fgh_name) {
@@ -147,7 +147,15 @@
         }, 100);
       }
     }
-    
+
+    // Функція, яка плавно прокручує до .container, щоб відцентрувати на екрані
+    function centerContainer() {
+      const container = document.querySelector('.container');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
     // При завантаженні сторінки встановлюємо значення для статичних полів
     window.addEventListener("load", function() {
       var prefill = getPrefillData();
@@ -163,10 +171,10 @@
         <h2>Крок 1: Основні дані</h2>
         <label for="fghName">Назва ФГ (не обов’язково):</label>
         <input type="text" id="fghName" placeholder="Введіть назву ФГ">
-        
+
         <label for="edrpou">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
         <input type="text" id="edrpou" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$" inputmode="numeric">
-        
+
         <!-- Поля локації через AngularJS -->
         <div ng-controller="mainCtrl">
           <label>Область:</label>
@@ -180,18 +188,17 @@
             <option value="">Оберіть район</option>
             <option ng-repeat="district in districts" value="{{district}}">{{district}}</option>
           </select>
-        
-          <label>Населений пункт:</label>
-			<select ng-model="selectedCity" required>
-			<option value="">Оберіть місто</option>
-			<option ng-repeat="city in cities" value="{{city}}">{{city}}</option>
-			</select>
 
-		</div>
-        
+          <label>Населений пункт:</label>
+          <select ng-model="selectedCity" required>
+            <option value="">Оберіть місто</option>
+            <option ng-repeat="city in cities" value="{{city}}">{{city}}</option>
+          </select>
+        </div>
+
         <button id="nextBtn1">Далі</button>
       </div>
-      
+
       <!-- Крок 2: Деталі заявки -->
       <div id="page2" class="hidden" ng-controller="step2Ctrl">
         <h2>Крок 2: Деталі заявки</h2>
@@ -200,13 +207,13 @@
           <option value="">Оберіть групу</option>
           <option ng-repeat="group in groups" value="{{group}}">{{group}}</option>
         </select>
-        
+
         <label for="cultureSelect">Вибір культури:</label>
         <select id="cultureSelect" ng-model="selectedCulture" required>
           <option value="">Оберіть культуру</option>
           <option ng-repeat="culture in cultures" value="{{culture}}">{{culture}}</option>
         </select>
-        
+
         <!-- Додаткові параметри -->
         <div ng-if="selectedCulture">
           <!-- Якщо обрано Пшеницю -->
@@ -282,22 +289,22 @@
             <input type="text" id="ambrizia" ng-model="extraFields.ambrizia" format-decimal placeholder="Наприклад, 12.3" inputmode="numeric">
           </div>
         </div>
-        
+
         <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість" required>
-        
+
         <div class="button-container">
           <button id="backBtn2" type="button">Назад</button>
           <button id="nextBtn2" type="button">Далі</button>
         </div>
       </div>
-      
+
       <!-- Крок 3: Ціна -->
       <div id="page3" class="hidden">
         <h2>Крок 3: Ціна</h2>
         <label for="price">Бажана ціна (не обов’язково):</label>
         <input type="text" id="price" placeholder="Введіть бажану ціну" inputmode="numeric">
-        
+
         <label for="currency">Вибір валюти:</label>
         <select id="currency" required>
           <option value="">Оберіть валюту</option>
@@ -305,12 +312,12 @@
           <option value="Долар">Долар</option>
           <option value="Євро">Євро</option>
         </select>
-        
+
         <label for="paymentForm">Вибір форми оплати:</label>
         <select id="paymentForm" required>
           <option value="">Оберіть форму оплати</option>
         </select>
-        
+
         <div class="button-container">
           <button id="backBtn3" type="button">Назад</button>
           <button id="submitBtn" type="button">Підтвердити заявку</button>
@@ -318,7 +325,7 @@
       </div>
     </div>
   </div>
-  
+
   <!-- AngularJS: модуль, контролери, директиви -->
   <script>
     angular.module('app', [])
@@ -389,6 +396,7 @@
               if(decIndex !== -1 && selectionStart > decIndex) {
                 var digitsAfter = currentVal.substring(decIndex + 1).length;
                 var selectionEnd = element[0].selectionEnd;
+                // Дозволимо лише 1 знак після крапки
                 if(digitsAfter >= 1 && (selectionEnd - selectionStart) === 0) {
                   e.preventDefault();
                   return false;
@@ -514,9 +522,17 @@
         });
       }]);
   </script>
-  
+
   <!-- Основна логіка переходів та відправки даних -->
   <script>
+    // Функція викликається після зміни екранів, щоби відцентрувати .container
+    function centerContainer() {
+      const container = document.querySelector('.container');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
     const paymentForms = {
       "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
       "Долар": ["Валютний контракт", "Готівка"],
@@ -541,12 +557,12 @@
       // Дозволити лише цифри
       this.value = this.value.replace(/\D/g, "");
     });
-    
+
     document.getElementById("price").addEventListener("input", function() {
       // Дозволити лише цифри (без крапки)
       this.value = this.value.replace(/\D/g, "");
     });
-    
+
     document.getElementById("nextBtn1").addEventListener("click", function() {
       const edrpou = document.getElementById("edrpou").value;
       if(edrpou && !(edrpou.length === 8 || edrpou.length === 10)) {
@@ -558,15 +574,20 @@
         alert("Будь ласка, оберіть усі обов'язкові поля для локації!");
         return;
       }
+      // Переходимо на наступний крок
       document.getElementById("page1").classList.add("hidden");
       document.getElementById("page2").classList.remove("hidden");
+      // Центруємо контейнер
+      centerContainer();
     });
-    
+
     document.getElementById("backBtn2").addEventListener("click", function() {
       document.getElementById("page2").classList.add("hidden");
       document.getElementById("page1").classList.remove("hidden");
+      // Центруємо контейнер
+      centerContainer();
     });
-    
+
     document.getElementById("nextBtn2").addEventListener("click", function() {
       var scope2 = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
       if(!scope2.selectedGroup || !scope2.selectedCulture || !document.getElementById("quantity").value) {
@@ -585,42 +606,47 @@
           }
         }
       }
+      // Переходимо на наступний крок
       document.getElementById("page2").classList.add("hidden");
       document.getElementById("page3").classList.remove("hidden");
+      // Центруємо контейнер
+      centerContainer();
     });
-    
+
     document.getElementById("backBtn3").addEventListener("click", function() {
       document.getElementById("page3").classList.add("hidden");
       document.getElementById("page2").classList.remove("hidden");
+      // Центруємо контейнер
+      centerContainer();
     });
-    
+
     document.getElementById("submitBtn").addEventListener("click", function() {
       if(!document.getElementById("currency").value || !document.getElementById("paymentForm").value) {
         alert("Будь ласка, заповніть усі обов'язкові поля на цьому кроці!");
         return;
       }
-      
+
       const fghName  = document.getElementById("fghName").value.trim();
       const edrpou   = document.getElementById("edrpou").value.trim();
       var locScope   = angular.element(document.querySelector('[ng-controller="mainCtrl"]')).scope();
       const region   = locScope.selectedRegion;
       const district = locScope.selectedDistrict;
       const city     = locScope.selectedCity;
-      
+
       var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
       const group    = step2Scope.selectedGroup;
       const culture  = step2Scope.selectedCulture;
       const quantity = document.getElementById("quantity").value.trim();
-      
+
       const price       = document.getElementById("price").value.trim();
       const currency    = document.getElementById("currency").value;
       const paymentForm = document.getElementById("paymentForm").value;
-      
+
       // Якщо у вас нема userId у telegram initData, використайте умовний (наприклад, 1124775269)
       let userId = Telegram.WebApp.initDataUnsafe.user
         ? Telegram.WebApp.initDataUnsafe.user.id
         : 1124775269;
-      
+
       const payload = {
         user_id: userId,
         fgh_name: fghName,
@@ -636,12 +662,12 @@
         payment_form: paymentForm,
         extra_fields: step2Scope.extraFields
       };
-      
+
       console.log("Заявка заповнена. Payload:", payload);
-  
+
       // Відправка даних у Bot через WebApp.sendData
       Telegram.WebApp.sendData(JSON.stringify(payload));
-  
+
       // Приклад відправки на ваш API
       fetch("https://agro-api-url.onrender.com/api/webapp_data", {
         method: "POST",
@@ -664,7 +690,7 @@
         alert("Помилка при відправленні даних. Спробуйте ще раз.");
       });
     });
-    
+
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => {
         console.log(
@@ -676,20 +702,21 @@
         );
       });
     }
-    
+
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
   </script>
-  	  <script>
-	  // Додаємо обробники фокуса для всіх полів вводу
-	  document.querySelectorAll('input').forEach(function(input) {
-		input.addEventListener('focus', function() {
-		  // Затримка дає час на появу клавіатури
-		  setTimeout(function() {
-			input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-		  }, 300);
-		});
-	  });
-	</script>
+
+  <script>
+    // Додаємо обробники фокуса для всіх полів вводу
+    document.querySelectorAll('input').forEach(function(input) {
+      input.addEventListener('focus', function() {
+        // Затримка дає час на появу клавіатури
+        setTimeout(function() {
+          input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300);
+      });
+    });
+  </script>
 </body>
 </html>
