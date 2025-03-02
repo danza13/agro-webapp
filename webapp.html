@@ -268,17 +268,6 @@
             <label for="smitteva_ripak">Сміттєва домішка (Не обов'язково):</label>
             <input type="text" id="smitteva_ripak" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3" inputmode="numeric">
           </div>
-		  <!-- Якщо обрано Рапс -->
-		  <div ng-if="selectedCulture.indexOf('Рапс') !== -1">
-            <label for="olijnist_na_siru">Олійність на сиру (Не обов'язково):</label>
-            <input type="text" id="olijnist_na_siru" ng-model="extraFields.olijnist_na_siru" format-decimal placeholder="Наприклад, 12.3" inputmode="numeric">
-            <label for="vologhist_ripak">Вологість (Не обов'язково):</label>
-            <input type="text" id="vologhist_ripak" ng-model="extraFields.vologhist" format-decimal placeholder="Наприклад, 12.3" inputmode="numeric">
-            <label for="glukozinolati">Глюкозінолати (Не обов'язково):</label>
-            <input type="text" id="glukozinolati" ng-model="extraFields.glukozinolati" format-decimal placeholder="Наприклад, 12.3" inputmode="numeric">
-            <label for="smitteva_ripak">Сміттєва домішка (Не обов'язково):</label>
-            <input type="text" id="smitteva_ripak" ng-model="extraFields.smitteva" format-decimal placeholder="Наприклад, 12.3" inputmode="numeric">
-          </div>
           <!-- Якщо обрано Соя -->
           <div ng-if="selectedCulture.indexOf('Соя') !== -1">
             <label for="bilok_na_siru">Білок на сиру (Не обов'язково):</label>
