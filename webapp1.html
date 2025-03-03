@@ -101,6 +101,44 @@
     input::placeholder {
       color: rgba(0,0,0,0.5);
     }
+    
+    /* Стили для кастомного модального вікна */
+    .custom-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    .custom-modal-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      max-width: 400px;
+      width: 80%;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .custom-modal-container p {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .custom-modal-container button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+    .custom-modal-container button:hover {
+      background-color: #0056b3;
+    }
   </style>
 
   <script>
@@ -118,16 +156,14 @@
       return {};
     }
 
-    // Функція для встановлення значень у статичних полях (наприклад, якщо є prefill)
+    // Функція для встановлення значень у статичних полях (якщо є prefill)
     function prefillStaticFields(prefill) {
       if (prefill.fgh_name) {
         document.getElementById("fghNameFca").value = prefill.fgh_name;
-        // Також на сторінці CPT
         document.getElementById("fghNameCpt").value = prefill.fgh_name;
       }
       if (prefill.edrpou) {
         document.getElementById("edrpouFca").value = prefill.edrpou;
-        // Також на сторінці CPT
         document.getElementById("edrpouCpt").value = prefill.edrpou;
       }
       if (prefill.price) {
@@ -157,6 +193,32 @@
       }
     }
 
+    // Функція для показу кастомного попередження
+    function showCustomAlert(message, callback) {
+      const overlay = document.createElement('div');
+      overlay.className = 'custom-modal-overlay';
+  
+      const modalContainer = document.createElement('div');
+      modalContainer.className = 'custom-modal-container';
+  
+      const messageEl = document.createElement('p');
+      messageEl.textContent = message;
+      modalContainer.appendChild(messageEl);
+  
+      const okButton = document.createElement('button');
+      okButton.textContent = 'OK';
+      okButton.addEventListener('click', function() {
+        document.body.removeChild(overlay);
+        if (callback && typeof callback === 'function') {
+          callback();
+        }
+      });
+      modalContainer.appendChild(okButton);
+  
+      overlay.appendChild(modalContainer);
+      document.body.appendChild(overlay);
+    }
+
     // При завантаженні сторінки підставимо prefill (якщо є)
     window.addEventListener("load", function() {
       var prefill = getPrefillData();
@@ -184,28 +246,23 @@
         <h2>Крок 2 (FCA): Основні дані</h2>
         <label for="fghNameFca">Назва ФГ (не обов’язково):</label>
         <input type="text" id="fghNameFca" placeholder="Введіть назву ФГ">
-
         <label for="edrpouFca">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
         <input type="text" id="edrpouFca" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$" inputmode="numeric">
-
         <label>Область:</label>
         <select ng-model="selectedRegionFca">
           <option value="">Оберіть область</option>
           <option ng-repeat="region in regions" value="{{region}}">{{region}}</option>
         </select>
-
         <label>Район:</label>
         <select ng-model="selectedDistrictFca">
           <option value="">Оберіть район</option>
           <option ng-repeat="district in districtsFca" value="{{district}}">{{district}}</option>
         </select>
-
         <label>Населений пункт:</label>
         <select ng-model="selectedCityFca">
           <option value="">Оберіть місто</option>
           <option ng-repeat="city in citiesFca" value="{{city}}">{{city}}</option>
         </select>
-
         <div class="button-container">
           <button id="backBtn1Fca" type="button">Назад</button>
           <button id="nextBtn1Fca" type="button">Далі</button>
@@ -217,20 +274,16 @@
         <h2>Крок 2 (CPT): Дані для доставки в порт</h2>
         <label for="fghNameCpt">Назва ФГ (не обов’язково):</label>
         <input type="text" id="fghNameCpt" placeholder="Введіть назву ФГ">
-
         <label for="edrpouCpt">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
         <input type="text" id="edrpouCpt" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$" inputmode="numeric">
-
         <!-- Для CPT: область фіксована "Одеса", район прочерк, порт = населений пункт -->
         <label>Область:</label>
         <select id="fixedRegionCpt" disabled>
           <option value="Одеса">Одеса</option>
         </select>
-
         <label>Порт (місто):</label>
         <select id="portSelectCpt">
           <option value="">Оберіть порт</option>
-          <!-- Алфавітний порядок: Ізмаїл, Кілія, Одеса, Орлівка, Південий, Рені, Чорноморськ -->
           <option value="Ізмаїл">Ізмаїл</option>
           <option value="Кілія">Кілія</option>
           <option value="Одеса">Одеса</option>
@@ -239,7 +292,6 @@
           <option value="Рені">Рені</option>
           <option value="Чорноморськ">Чорноморськ</option>
         </select>
-
         <div class="button-container">
           <button id="backBtn1Cpt" type="button">Назад</button>
           <button id="nextBtn1Cpt" type="button">Далі</button>
@@ -254,13 +306,11 @@
           <option value="">Оберіть групу</option>
           <option ng-repeat="group in groups" value="{{group}}">{{group}}</option>
         </select>
-
         <label for="cultureSelect">Вибір культури:</label>
         <select id="cultureSelect" ng-model="selectedCulture">
           <option value="">Оберіть культуру</option>
           <option ng-repeat="culture in cultures" value="{{culture}}">{{culture}}</option>
         </select>
-
         <!-- Додаткові параметри (залежно від культури) -->
         <div ng-if="selectedCulture">
           <!-- Якщо Пшениця -->
@@ -336,10 +386,8 @@
             <input type="text" id="ambrizia" ng-model="extraFields.ambrizia" format-decimal placeholder="Наприклад, 12.3" inputmode="numeric">
           </div>
         </div>
-
         <label for="quantity">Кількість (тонни):</label>
         <input type="number" id="quantity" placeholder="Введіть кількість">
-
         <div class="button-container">
           <button id="backBtn2" type="button">Назад</button>
           <button id="nextBtn2" type="button">Далі</button>
@@ -351,7 +399,6 @@
         <h2>Крок 4: Ціна</h2>
         <label for="price">Бажана ціна (не обов’язково):</label>
         <input type="text" id="price" placeholder="Введіть бажану ціну" inputmode="numeric">
-
         <label for="currency">Вибір валюти:</label>
         <select id="currency">
           <option value="">Оберіть валюту</option>
@@ -359,12 +406,10 @@
           <option value="Долар">Долар</option>
           <option value="Євро">Євро</option>
         </select>
-
         <label for="paymentForm">Вибір форми оплати:</label>
         <select id="paymentForm">
           <option value="">Оберіть форму оплати</option>
         </select>
-
         <div class="button-container">
           <button id="backBtn3" type="button">Назад</button>
           <button id="submitBtn" type="button">Підтвердити заявку</button>
@@ -376,7 +421,6 @@
   <!-- Модуль AngularJS -->
   <script>
     angular.module('app', [])
-      // Директива для пошукового списку (не використовується в цьому прикладі, залишена для сумісності)
       .directive('dropdownList', function() {
         return {
           restrict: 'E',
@@ -400,17 +444,14 @@
           link: function(scope, element) {
             scope.listVisible = false;
             scope.searchText = scope.ngModel || '';
-
             scope.toggleList = function() {
               scope.listVisible = true;
             };
-
             scope.selectItem = function(item) {
               scope.ngModel = item;
               scope.searchText = item;
               scope.listVisible = false;
             };
-
             document.addEventListener('click', function(e) {
               if (!element[0].contains(e.target)) {
                 scope.$apply(function() {
@@ -421,7 +462,6 @@
           }
         };
       })
-      // Директива для форматування десяткових полів (1 знак після крапки/коми)
       .directive('formatDecimal', function() {
         return {
           require: 'ngModel',
@@ -449,19 +489,16 @@
                 }
               }
             });
-
             ngModel.$validators.decimal = function(modelValue, viewValue) {
               var value = modelValue || viewValue;
               if (!value) return true;
               value = value.toString().replace(',', '.');
               return decimalRegex.test(value);
             };
-
             ngModel.$parsers.push(function(value) {
               if (!value) return value;
               return value.replace(',', '.');
             });
-
             ngModel.$formatters.push(function(value) {
               if (value === undefined || value === null || value === '') return value;
               value = value.toString().replace(',', '.');
@@ -470,7 +507,6 @@
               }
               return value;
             });
-
             element.on('blur', function() {
               var value = ngModel.$modelValue;
               if (value && value.toString().indexOf('.') === -1) {
@@ -481,27 +517,19 @@
           }
         };
       })
-      // Головний контролер для завантаження даних областей (FCA)
       .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
-        // Тип продажу
         $scope.saleType = "";
-
-        // Дані для FCA
         $scope.selectedRegionFca = "";
         $scope.selectedDistrictFca = "";
         $scope.selectedCityFca = "";
         $scope.districtsFca = [];
         $scope.citiesFca = [];
-
-        // Завантажимо data.json (у ньому зберігаються області/райони/міста)
         $http.get('data.json').then(function(response) {
           $scope.locationsData = response.data;
           $scope.regions = Object.keys($scope.locationsData);
         }, function(error) {
           console.error("Помилка завантаження data.json:", error);
         });
-
-        // Слідкуємо за зміною області (FCA)
         $scope.$watch('selectedRegionFca', function(newVal, oldVal) {
           if (newVal !== oldVal) {
             $scope.selectedDistrictFca = "";
@@ -514,8 +542,6 @@
             $scope.citiesFca = [];
           }
         });
-
-        // Слідкуємо за зміною району (FCA)
         $scope.$watch('selectedDistrictFca', function(newVal, oldVal) {
           if (newVal !== oldVal) {
             $scope.selectedCityFca = "";
@@ -526,13 +552,9 @@
             $scope.citiesFca = [];
           }
         });
-
       }])
-      // Контролер для вибору групи/культури
       .controller('step2Ctrl', ['$scope', function($scope) {
         var prefill = getPrefillData();
-
-        // Приклад списків груп->культур
         const cultureGroups = {
           "Зернова": [
             "Пшениця 2 кл.", "Пшениця 3 кл.", "Пшениця 4 кл.", "Ячмінь", "Кукурудза", "Овес", "Жито", "Кукурудза кремніста",
@@ -556,14 +578,11 @@
             "Льон золотистий", "Льон коричневий", "Просо чорне"
           ]
         };
-
         $scope.groups = Object.keys(cultureGroups).sort();
         $scope.selectedGroup = prefill.group || "";
         $scope.cultures = $scope.selectedGroup ? cultureGroups[$scope.selectedGroup].slice().sort() : [];
         $scope.selectedCulture = prefill.culture || "";
         $scope.extraFields = prefill.extra_fields || {};
-
-        // Слідкуємо за зміною групи
         $scope.$watch('selectedGroup', function(newVal) {
           if(newVal) {
             $scope.cultures = cultureGroups[newVal].slice().sort();
@@ -580,14 +599,12 @@
 
   <!-- Основна логіка переходів між сторінками та відправки даних до Telegram -->
   <script>
-    // Опції форм оплати залежно від валюти
     const paymentForms = {
       "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
       "Долар": ["Валютний контракт", "Готівка"],
       "Євро": ["Валютний контракт"]
     };
 
-    // Зміна списку форм оплати при зміні валюти
     document.getElementById("currency").addEventListener("change", function() {
       const currency = this.value;
       const paymentSelect = document.getElementById("paymentForm");
@@ -602,25 +619,21 @@
       }
     });
 
-    // Тільки цифри для поля ЄДРПОУ (FCA)
     document.getElementById("edrpouFca").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
-    // Тільки цифри для поля ЄДРПОУ (CPT)
     document.getElementById("edrpouCpt").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
-    // Тільки цифри для поля price
     document.getElementById("price").addEventListener("input", function() {
       this.value = this.value.replace(/\D/g, "");
     });
 
-    // Перехід від page0 -> page1_fca/page1_cpt
     document.getElementById("nextBtn0").addEventListener("click", function() {
       var scope = angular.element(document.querySelector('.container')).scope();
       const saleType = scope.saleType;
       if (!saleType) {
-        alert("Спочатку оберіть тип продажу!");
+        showCustomAlert("Спочатку оберіть тип продажу!");
         return;
       }
       document.getElementById("page0").classList.add("hidden");
@@ -632,31 +645,27 @@
       centerContainer();
     });
 
-    // Назад із page1_fca -> page0
     document.getElementById("backBtn1Fca").addEventListener("click", function() {
       document.getElementById("page1_fca").classList.add("hidden");
       document.getElementById("page0").classList.remove("hidden");
       centerContainer();
     });
 
-    // Назад із page1_cpt -> page0
     document.getElementById("backBtn1Cpt").addEventListener("click", function() {
       document.getElementById("page1_cpt").classList.add("hidden");
       document.getElementById("page0").classList.remove("hidden");
       centerContainer();
     });
 
-    // Вперед: page1_fca -> page2
     document.getElementById("nextBtn1Fca").addEventListener("click", function() {
-      // Перевірка EDRPOU
       const edrpouVal = document.getElementById("edrpouFca").value;
       if (edrpouVal && !(edrpouVal.length === 8 || edrpouVal.length === 10)) {
-        alert("Код ЄДРПОУ повинен містити 8 або 10 цифр (або бути пустим).");
+        showCustomAlert("Код ЄДРПОУ повинен містити 8 або 10 цифр (або бути пустим).");
         return;
       }
       var scope = angular.element(document.querySelector('.container')).scope();
       if(!scope.selectedRegionFca || !scope.selectedDistrictFca || !scope.selectedCityFca) {
-        alert("Будь ласка, заповніть усі обов'язкові поля: область, район, місто!");
+        showCustomAlert("Будь ласка, заповніть усі обов'язкові поля: область, район, місто!");
         return;
       }
       document.getElementById("page1_fca").classList.add("hidden");
@@ -664,16 +673,15 @@
       centerContainer();
     });
 
-    // Вперед: page1_cpt -> page2
     document.getElementById("nextBtn1Cpt").addEventListener("click", function() {
       const edrpouVal = document.getElementById("edrpouCpt").value;
       if (edrpouVal && !(edrpouVal.length === 8 || edrpouVal.length === 10)) {
-        alert("Код ЄДРПОУ повинен містити 8 або 10 цифр (або бути пустим).");
+        showCustomAlert("Код ЄДРПОУ повинен містити 8 або 10 цифр (або бути пустим).");
         return;
       }
       const portVal = document.getElementById("portSelectCpt").value;
       if(!portVal) {
-        alert("Будь ласка, оберіть порт!");
+        showCustomAlert("Будь ласка, оберіть порт!");
         return;
       }
       document.getElementById("page1_cpt").classList.add("hidden");
@@ -681,7 +689,6 @@
       centerContainer();
     });
 
-    // Назад: page2 -> (залежно від типу FCA/CPT)
     document.getElementById("backBtn2").addEventListener("click", function() {
       var scope = angular.element(document.querySelector('.container')).scope();
       const saleType = scope.saleType;
@@ -694,24 +701,22 @@
       centerContainer();
     });
 
-    // Далі: page2 -> page3
     document.getElementById("nextBtn2").addEventListener("click", function() {
       var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
       const group    = step2Scope.selectedGroup;
       const culture  = step2Scope.selectedCulture;
       const quantity = document.getElementById("quantity").value.trim();
       if(!group || !culture || !quantity) {
-        alert("Будь ласка, заповніть усі обов'язкові поля (група, культура, кількість)!");
+        showCustomAlert("Будь ласка, заповніть усі обов'язкові поля (група, культура, кількість)!");
         return;
       }
-      // Перевірка дробових полів у extraFields
       var extra = step2Scope.extraFields;
       var regex = /^\d+(?:[.,]\d)?$/;
       for(var key in extra) {
         if(extra[key]) {
           var val = extra[key].toString().replace(',', '.');
           if(!regex.test(val)) {
-            alert("Некоректний формат у полі '" + key + "'. Використовуйте число з одним десятковим знаком, наприклад 12.3");
+            showCustomAlert("Некоректний формат у полі '" + key + "'. Використовуйте число з одним десятковим знаком, наприклад 12.3");
             return;
           }
         }
@@ -721,32 +726,26 @@
       centerContainer();
     });
 
-    // Назад: page3 -> page2
     document.getElementById("backBtn3").addEventListener("click", function() {
       document.getElementById("page3").classList.add("hidden");
       document.getElementById("page2").classList.remove("hidden");
       centerContainer();
     });
 
-    // Надсилання фінальної заявки
     document.getElementById("submitBtn").addEventListener("click", function() {
       const currency = document.getElementById("currency").value;
       const paymentForm = document.getElementById("paymentForm").value;
       if(!currency || !paymentForm) {
-        alert("Будь ласка, оберіть валюту та форму оплати!");
+        showCustomAlert("Будь ласка, оберіть валюту та форму оплати!");
         return;
       }
-
-      // Зчитуємо значення з FCA/CPT
       var scope = angular.element(document.querySelector('.container')).scope();
       const saleType = scope.saleType || "";
-
       let fghName = "";
       let edrpou  = "";
       let region  = "";
       let district= "";
       let city    = "";
-
       if (saleType === "FCA") {
         fghName = document.getElementById("fghNameFca").value.trim();
         edrpou  = document.getElementById("edrpouFca").value.trim();
@@ -760,23 +759,18 @@
         district= "-";
         city    = document.getElementById("portSelectCpt").value;
       }
-
       var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
       const group    = step2Scope.selectedGroup;
       const culture  = step2Scope.selectedCulture;
       const quantity = document.getElementById("quantity").value.trim();
       const extraFields = step2Scope.extraFields;
-
       const price = document.getElementById("price").value.trim();
-
-      // Беремо user_id з Telegram WebApp, або ставимо умовний, якщо в initData його немає
       let userId = Telegram.WebApp.initDataUnsafe.user
         ? Telegram.WebApp.initDataUnsafe.user.id
         : 1124775269;
-
       const payload = {
         user_id: userId,
-        sale_type: saleType,   // Додаємо тип продажу
+        sale_type: saleType,
         fgh_name: fghName,
         edrpou: edrpou,
         region: region,
@@ -790,13 +784,8 @@
         payment_form: paymentForm,
         extra_fields: extraFields
       };
-
       console.log("Готовий payload:", payload);
-
-      // Відправка через Telegram WebApp
       Telegram.WebApp.sendData(JSON.stringify(payload));
-
-      // Приклад відправки на ваш API (URL змініть під себе)
       fetch("https://agro-api-url.onrender.com/api/webapp_data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -810,16 +799,15 @@
             Telegram.WebApp.close();
           }, 1000);
         } else {
-          alert("Сталася помилка при відправленні даних. Спробуйте ще раз.");
+          showCustomAlert("Сталася помилка при відправленні даних. Спробуйте ще раз.");
         }
       })
       .catch(error => {
         console.error("Помилка при відправленні даних:", error);
-        alert("Помилка при відправленні даних. Спробуйте ще раз.");
+        showCustomAlert("Помилка при відправленні даних. Спробуйте ще раз.");
       });
     });
 
-    // Для пристроїв із віртуальною клавіатурою (iOS тощо) – зсув фокуса
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => {
         console.log(
@@ -831,12 +819,10 @@
         );
       });
     }
-
-    // Автоматична ініціалізація Telegram WebApp
+    
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
-
-    // Прокрутка до поля вводу при фокусі
+    
     document.querySelectorAll('input').forEach(function(input) {
       input.addEventListener('focus', function() {
         setTimeout(function() {
