@@ -11,34 +11,39 @@
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
   <style>
-    /* Загальні стилі сторінки */
+    /* Фон сторінки: повертаємо зображення пшениці та затемнення на всю сторінку */
     body, html {
       margin: 0;
       padding: 0;
-      padding-bottom: 300px; 
       min-height: 100vh;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #0d47a1, #1976d2);
+      font-family: 'Roboto Mono', monospace;
+      background: url('https://images.pexels.com/photos/730897/pexels-photo-730897.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940')
+        no-repeat center center fixed;
       background-size: cover;
       color: #fff;
-      text-align: center;
       overflow-x: hidden;
     }
-    /* Анімація появи контенту */
+    /* Затемнення на всю сторінку */
     .overlay {
-      background-color: rgba(0,0,0,0.5);
-      min-height: calc(100vh + 300px);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.6);
       display: flex;
       justify-content: center;
       align-items: center;
       padding: 20px;
       box-sizing: border-box;
       animation: fadeIn 1s ease-in-out;
+      z-index: 1;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.95); }
       to { opacity: 1; transform: scale(1); }
     }
+    /* Контейнер форми */
     .container {
       background: rgba(255,255,255,0.15);
       padding: 30px;
@@ -47,10 +52,24 @@
       max-width: 500px;
       box-sizing: border-box;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-      animation: slideIn 0.8s ease-out;
+      position: relative;
+      z-index: 2;
     }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(30px); }
+    /* Анімації для переходу між кроками */
+    .page {
+      opacity: 1;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-out {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInPage 0.5s forwards;
+    }
+    @keyframes fadeInPage {
       to { opacity: 1; transform: translateY(0); }
     }
     h2 {
@@ -65,12 +84,13 @@
       margin: 12px 0 5px;
       text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     }
+    /* Технологічний стиль полів вводу та селектів */
     input, select, textarea {
       width: 100%; 
       padding: 12px; 
       margin-bottom: 15px; 
       border-radius: 8px; 
-      border: 1px solid rgba(255,255,255,0.3);
+      border: 2px solid rgba(255,255,255,0.3);
       box-sizing: border-box; 
       font-size: 16px;
       transition: all 0.3s ease;
@@ -79,23 +99,25 @@
     }
     input:focus, select:focus, textarea:focus {
       outline: none;
-      border-color: #1976d2;
-      box-shadow: 0 0 8px rgba(25, 118, 210, 0.5);
+      border-color: #00e6e6;
+      box-shadow: 0 0 8px rgba(0,230,230,0.5);
     }
+    /* Технологічний стиль кнопок */
     button { 
-      background: linear-gradient(45deg, #2196f3, #21cbf3); 
-      color: #fff; 
+      background: #111;
+      color: #00e6e6;
       cursor: pointer; 
       transition: transform 0.2s, box-shadow 0.2s;
       padding: 12px;
       border-radius: 8px;
-      border: none;
+      border: 2px solid #00e6e6;
       font-size: 16px;
       margin-bottom: 10px;
+      font-family: 'Roboto Mono', monospace;
     }
     button:hover { 
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 4px 12px rgba(0,230,230,0.5);
     }
     button:active {
       transform: translateY(0);
@@ -110,6 +132,7 @@
     .button-container button {
       width: 48%;
     }
+    /* Стилізація випадаючого списку */
     .dropdown-container {
       position: relative;
       text-align: left;
@@ -142,7 +165,6 @@
     input::placeholder {
       color: rgba(0,0,0,0.5);
     }
-    
     /* Стилі кастомного модального вікна */
     .custom-modal-overlay {
       position: fixed;
@@ -162,13 +184,13 @@
       to { opacity: 1; }
     }
     .custom-modal-container {
-      background-color: #fff;
+      background-color: #111;
       padding: 25px;
       border-radius: 10px;
       max-width: 400px;
       width: 80%;
       text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(0,230,230,0.5);
       animation: scaleIn 0.4s ease-in-out;
     }
     @keyframes scaleIn {
@@ -177,21 +199,23 @@
     }
     .custom-modal-container p {
       margin-bottom: 20px;
-      color: #333;
+      color: #00e6e6;
       font-size: 16px;
     }
     .custom-modal-container button {
       padding: 10px 20px;
-      border: none;
+      border: 2px solid #00e6e6;
       border-radius: 8px;
-      background: linear-gradient(45deg, #2196f3, #21cbf3);
-      color: #fff;
+      background: #111;
+      color: #00e6e6;
       cursor: pointer;
       transition: background 0.3s ease, transform 0.2s;
       font-size: 16px;
+      font-family: 'Roboto Mono', monospace;
     }
     .custom-modal-container button:hover {
-      background: linear-gradient(45deg, #1976d2, #1e88e5);
+      background: #00e6e6;
+      color: #111;
       transform: translateY(-2px);
     }
   </style>
@@ -274,6 +298,26 @@
       document.body.appendChild(overlay);
     }
 
+    // Функція для анімації переходу між сторінками
+    function animateTransition(fromId, toId) {
+      const fromPage = document.getElementById(fromId);
+      const toPage = document.getElementById(toId);
+      // Додаємо клас fade-out до поточної сторінки
+      fromPage.classList.add("fade-out");
+      setTimeout(() => {
+        // Ховаємо попередню сторінку
+        fromPage.classList.add("hidden");
+        fromPage.classList.remove("fade-out");
+        // Показуємо наступну сторінку з анімацією fade-in
+        toPage.classList.remove("hidden");
+        toPage.classList.add("fade-in");
+        setTimeout(() => {
+          toPage.classList.remove("fade-in");
+        }, 500);
+        centerContainer();
+      }, 500);
+    }
+
     // При завантаженні сторінки підставимо prefill (якщо є)
     window.addEventListener("load", function() {
       var prefill = getPrefillData();
@@ -285,7 +329,7 @@
   <div class="overlay">
     <div class="container" ng-controller="mainCtrl">
       <!-- Сторінка 0: Вибір типу продажу -->
-      <div id="page0">
+      <div id="page0" class="page">
         <h2>Крок 1: Тип продажу</h2>
         <label for="saleTypeSelect">Оберіть тип продажу:</label>
         <select id="saleTypeSelect" ng-model="saleType">
@@ -297,7 +341,7 @@
       </div>
 
       <!-- Сторінка 1 (FCA): Введення ФГ, ЄДРПОУ, область/район/місто -->
-      <div id="page1_fca" class="hidden">
+      <div id="page1_fca" class="page hidden">
         <h2>Крок 2 (FCA): Основні дані</h2>
         <label for="fghNameFca">Назва ФГ (не обов’язково):</label>
         <input type="text" id="fghNameFca" placeholder="Введіть назву ФГ">
@@ -325,7 +369,7 @@
       </div>
 
       <!-- Сторінка 1 (CPT): Введення ФГ, ЄДРПОУ, область=Одеса, порт -->
-      <div id="page1_cpt" class="hidden">
+      <div id="page1_cpt" class="page hidden">
         <h2>Крок 2 (CPT): Дані для доставки в порт</h2>
         <label for="fghNameCpt">Назва ФГ (не обов’язково):</label>
         <input type="text" id="fghNameCpt" placeholder="Введіть назву ФГ">
@@ -354,7 +398,7 @@
       </div>
 
       <!-- Сторінка 2: Вибір групи, культури, додаткові параметри, кількість -->
-      <div id="page2" class="hidden" ng-controller="step2Ctrl">
+      <div id="page2" class="page hidden" ng-controller="step2Ctrl">
         <h2>Крок 3: Деталі заявки</h2>
         <label for="groupSelect">Вибір групи:</label>
         <select id="groupSelect" ng-model="selectedGroup">
@@ -450,7 +494,7 @@
       </div>
 
       <!-- Сторінка 3: Ціна, валюта, форма оплати -->
-      <div id="page3" class="hidden">
+      <div id="page3" class="page hidden">
         <h2>Крок 4: Ціна</h2>
         <label for="price">Бажана ціна (не обов’язково):</label>
         <input type="text" id="price" placeholder="Введіть бажану ціну" inputmode="numeric">
@@ -691,25 +735,19 @@
         showCustomAlert("Спочатку оберіть тип продажу!");
         return;
       }
-      document.getElementById("page0").classList.add("hidden");
-      if (saleType === "FCA") {
-        document.getElementById("page1_fca").classList.remove("hidden");
+      if(saleType === "FCA") {
+        animateTransition("page0", "page1_fca");
       } else {
-        document.getElementById("page1_cpt").classList.remove("hidden");
+        animateTransition("page0", "page1_cpt");
       }
-      centerContainer();
     });
 
     document.getElementById("backBtn1Fca").addEventListener("click", function() {
-      document.getElementById("page1_fca").classList.add("hidden");
-      document.getElementById("page0").classList.remove("hidden");
-      centerContainer();
+      animateTransition("page1_fca", "page0");
     });
 
     document.getElementById("backBtn1Cpt").addEventListener("click", function() {
-      document.getElementById("page1_cpt").classList.add("hidden");
-      document.getElementById("page0").classList.remove("hidden");
-      centerContainer();
+      animateTransition("page1_cpt", "page0");
     });
 
     document.getElementById("nextBtn1Fca").addEventListener("click", function() {
@@ -723,9 +761,7 @@
         showCustomAlert("Будь ласка, заповніть усі обов'язкові поля: область, район, місто!");
         return;
       }
-      document.getElementById("page1_fca").classList.add("hidden");
-      document.getElementById("page2").classList.remove("hidden");
-      centerContainer();
+      animateTransition("page1_fca", "page2");
     });
 
     document.getElementById("nextBtn1Cpt").addEventListener("click", function() {
@@ -739,21 +775,17 @@
         showCustomAlert("Будь ласка, оберіть порт!");
         return;
       }
-      document.getElementById("page1_cpt").classList.add("hidden");
-      document.getElementById("page2").classList.remove("hidden");
-      centerContainer();
+      animateTransition("page1_cpt", "page2");
     });
 
     document.getElementById("backBtn2").addEventListener("click", function() {
       var scope = angular.element(document.querySelector('.container')).scope();
       const saleType = scope.saleType;
-      document.getElementById("page2").classList.add("hidden");
-      if (saleType === "FCA") {
-        document.getElementById("page1_fca").classList.remove("hidden");
+      if(saleType === "FCA") {
+        animateTransition("page2", "page1_fca");
       } else {
-        document.getElementById("page1_cpt").classList.remove("hidden");
+        animateTransition("page2", "page1_cpt");
       }
-      centerContainer();
     });
 
     document.getElementById("nextBtn2").addEventListener("click", function() {
@@ -776,15 +808,11 @@
           }
         }
       }
-      document.getElementById("page2").classList.add("hidden");
-      document.getElementById("page3").classList.remove("hidden");
-      centerContainer();
+      animateTransition("page2", "page3");
     });
 
     document.getElementById("backBtn3").addEventListener("click", function() {
-      document.getElementById("page3").classList.add("hidden");
-      document.getElementById("page2").classList.remove("hidden");
-      centerContainer();
+      animateTransition("page3", "page2");
     });
 
     document.getElementById("submitBtn").addEventListener("click", function() {
