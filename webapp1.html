@@ -141,26 +141,29 @@
       background: #fff;
       color: #000;
     }
+    /* Оновлена стилістика випадаючого списку з агротематикою */
     .dropdown-list {
       position: absolute;
       top: 100%;
       left: 0;
       right: 0;
-      background: #fff;
-      color: #000;
+      background: #e8f5e9; /* світло-зелений фон */
+      color: #2e7d32; /* темно-зелений текст */
       max-height: 150px;
       overflow-y: auto;
-      border: 1px solid #ccc;
+      border: 1px solid #a5d6a7;
       z-index: 1000;
       border-radius: 0 0 8px 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      transition: background 0.3s ease;
     }
     .dropdown-list div {
       padding: 10px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s ease;
     }
     .dropdown-list div:hover {
-      background: #f0f0f0;
+      background: #c8e6c9; /* трохи насиченіший зелений при наведенні */
     }
     input::placeholder {
       color: rgba(0,0,0,0.5);
