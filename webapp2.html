@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <!-- Зверніть увагу: залишено maximum-scale=1.0, user-scalable=no -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Редагування заявки</title>
+  <!-- Підключення AngularJS (необхідно для однаковості оформлення, хоча логіка мінімальна) -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      padding-bottom: 300px;
+      min-height: 100vh;
+      font-family: sans-serif;
+      background: url('https://images.pexels.com/photos/730897/pexels-photo-730897.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940')
+        no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      text-align: center;
+    }
+    .overlay {
+      background-color: rgba(0,0,0,0.5);
+      min-height: calc(100vh + 300px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .container {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 500px;
+      box-sizing: border-box;
+    }
+    h2 { margin-bottom: 15px; }
+    label {
+      display: block;
+      text-align: left;
+      font-weight: bold;
+      margin: 10px 0 5px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    button { 
+      background: #007bff; 
+      color: #fff; 
+      cursor: pointer; 
+      transition: background 0.3s ease;
+    }
+    button:hover { background: #0056b3; }
+    /* Стилі для кастомного модального вікна */
+    .custom-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+    }
+    .custom-modal-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      max-width: 400px;
+      width: 80%;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .custom-modal-container p {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .custom-modal-container button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+    .custom-modal-container button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body ng-app="app">
+  <div class="overlay">
+    <div class="container" ng-controller="formCtrl">
+      <h2>Редагування заявки</h2>
+      
+      <label for="quantity">Кількість (тонни):</label>
+      <input type="number" id="quantity" placeholder="Введіть кількість" ng-model="formData.quantity">
+      
+      <label for="price">Бажана ціна (не обов’язково):</label>
+      <input type="text" id="price" placeholder="Введіть бажану ціну" ng-model="formData.price" inputmode="numeric" 
+             ng-change="formData.price = formData.price.replace(/\D/g, '')">
+      
+      <label for="currency">Вибір валюти:</label>
+      <select id="currency" ng-model="formData.currency" ng-change="updatePaymentForms()">
+        <option value="">Оберіть валюту</option>
+        <option value="Грн">Грн</option>
+        <option value="Долар">Долар</option>
+        <option value="Євро">Євро</option>
+      </select>
+      
+      <label for="paymentForm">Вибір форми оплати:</label>
+      <select id="paymentForm" ng-model="formData.paymentForm">
+        <option value="">Оберіть форму оплати</option>
+        <option ng-repeat="option in paymentOptions" value="{{option}}">{{option}}</option>
+      </select>
+      
+      <button id="submitBtn" ng-click="submitForm()">Підтвердити зміни</button>
+    </div>
+  </div>
+
+  <script>
+    angular.module('app', [])
+      .controller('formCtrl', ['$scope', function($scope) {
+        // Початкові дані форми
+        $scope.formData = {
+          quantity: '',
+          price: '',
+          currency: '',
+          paymentForm: ''
+        };
+
+        // Варіанти форм оплати для кожної валюти
+        const paymentForms = {
+          "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
+          "Долар": ["Валютний контракт", "Готівка"],
+          "Євро": ["Валютний контракт"]
+        };
+
+        $scope.paymentOptions = [];
+
+        // Оновлення варіантів форм оплати при зміні валюти
+        $scope.updatePaymentForms = function() {
+          const curr = $scope.formData.currency;
+          $scope.paymentOptions = paymentForms[curr] || [];
+          $scope.formData.paymentForm = "";
+        };
+
+        // Функція для показу кастомного попередження
+        function showCustomAlert(message, callback) {
+          const overlay = document.createElement('div');
+          overlay.className = 'custom-modal-overlay';
+      
+          const modalContainer = document.createElement('div');
+          modalContainer.className = 'custom-modal-container';
+      
+          const messageEl = document.createElement('p');
+          messageEl.textContent = message;
+          modalContainer.appendChild(messageEl);
+      
+          const okButton = document.createElement('button');
+          okButton.textContent = 'OK';
+          okButton.addEventListener('click', function() {
+            document.body.removeChild(overlay);
+            if (callback && typeof callback === 'function') {
+              callback();
+            }
+          });
+          modalContainer.appendChild(okButton);
+      
+          overlay.appendChild(modalContainer);
+          document.body.appendChild(overlay);
+        }
+
+        // Функція відправки даних
+        $scope.submitForm = function() {
+          if (!$scope.formData.quantity || !$scope.formData.currency || !$scope.formData.paymentForm) {
+            showCustomAlert("Будь ласка, заповніть усі обов’язкові поля!");
+            return;
+          }
+          // Формуємо payload (залиште додаткові параметри, якщо потрібно)
+          const payload = {
+            quantity: $scope.formData.quantity,
+            price: $scope.formData.price,
+            currency: $scope.formData.currency,
+            payment_form: $scope.formData.paymentForm
+          };
+          console.log("Готовий payload:", payload);
+          Telegram.WebApp.sendData(JSON.stringify(payload));
+          // Можна додатково відправити дані на сервер, якщо потрібно:
+          /*
+          fetch("https://agro-api-url.onrender.com/api/webapp_data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          })
+          .then(response => response.json())
+          .then(data => {
+            console.log("Відповідь від API:", data);
+            if(data.status === "ok" || data.status === "preview") {
+              setTimeout(() => {
+                Telegram.WebApp.close();
+              }, 1000);
+            } else {
+              showCustomAlert("Сталася помилка при відправленні даних. Спробуйте ще раз.");
+            }
+          })
+          .catch(error => {
+            console.error("Помилка при відправленні даних:", error);
+            showCustomAlert("Помилка при відправленні даних. Спробуйте ще раз.");
+          });
+          */
+        };
+
+        Telegram.WebApp.ready();
+        console.log("WebApp готовий.");
+      }]);
+  </script>
+</body>
+</html>
