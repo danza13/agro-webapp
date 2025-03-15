@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="uk" ng-app="app">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -65,13 +65,17 @@
       top: 0; left: 0;
       width: 100%; height: 100%;
       background-color: rgba(0,0,0,0.5);
-      display: flex; justify-content: center; align-items: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       z-index: 10000;
     }
     .custom-modal-container {
       background-color: #fff;
-      padding: 20px; border-radius: 5px;
-      max-width: 400px; width: 80%;
+      padding: 20px;
+      border-radius: 5px;
+      max-width: 400px;
+      width: 80%;
       text-align: center;
       box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
@@ -80,20 +84,37 @@
       color: #333;
     }
     .custom-modal-container button {
-      padding: 10px 20px; border: none;
-      border-radius: 5px; background-color: #007bff;
-      color: #fff; cursor: pointer;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
     }
     .custom-modal-container button:hover {
       background-color: #0056b3;
     }
   </style>
+  <script>
+    // Функція зчитування даних з URL (параметр ?data=...)
+    function getPrefillData() {
+      const params = new URLSearchParams(window.location.search);
+      const dataParam = params.get('data');
+      if (dataParam) {
+        try {
+          return JSON.parse(decodeURIComponent(dataParam));
+        } catch (e) {
+          console.error('Помилка парсингу даних:', e);
+        }
+      }
+      return {};
+    }
+  </script>
 </head>
-<body ng-app="app">
+<body ng-controller="formCtrl">
   <div class="overlay">
-    <div class="container" ng-controller="formCtrl">
+    <div class="container">
       <h2>Редагування заявки</h2>
-
       <label for="quantity">Кількість (тонни):</label>
       <input type="number" id="quantity" placeholder="Введіть кількість" ng-model="formData.quantity">
       
@@ -148,56 +169,44 @@
           }
         };
 
-        // Інтегроване зчитування параметра ?data=... з URL та встановлення значень у форму
-        function prefillFromUrl() {
-          const params = new URLSearchParams(window.location.search);
-          const dataStr = params.get("data");
-          if (!dataStr) return;  // Якщо даних немає, виходимо
-          try {
-            const parsed = JSON.parse(dataStr);
-            // Кількість
-            if (parsed.quantity) {
-              $scope.formData.quantity = parsed.quantity.toString().replace(/[^\d.]/g, '');
-            }
-            // Ціна
-            if (parsed.price) {
-              $scope.formData.price = parsed.price.toString();
-            }
-            // Валюта: перетворення, якщо дані приходять з інших форматів
-            if (parsed.currency) {
-              const curLower = parsed.currency.toLowerCase();
-              if (curLower.includes("грн") || curLower.includes("uah")) {
-                $scope.formData.currency = "Грн";
-              } else if (curLower.includes("dol") || curLower.includes("usd") || curLower.includes("дол")) {
-                $scope.formData.currency = "Долар";
-              } else if (curLower.includes("євр") || curLower.includes("eur")) {
-                $scope.formData.currency = "Євро";
-              }
-            }
-            // Форма оплати: трансляція значення
-            if (parsed.payment_form) {
-              let pf = parsed.payment_form.toLowerCase();
-              if (pf.includes("з пдв")) {
-                $scope.formData.paymentForm = "Перерахунок з ПДВ";
-              } else if (pf.includes("без пдв")) {
-                $scope.formData.paymentForm = "Перерахунок без ПДВ";
-              } else if (pf.includes("готів")) {
-                $scope.formData.paymentForm = "Готівка";
-              } else if (pf.includes("валют")) {
-                $scope.formData.paymentForm = "Валютний контракт";
-              }
-            }
-            // Після встановлення валюти оновлюємо варіанти форми оплати
-            $scope.updatePaymentForms();
-
-            // Примусово оновлюємо AngularJS через $applyAsync
-            $scope.$applyAsync();
-          } catch(e) {
-            console.error("Помилка парсингу ?data=...", e);
+        // Функція, яка читає дані з URL та записує їх у модель AngularJS
+        $scope.prefillFromUrl = function() {
+          const prefill = getPrefillData();
+          if (prefill.quantity !== undefined) {
+            // Примусово перетворюємо на рядок
+            $scope.formData.quantity = prefill.quantity.toString().replace(/[^\d.]/g, '');
           }
-        }
-        // Викликаємо prefill функцію всередині контролера
-        prefillFromUrl();
+          if (prefill.price) {
+            $scope.formData.price = prefill.price.toString();
+          }
+          if (prefill.currency) {
+            const curLower = prefill.currency.toLowerCase();
+            if (curLower.includes("грн") || curLower.includes("uah")) {
+              $scope.formData.currency = "Грн";
+            } else if (curLower.includes("dol") || curLower.includes("usd") || curLower.includes("дол")) {
+              $scope.formData.currency = "Долар";
+            } else if (curLower.includes("євр") || curLower.includes("eur")) {
+              $scope.formData.currency = "Євро";
+            }
+          }
+          if (prefill.payment_form) {
+            let pf = prefill.payment_form.toLowerCase();
+            if (pf.includes("з пдв")) {
+              $scope.formData.paymentForm = "Перерахунок з ПДВ";
+            } else if (pf.includes("без пдв")) {
+              $scope.formData.paymentForm = "Перерахунок без ПДВ";
+            } else if (pf.includes("готів")) {
+              $scope.formData.paymentForm = "Готівка";
+            } else if (pf.includes("валют")) {
+              $scope.formData.paymentForm = "Валютний контракт";
+            }
+          }
+          $scope.updatePaymentForms();
+        };
+
+        // Викликаємо prefillFromUrl безпосередньо всередині контролера,
+        // щоб AngularJS оновив модель, а не просто DOM.
+        $scope.prefillFromUrl();
 
         // Функція показу кастомного alert
         function showCustomAlert(message, callback) {
