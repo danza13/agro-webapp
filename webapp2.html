@@ -184,7 +184,8 @@
 		$scope.prefillFromUrl = function() {
 		  const prefill = getPrefillData();
 		  if (prefill.quantity !== undefined) {
-			$scope.formData.quantity = prefill.quantity.toString().replace(/[^\d.]/g, '');
+			// Перетворюємо значення в число
+			$scope.formData.quantity = parseFloat(prefill.quantity);
 		  }
 		  if (prefill.price) {
 			$scope.formData.price = prefill.price.toString();
