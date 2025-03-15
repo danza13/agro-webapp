@@ -115,9 +115,10 @@
   <div class="overlay">
     <div class="container">
       <h2>Редагування заявки</h2>
-      <label for="quantity">Кількість (тонни):</label>
-      <!-- Замість input type="number" використовуємо type="text" з inputmode="numeric" -->
-      <input type="text" id="quantity" placeholder="Введіть кількість" ng-model="formData.quantity" inputmode="numeric">
+		<label for="quantity">Кількість (тонни):</label>
+		<input type="text" id="quantity" placeholder="Введіть кількість" 
+			   ng-model="formData.quantity" inputmode="numeric" 
+			   pattern="^\d+$" ng-pattern="/^\d+$/">
       
       <label for="price">Бажана ціна (не обов’язково):</label>
       <input type="text" id="price" placeholder="Введіть бажану ціну" 
@@ -185,7 +186,7 @@
 		$scope.prefillFromUrl = function() {
 		  const prefill = getPrefillData();
 		  if (prefill.quantity !== undefined) {
-			// Перетворюємо значення в число і записуємо як рядок, якщо потрібно
+			// Перетворюємо значення в число
 			$scope.formData.quantity = parseFloat(prefill.quantity);
 		  }
 		  if (prefill.price) {
