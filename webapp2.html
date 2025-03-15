@@ -142,118 +142,122 @@
   </div>
 
   <script>
-    angular.module('app', [])
-      .controller('formCtrl', ['$scope', function($scope) {
-        // Початкові значення форми
-        $scope.formData = {
-          quantity: '',
-          price: '',
-          currency: '',
-          paymentForm: ''
-        };
+	angular.module('app', [])
+	  .controller('formCtrl', ['$scope', '$timeout', function($scope, $timeout) {
+		// Початкові значення форми
+		$scope.formData = {
+		  quantity: '',
+		  price: '',
+		  currency: '',
+		  paymentForm: ''
+		};
 
-        // Набори форм оплати для кожної валюти
-        const paymentForms = {
-          "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
-          "Долар": ["Валютний контракт", "Готівка"],
-          "Євро": ["Валютний контракт"]
-        };
-        $scope.paymentOptions = [];
+		const paymentForms = {
+		  "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
+		  "Долар": ["Валютний контракт", "Готівка"],
+		  "Євро": ["Валютний контракт"]
+		};
+		$scope.paymentOptions = [];
 
-        // Функція для оновлення варіантів форми оплати при зміні валюти
-        $scope.updatePaymentForms = function() {
-          const curr = $scope.formData.currency;
-          $scope.paymentOptions = paymentForms[curr] || [];
-          if (!$scope.paymentOptions.includes($scope.formData.paymentForm)) {
-            $scope.formData.paymentForm = "";
-          }
-        };
+		$scope.updatePaymentForms = function() {
+		  const curr = $scope.formData.currency;
+		  $scope.paymentOptions = paymentForms[curr] || [];
+		  if (!$scope.paymentOptions.includes($scope.formData.paymentForm)) {
+			$scope.formData.paymentForm = "";
+		  }
+		};
 
-        // Функція, яка читає дані з URL та записує їх у модель AngularJS
-        $scope.prefillFromUrl = function() {
-          const prefill = getPrefillData();
-          if (prefill.quantity !== undefined) {
-            // Примусово перетворюємо на рядок
-            $scope.formData.quantity = prefill.quantity.toString().replace(/[^\d.]/g, '');
-          }
-          if (prefill.price) {
-            $scope.formData.price = prefill.price.toString();
-          }
-          if (prefill.currency) {
-            const curLower = prefill.currency.toLowerCase();
-            if (curLower.includes("грн") || curLower.includes("uah")) {
-              $scope.formData.currency = "Грн";
-            } else if (curLower.includes("dol") || curLower.includes("usd") || curLower.includes("дол")) {
-              $scope.formData.currency = "Долар";
-            } else if (curLower.includes("євр") || curLower.includes("eur")) {
-              $scope.formData.currency = "Євро";
-            }
-          }
-          if (prefill.payment_form) {
-            let pf = prefill.payment_form.toLowerCase();
-            if (pf.includes("з пдв")) {
-              $scope.formData.paymentForm = "Перерахунок з ПДВ";
-            } else if (pf.includes("без пдв")) {
-              $scope.formData.paymentForm = "Перерахунок без ПДВ";
-            } else if (pf.includes("готів")) {
-              $scope.formData.paymentForm = "Готівка";
-            } else if (pf.includes("валют")) {
-              $scope.formData.paymentForm = "Валютний контракт";
-            }
-          }
-          $scope.updatePaymentForms();
-        };
+		function getPrefillData() {
+		  const params = new URLSearchParams(window.location.search);
+		  const dataParam = params.get('data');
+		  if (dataParam) {
+			try {
+			  return JSON.parse(decodeURIComponent(dataParam));
+			} catch (e) {
+			  console.error('Помилка парсингу даних:', e);
+			}
+		  }
+		  return {};
+		}
 
-        // Викликаємо prefillFromUrl безпосередньо всередині контролера,
-        // щоб AngularJS оновив модель, а не просто DOM.
-        $scope.prefillFromUrl();
+		// Функція, що записує дані з URL у модель AngularJS
+		$scope.prefillFromUrl = function() {
+		  const prefill = getPrefillData();
+		  if (prefill.quantity !== undefined) {
+			$scope.formData.quantity = prefill.quantity.toString().replace(/[^\d.]/g, '');
+		  }
+		  if (prefill.price) {
+			$scope.formData.price = prefill.price.toString();
+		  }
+		  if (prefill.currency) {
+			const curLower = prefill.currency.toLowerCase();
+			if (curLower.includes("грн") || curLower.includes("uah")) {
+			  $scope.formData.currency = "Грн";
+			} else if (curLower.includes("dol") || curLower.includes("usd") || curLower.includes("дол")) {
+			  $scope.formData.currency = "Долар";
+			} else if (curLower.includes("євр") || curLower.includes("eur")) {
+			  $scope.formData.currency = "Євро";
+			}
+		  }
+		  if (prefill.payment_form) {
+			let pf = prefill.payment_form.toLowerCase();
+			if (pf.includes("з пдв")) {
+			  $scope.formData.paymentForm = "Перерахунок з ПДВ";
+			} else if (pf.includes("без пдв")) {
+			  $scope.formData.paymentForm = "Перерахунок без ПДВ";
+			} else if (pf.includes("готів")) {
+			  $scope.formData.paymentForm = "Готівка";
+			} else if (pf.includes("валют")) {
+			  $scope.formData.paymentForm = "Валютний контракт";
+			}
+		  }
+		  $scope.updatePaymentForms();
+		};
 
-        // Функція показу кастомного alert
-        function showCustomAlert(message, callback) {
-          const overlay = document.createElement('div');
-          overlay.className = 'custom-modal-overlay';
-      
-          const modalContainer = document.createElement('div');
-          modalContainer.className = 'custom-modal-container';
-      
-          const messageEl = document.createElement('p');
-          messageEl.textContent = message;
-          modalContainer.appendChild(messageEl);
-      
-          const okButton = document.createElement('button');
-          okButton.textContent = 'OK';
-          okButton.addEventListener('click', function() {
-            document.body.removeChild(overlay);
-            if (callback && typeof callback === 'function') {
-              callback();
-            }
-          });
-          modalContainer.appendChild(okButton);
-      
-          overlay.appendChild(modalContainer);
-          document.body.appendChild(overlay);
-        }
+		// Викликаємо prefillFromUrl із невеликим відкладенням, щоб AngularJS вже було готове
+		$timeout(function() {
+		  $scope.prefillFromUrl();
+		}, 100);
 
-        // Функція відправки даних у Telegram бота
-        $scope.submitForm = function() {
-          if (!$scope.formData.quantity || !$scope.formData.currency || !$scope.formData.paymentForm) {
-            showCustomAlert("Будь ласка, заповніть усі обов’язкові поля!");
-            return;
-          }
-          const payload = {
-            quantity: $scope.formData.quantity,
-            price: $scope.formData.price,
-            currency: $scope.formData.currency,
-            payment_form: $scope.formData.paymentForm
-          };
-          console.log("Готовий payload:", payload);
-          Telegram.WebApp.sendData(JSON.stringify(payload));
-        };
+		function showCustomAlert(message, callback) {
+		  const overlay = document.createElement('div');
+		  overlay.className = 'custom-modal-overlay';
+		  const modalContainer = document.createElement('div');
+		  modalContainer.className = 'custom-modal-container';
+		  const messageEl = document.createElement('p');
+		  messageEl.textContent = message;
+		  modalContainer.appendChild(messageEl);
+		  const okButton = document.createElement('button');
+		  okButton.textContent = 'OK';
+		  okButton.addEventListener('click', function() {
+			document.body.removeChild(overlay);
+			if (callback && typeof callback === 'function') {
+			  callback();
+			}
+		  });
+		  modalContainer.appendChild(okButton);
+		  overlay.appendChild(modalContainer);
+		  document.body.appendChild(overlay);
+		}
 
-        // Виклик Telegram.WebApp.ready() для повідомлення про готовність WebApp
-        Telegram.WebApp.ready();
-        console.log("WebApp готовий.");
-      }]);
+		$scope.submitForm = function() {
+		  if (!$scope.formData.quantity || !$scope.formData.currency || !$scope.formData.paymentForm) {
+			showCustomAlert("Будь ласка, заповніть усі обов’язкові поля!");
+			return;
+		  }
+		  const payload = {
+			quantity: $scope.formData.quantity,
+			price: $scope.formData.price,
+			currency: $scope.formData.currency,
+			payment_form: $scope.formData.paymentForm
+		  };
+		  console.log("Готовий payload:", payload);
+		  Telegram.WebApp.sendData(JSON.stringify(payload));
+		};
+
+		Telegram.WebApp.ready();
+		console.log("WebApp готовий.");
+	  }]);
   </script>
 </body>
 </html>
