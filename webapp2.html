@@ -151,7 +151,7 @@
 
             // КІЛЬКІСТЬ
             if (parsed.quantity) {
-              $scope.formData.quantity = parsed.quantity.toString();
+              $scope.formData.quantity = parsed.quantity.toString().replace(/[^\d.]/g, '');
             }
             // ЦІНА
             if (parsed.price) {
