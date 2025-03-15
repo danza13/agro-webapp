@@ -189,6 +189,9 @@
             }
             // Після встановлення валюти оновлюємо варіанти форми оплати
             $scope.updatePaymentForms();
+
+            // Примусово оновлюємо AngularJS через $applyAsync
+            $scope.$applyAsync();
           } catch(e) {
             console.error("Помилка парсингу ?data=...", e);
           }
