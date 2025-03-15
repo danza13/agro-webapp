@@ -5,7 +5,7 @@
   <!-- Зверніть увагу: залишено maximum-scale=1.0, user-scalable=no -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Редагування заявки</title>
-  <!-- Підключення AngularJS (необхідно для однаковості оформлення, хоча логіка мінімальна) -->
+  <!-- Підключення AngularJS -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
@@ -55,13 +55,14 @@
       box-sizing: border-box;
       font-size: 16px;
     }
-    button { 
-      background: #007bff; 
-      color: #fff; 
-      cursor: pointer; 
+    button {
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
       transition: background 0.3s ease;
     }
     button:hover { background: #0056b3; }
+
     /* Стилі для кастомного модального вікна */
     .custom-modal-overlay {
       position: fixed;
@@ -110,7 +111,7 @@
       <input type="number" id="quantity" placeholder="Введіть кількість" ng-model="formData.quantity">
       
       <label for="price">Бажана ціна (не обов’язково):</label>
-      <input type="text" id="price" placeholder="Введіть бажану ціну" ng-model="formData.price" inputmode="numeric" 
+      <input type="text" id="price" placeholder="Введіть бажану ціну" ng-model="formData.price" inputmode="numeric"
              ng-change="formData.price = formData.price.replace(/\D/g, '')">
       
       <label for="currency">Вибір валюти:</label>
@@ -148,14 +149,62 @@
           "Долар": ["Валютний контракт", "Готівка"],
           "Євро": ["Валютний контракт"]
         };
-
         $scope.paymentOptions = [];
+
+        // Зчитуємо ?data=... з адресного рядка
+        (function prefillFromUrl() {
+          const params = new URLSearchParams(window.location.search);
+          const dataStr = params.get("data");
+          if (dataStr) {
+            try {
+              const parsed = JSON.parse(dataStr);
+              // Заповнення quantity, price
+              if (parsed.quantity) $scope.formData.quantity = parsed.quantity.toString();
+              if (parsed.price)    $scope.formData.price = parsed.price.toString();
+
+              // Вихідні рядки "currency" можуть бути різними: "uah", "грн", "dollar", "долар", "euro", "євро", ...
+              // Спробуємо привести до "Грн"/"Долар"/"Євро"
+              if (parsed.currency) {
+                const c = parsed.currency.toLowerCase();
+                if (c.includes("грн") || c.includes("uah")) {
+                  $scope.formData.currency = "Грн";
+                } else if (c.includes("дол") || c.includes("dol") || c.includes("usd")) {
+                  $scope.formData.currency = "Долар";
+                } else if (c.includes("євро") || c.includes("eur")) {
+                  $scope.formData.currency = "Євро";
+                }
+              }
+
+              // payment_form можуть бути інші рядки — приводимо регістр/перевіряємо
+              if (parsed.payment_form) {
+                // Наприклад, якщо це "перерахунок з пдв" → "Перерахунок з ПДВ"
+                let pf = parsed.payment_form.toLowerCase();
+                if (pf.includes("з пдв")) {
+                  $scope.formData.paymentForm = "Перерахунок з ПДВ";
+                } else if (pf.includes("без пдв")) {
+                  $scope.formData.paymentForm = "Перерахунок без ПДВ";
+                } else if (pf.includes("готів")) {
+                  $scope.formData.paymentForm = "Готівка";
+                } else if (pf.includes("валют") && $scope.formData.currency === "Долар") {
+                  $scope.formData.paymentForm = "Валютний контракт";
+                } else if (pf.includes("валют") && $scope.formData.currency === "Євро") {
+                  $scope.formData.paymentForm = "Валютний контракт";
+                }
+              }
+            } catch(e) {
+              console.error("Помилка парсингу ?data=", e);
+            }
+          }
+        })();
 
         // Оновлення варіантів форм оплати при зміні валюти
         $scope.updatePaymentForms = function() {
           const curr = $scope.formData.currency;
           $scope.paymentOptions = paymentForms[curr] || [];
-          $scope.formData.paymentForm = "";
+          // Якщо наразі обраний paymentForm не входить у paymentOptions — скидаємо
+          if (!$scope.paymentOptions.includes($scope.formData.paymentForm)) {
+            $scope.formData.paymentForm = "";
+          }
         };
 
         // Функція для показу кастомного попередження
@@ -190,7 +239,7 @@
             showCustomAlert("Будь ласка, заповніть усі обов’язкові поля!");
             return;
           }
-          // Формуємо payload (залиште додаткові параметри, якщо потрібно)
+
           const payload = {
             quantity: $scope.formData.quantity,
             price: $scope.formData.price,
@@ -198,34 +247,18 @@
             payment_form: $scope.formData.paymentForm
           };
           console.log("Готовий payload:", payload);
+
+          // Надсилаємо назад у бот:
           Telegram.WebApp.sendData(JSON.stringify(payload));
-          // Можна додатково відправити дані на сервер, якщо потрібно:
-          /*
-          fetch("https://agro-api-url.onrender.com/api/webapp_data", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          })
-          .then(response => response.json())
-          .then(data => {
-            console.log("Відповідь від API:", data);
-            if(data.status === "ok" || data.status === "preview") {
-              setTimeout(() => {
-                Telegram.WebApp.close();
-              }, 1000);
-            } else {
-              showCustomAlert("Сталася помилка при відправленні даних. Спробуйте ще раз.");
-            }
-          })
-          .catch(error => {
-            console.error("Помилка при відправленні даних:", error);
-            showCustomAlert("Помилка при відправленні даних. Спробуйте ще раз.");
-          });
-          */
         };
 
+        // Викликаємо готовність WebApp
         Telegram.WebApp.ready();
         console.log("WebApp готовий.");
+
+        // Після ініціалізації викликаємо оновлення paymentOptions
+        // (щоб обрати правильну форму оплати, якщо валюта прийшла з ?data=)
+        $scope.updatePaymentForms();
       }]);
   </script>
 </body>
