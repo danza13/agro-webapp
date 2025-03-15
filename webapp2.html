@@ -123,8 +123,7 @@
   <script>
     angular.module('app', [])
       .controller('formCtrl', ['$scope', function($scope) {
-
-        // 1. Початкові значення
+        // Початкові значення форми
         $scope.formData = {
           quantity: '',
           price: '',
@@ -132,7 +131,7 @@
           paymentForm: ''
         };
 
-        // 2. Набори форм оплати
+        // Набори форм оплати для кожної валюти
         const paymentForms = {
           "Грн": ["Перерахунок з ПДВ", "Перерахунок без ПДВ", "Готівка"],
           "Долар": ["Валютний контракт", "Готівка"],
@@ -140,25 +139,31 @@
         };
         $scope.paymentOptions = [];
 
-        // 3. Читаємо ?data=... з URL і підставляємо
-        (function prefillFromUrl() {
+        // Функція для оновлення варіантів форми оплати при зміні валюти
+        $scope.updatePaymentForms = function() {
+          const curr = $scope.formData.currency;
+          $scope.paymentOptions = paymentForms[curr] || [];
+          if (!$scope.paymentOptions.includes($scope.formData.paymentForm)) {
+            $scope.formData.paymentForm = "";
+          }
+        };
+
+        // Інтегроване зчитування параметра ?data=... з URL та встановлення значень у форму
+        function prefillFromUrl() {
           const params = new URLSearchParams(window.location.search);
           const dataStr = params.get("data");
-          if (!dataStr) return;  // немає ?data, виходимо
-
+          if (!dataStr) return;  // Якщо даних немає, виходимо
           try {
             const parsed = JSON.parse(dataStr);
-
-            // КІЛЬКІСТЬ
+            // Кількість
             if (parsed.quantity) {
               $scope.formData.quantity = parsed.quantity.toString().replace(/[^\d.]/g, '');
             }
-            // ЦІНА
+            // Ціна
             if (parsed.price) {
               $scope.formData.price = parsed.price.toString();
             }
-            // ВАЛЮТА (трансляція)
-            // Якщо з бота приходить "dollar"/"uah" тощо, переводимо в "Долар"/"Грн"/"Євро"
+            // Валюта: перетворення, якщо дані приходять з інших форматів
             if (parsed.currency) {
               const curLower = parsed.currency.toLowerCase();
               if (curLower.includes("грн") || curLower.includes("uah")) {
@@ -169,10 +174,9 @@
                 $scope.formData.currency = "Євро";
               }
             }
-            // ФОРМА ОПЛАТИ (трансляція)
+            // Форма оплати: трансляція значення
             if (parsed.payment_form) {
               let pf = parsed.payment_form.toLowerCase();
-              // Перерахунок з ПДВ / без ПДВ
               if (pf.includes("з пдв")) {
                 $scope.formData.paymentForm = "Перерахунок з ПДВ";
               } else if (pf.includes("без пдв")) {
@@ -180,28 +184,19 @@
               } else if (pf.includes("готів")) {
                 $scope.formData.paymentForm = "Готівка";
               } else if (pf.includes("валют")) {
-                // Валютний контракт, але уточніть, для "Долар" чи "Євро"
                 $scope.formData.paymentForm = "Валютний контракт";
               }
             }
+            // Після встановлення валюти оновлюємо варіанти форми оплати
+            $scope.updatePaymentForms();
           } catch(e) {
             console.error("Помилка парсингу ?data=...", e);
           }
-        })();
+        }
+        // Викликаємо prefill функцію всередині контролера
+        prefillFromUrl();
 
-        // 4. Оновлюємо варіанти форм оплати, якщо змінилась валюта
-        $scope.updatePaymentForms = function() {
-          const curr = $scope.formData.currency;
-          $scope.paymentOptions = paymentForms[curr] || [];
-          if (!$scope.paymentOptions.includes($scope.formData.paymentForm)) {
-            $scope.formData.paymentForm = "";
-          }
-        };
-
-        // 5. Запускаємо функцію для оновлення після зчитування
-        $scope.updatePaymentForms();
-
-        // 6. Функція показу кастомного alert
+        // Функція показу кастомного alert
         function showCustomAlert(message, callback) {
           const overlay = document.createElement('div');
           overlay.className = 'custom-modal-overlay';
@@ -227,7 +222,7 @@
           document.body.appendChild(overlay);
         }
 
-        // 7. Відправка даних у бота
+        // Функція відправки даних у Telegram бота
         $scope.submitForm = function() {
           if (!$scope.formData.quantity || !$scope.formData.currency || !$scope.formData.paymentForm) {
             showCustomAlert("Будь ласка, заповніть усі обов’язкові поля!");
@@ -240,12 +235,10 @@
             payment_form: $scope.formData.paymentForm
           };
           console.log("Готовий payload:", payload);
-
-          // Відправляємо назад у бот
           Telegram.WebApp.sendData(JSON.stringify(payload));
         };
 
-        // 8. Telegram.WebApp.ready()
+        // Виклик Telegram.WebApp.ready() для повідомлення про готовність WebApp
         Telegram.WebApp.ready();
         console.log("WebApp готовий.");
       }]);
