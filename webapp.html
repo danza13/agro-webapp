@@ -2,7 +2,8 @@
 <html lang="uk" ng-app="app">
 <head>
   <meta charset="UTF-8">
-  <!-- Зверніть увагу: тут залишається maximum-scale=1.0, user-scalable=no, що може ускладнювати поведінку на iOS -->
+  <!-- Зверніть увагу: тут залишається maximum-scale=1.0, user-scalable=no,
+       що може ускладнювати поведінку на iOS -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Заповнення заявки – кроки</title>
   <!-- Підключення AngularJS -->
@@ -13,10 +14,11 @@
     body, html {
       margin: 0;
       padding: 0;
-      padding-bottom: 300px;
+      padding-bottom: 300px; 
       min-height: 100vh;
       font-family: sans-serif;
-      background: url('https://images.pexels.com/photos/730897/pexels-photo-730897.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940') no-repeat center center fixed;
+      background: url('https://images.pexels.com/photos/730897/pexels-photo-730897.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940')
+        no-repeat center center fixed;
       background-size: cover;
       color: #fff;
       text-align: center;
@@ -46,18 +48,18 @@
       margin: 10px 0 5px;
     }
     input, select, textarea, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 10px;
-      border-radius: 5px;
-      border: none;
-      box-sizing: border-box;
+      width: 100%; 
+      padding: 10px; 
+      margin-bottom: 10px; 
+      border-radius: 5px; 
+      border: none; 
+      box-sizing: border-box; 
       font-size: 16px;
     }
-    button {
-      background: #007bff;
-      color: #fff;
-      cursor: pointer;
+    button { 
+      background: #007bff; 
+      color: #fff; 
+      cursor: pointer; 
       transition: background 0.3s ease;
     }
     button:hover { background: #0056b3; }
@@ -93,8 +95,13 @@
       padding: 8px;
       cursor: pointer;
     }
-    .dropdown-list div:hover { background: #f0f0f0; }
-    input::placeholder { color: rgba(0,0,0,0.5); }
+    .dropdown-list div:hover {
+      background: #f0f0f0;
+    }
+    input::placeholder {
+      color: rgba(0,0,0,0.5);
+    }
+    
     /* Стили для кастомного модального вікна */
     .custom-modal-overlay {
       position: fixed;
@@ -129,8 +136,11 @@
       color: #fff;
       cursor: pointer;
     }
-    .custom-modal-container button:hover { background-color: #0056b3; }
+    .custom-modal-container button:hover {
+      background-color: #0056b3;
+    }
   </style>
+
   <script>
     // Функція для зчитування даних з URL (параметр ?data=...)
     function getPrefillData() {
@@ -173,38 +183,26 @@
           document.getElementById("paymentForm").value = prefill.payment_form;
         }, 100);
       }
-      // Заповнення поля "Тип продажу" та оновлення AngularJS моделі
+      // Заповнення нового поля "Тип продажу"
       if (prefill.sale_type) {
         document.getElementById("saleTypeSelect").value = prefill.sale_type;
-        var saleScope = angular.element(document.getElementById("saleTypeSelect")).scope();
-        saleScope.saleType = prefill.sale_type;
-        saleScope.$apply();
       }
-      // Заповнення географічних даних залежно від типу продажу та оновлення AngularJS моделей
+      // Заповнення географічних даних залежно від типу продажу
       if (prefill.region) {
         var saleType = prefill.sale_type || "";
         if (saleType === "FCA") {
           var regionSelect = document.querySelector("select[ng-model='selectedRegionFca']");
           if (regionSelect) {
             regionSelect.value = prefill.region;
-            var regionScope = angular.element(regionSelect).scope();
-            regionScope.selectedRegionFca = prefill.region;
-            regionScope.$apply();
             regionSelect.dispatchEvent(new Event("change"));
           }
           var districtSelect = document.querySelector("select[ng-model='selectedDistrictFca']");
           if (districtSelect) {
             districtSelect.value = prefill.district || "";
-            var districtScope = angular.element(districtSelect).scope();
-            districtScope.selectedDistrictFca = prefill.district || "";
-            districtScope.$apply();
           }
           var citySelect = document.querySelector("select[ng-model='selectedCityFca']");
           if (citySelect) {
             citySelect.value = prefill.city || "";
-            var cityScope = angular.element(citySelect).scope();
-            cityScope.selectedCityFca = prefill.city || "";
-            cityScope.$apply();
           }
         } else if (saleType === "CPT") {
           // Для CPT область фіксована, порт заповнюється з поля city
@@ -228,11 +226,14 @@
     function showCustomAlert(message, callback) {
       const overlay = document.createElement('div');
       overlay.className = 'custom-modal-overlay';
+  
       const modalContainer = document.createElement('div');
       modalContainer.className = 'custom-modal-container';
+  
       const messageEl = document.createElement('p');
       messageEl.textContent = message;
       modalContainer.appendChild(messageEl);
+  
       const okButton = document.createElement('button');
       okButton.textContent = 'OK';
       okButton.addEventListener('click', function() {
@@ -242,6 +243,7 @@
         }
       });
       modalContainer.appendChild(okButton);
+  
       overlay.appendChild(modalContainer);
       document.body.appendChild(overlay);
     }
@@ -544,42 +546,55 @@
           }
         };
       })
-      .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
-        $scope.saleType = "";
-        $scope.selectedRegionFca = "";
-        $scope.selectedDistrictFca = "";
-        $scope.selectedCityFca = "";
-        $scope.districtsFca = [];
-        $scope.citiesFca = [];
-        $http.get('data.json').then(function(response) {
-          $scope.locationsData = response.data;
-          $scope.regions = Object.keys($scope.locationsData);
-        }, function(error) {
-          console.error("Помилка завантаження data.json:", error);
-        });
-        $scope.$watch('selectedRegionFca', function(newVal, oldVal) {
-          if (newVal !== oldVal) {
-            $scope.selectedDistrictFca = "";
-            $scope.selectedCityFca = "";
-          }
-          if (newVal && $scope.locationsData[newVal]) {
-            $scope.districtsFca = Object.keys($scope.locationsData[newVal]);
-          } else {
-            $scope.districtsFca = [];
-            $scope.citiesFca = [];
-          }
-        });
-        $scope.$watch('selectedDistrictFca', function(newVal, oldVal) {
-          if (newVal !== oldVal) {
-            $scope.selectedCityFca = "";
-          }
-          if (newVal && $scope.selectedRegionFca && $scope.locationsData[$scope.selectedRegionFca][newVal]) {
-            $scope.citiesFca = $scope.locationsData[$scope.selectedRegionFca][newVal];
-          } else {
-            $scope.citiesFca = [];
-          }
-        });
-      }])
+		.controller('mainCtrl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
+		  $scope.saleType = "";
+		  $scope.selectedRegionFca = "";
+		  $scope.selectedDistrictFca = "";
+		  $scope.selectedCityFca = "";
+		  $scope.districtsFca = [];
+		  $scope.citiesFca = [];
+
+		  $http.get('data.json').then(function(response) {
+			$scope.locationsData = response.data;
+			$scope.regions = Object.keys($scope.locationsData);
+			// Якщо глобальні prefill-дані вже збережені (змінна window.prefillData)
+			if (window.prefillData) {
+			  // Використовуємо $timeout, щоб почекати, поки AngularJS завантажить дані
+			  $timeout(function() {
+				$scope.saleType = window.prefillData.sale_type || "";
+				$scope.selectedRegionFca = window.prefillData.region || "";
+				$scope.selectedDistrictFca = window.prefillData.district || "";
+				$scope.selectedCityFca = window.prefillData.city || "";
+			  }, 500);
+			}
+		  }, function(error) {
+			console.error("Помилка завантаження data.json:", error);
+		  });
+
+		  $scope.$watch('selectedRegionFca', function(newVal, oldVal) {
+			if (newVal !== oldVal) {
+			  $scope.selectedDistrictFca = "";
+			  $scope.selectedCityFca = "";
+			}
+			if (newVal && $scope.locationsData[newVal]) {
+			  $scope.districtsFca = Object.keys($scope.locationsData[newVal]);
+			} else {
+			  $scope.districtsFca = [];
+			  $scope.citiesFca = [];
+			}
+		  });
+
+		  $scope.$watch('selectedDistrictFca', function(newVal, oldVal) {
+			if (newVal !== oldVal) {
+			  $scope.selectedCityFca = "";
+			}
+			if (newVal && $scope.selectedRegionFca && $scope.locationsData[$scope.selectedRegionFca][newVal]) {
+			  $scope.citiesFca = $scope.locationsData[$scope.selectedRegionFca][newVal];
+			} else {
+			  $scope.citiesFca = [];
+			}
+		  });
+		}])
       .controller('step2Ctrl', ['$scope', function($scope) {
         var prefill = getPrefillData();
         const cultureGroups = {
@@ -623,6 +638,7 @@
         });
       }]);
   </script>
+
   <!-- Основна логіка переходів між сторінками та відправки даних до Telegram -->
   <script>
     const paymentForms = {
@@ -845,10 +861,10 @@
         );
       });
     }
-
+    
     Telegram.WebApp.ready();
     console.log("WebApp готовий.");
-
+    
     document.querySelectorAll('input').forEach(function(input) {
       input.addEventListener('focus', function() {
         setTimeout(function() {
