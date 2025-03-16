@@ -546,55 +546,42 @@
           }
         };
       })
-		.controller('mainCtrl', ['$scope', '$http', '$timeout', function($scope, $http, $timeout) {
-		  $scope.saleType = "";
-		  $scope.selectedRegionFca = "";
-		  $scope.selectedDistrictFca = "";
-		  $scope.selectedCityFca = "";
-		  $scope.districtsFca = [];
-		  $scope.citiesFca = [];
-
-		  $http.get('data.json').then(function(response) {
-			$scope.locationsData = response.data;
-			$scope.regions = Object.keys($scope.locationsData);
-			// Якщо глобальні prefill-дані вже збережені (змінна window.prefillData)
-			if (window.prefillData) {
-			  // Використовуємо $timeout, щоб почекати, поки AngularJS завантажить дані
-			  $timeout(function() {
-				$scope.saleType = window.prefillData.sale_type || "";
-				$scope.selectedRegionFca = window.prefillData.region || "";
-				$scope.selectedDistrictFca = window.prefillData.district || "";
-				$scope.selectedCityFca = window.prefillData.city || "";
-			  }, 500);
-			}
-		  }, function(error) {
-			console.error("Помилка завантаження data.json:", error);
-		  });
-
-		  $scope.$watch('selectedRegionFca', function(newVal, oldVal) {
-			if (newVal !== oldVal) {
-			  $scope.selectedDistrictFca = "";
-			  $scope.selectedCityFca = "";
-			}
-			if (newVal && $scope.locationsData[newVal]) {
-			  $scope.districtsFca = Object.keys($scope.locationsData[newVal]);
-			} else {
-			  $scope.districtsFca = [];
-			  $scope.citiesFca = [];
-			}
-		  });
-
-		  $scope.$watch('selectedDistrictFca', function(newVal, oldVal) {
-			if (newVal !== oldVal) {
-			  $scope.selectedCityFca = "";
-			}
-			if (newVal && $scope.selectedRegionFca && $scope.locationsData[$scope.selectedRegionFca][newVal]) {
-			  $scope.citiesFca = $scope.locationsData[$scope.selectedRegionFca][newVal];
-			} else {
-			  $scope.citiesFca = [];
-			}
-		  });
-		}])
+      .controller('mainCtrl', ['$scope', '$http', function($scope, $http) {
+        $scope.saleType = "";
+        $scope.selectedRegionFca = "";
+        $scope.selectedDistrictFca = "";
+        $scope.selectedCityFca = "";
+        $scope.districtsFca = [];
+        $scope.citiesFca = [];
+        $http.get('data.json').then(function(response) {
+          $scope.locationsData = response.data;
+          $scope.regions = Object.keys($scope.locationsData);
+        }, function(error) {
+          console.error("Помилка завантаження data.json:", error);
+        });
+        $scope.$watch('selectedRegionFca', function(newVal, oldVal) {
+          if (newVal !== oldVal) {
+            $scope.selectedDistrictFca = "";
+            $scope.selectedCityFca = "";
+          }
+          if (newVal && $scope.locationsData[newVal]) {
+            $scope.districtsFca = Object.keys($scope.locationsData[newVal]);
+          } else {
+            $scope.districtsFca = [];
+            $scope.citiesFca = [];
+          }
+        });
+        $scope.$watch('selectedDistrictFca', function(newVal, oldVal) {
+          if (newVal !== oldVal) {
+            $scope.selectedCityFca = "";
+          }
+          if (newVal && $scope.selectedRegionFca && $scope.locationsData[$scope.selectedRegionFca][newVal]) {
+            $scope.citiesFca = $scope.locationsData[$scope.selectedRegionFca][newVal];
+          } else {
+            $scope.citiesFca = [];
+          }
+        });
+      }])
       .controller('step2Ctrl', ['$scope', function($scope) {
         var prefill = getPrefillData();
         const cultureGroups = {
