@@ -183,6 +183,35 @@
           document.getElementById("paymentForm").value = prefill.payment_form;
         }, 100);
       }
+      // Заповнення нового поля "Тип продажу"
+      if (prefill.sale_type) {
+        document.getElementById("saleTypeSelect").value = prefill.sale_type;
+      }
+      // Заповнення географічних даних залежно від типу продажу
+      if (prefill.region) {
+        var saleType = prefill.sale_type || "";
+        if (saleType === "FCA") {
+          var regionSelect = document.querySelector("select[ng-model='selectedRegionFca']");
+          if (regionSelect) {
+            regionSelect.value = prefill.region;
+            regionSelect.dispatchEvent(new Event("change"));
+          }
+          var districtSelect = document.querySelector("select[ng-model='selectedDistrictFca']");
+          if (districtSelect) {
+            districtSelect.value = prefill.district || "";
+          }
+          var citySelect = document.querySelector("select[ng-model='selectedCityFca']");
+          if (citySelect) {
+            citySelect.value = prefill.city || "";
+          }
+        } else if (saleType === "CPT") {
+          // Для CPT область фіксована, порт заповнюється з поля city
+          var portSelect = document.getElementById("portSelectCpt");
+          if (portSelect) {
+            portSelect.value = prefill.city || "";
+          }
+        }
+      }
     }
 
     // Функція, яка плавно прокручує сторінку до контейнера
