@@ -276,6 +276,8 @@
         <label for="edrpouFca">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
         <input type="text" id="edrpouFca" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$" inputmode="numeric">
         <label>Область:</label>
+		<label for="phoneFca">Номер телефону ФГ (не обов’язково):</label>
+		<input type="text" id="phoneFca" placeholder="+380XXXXXXXXX" pattern="^\+380\d{9}$" inputmode="tel">
         <select ng-model="selectedRegionFca">
           <option value="">Оберіть область</option>
           <option ng-repeat="region in regions" value="{{region}}">{{region}}</option>
@@ -303,7 +305,9 @@
         <input type="text" id="fghNameCpt" placeholder="Введіть назву ФГ">
         <label for="edrpouCpt">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
         <input type="text" id="edrpouCpt" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$" inputmode="numeric">
-        <!-- Для CPT: область фіксована "Одеса", район прочерк, порт = населений пункт -->
+        <label for="phoneCpt">Номер телефону ФГ (не обов’язково):</label>
+		<input type="text" id="phoneCpt" placeholder="+380XXXXXXXXX" pattern="^\+380\d{9}$" inputmode="tel">
+		<!-- Для CPT: область фіксована "Одеса", район прочерк, порт = населений пункт -->
         <label>Область:</label>
         <select id="fixedRegionCpt" disabled>
           <option value="Одеса">Одеса</option>
@@ -758,81 +762,96 @@
       centerContainer();
     });
 
-    document.getElementById("submitBtn").addEventListener("click", function() {
-      const currency = document.getElementById("currency").value;
-      const paymentForm = document.getElementById("paymentForm").value;
-      if(!currency || !paymentForm) {
-        showCustomAlert("Будь ласка, оберіть валюту та форму оплати!");
-        return;
-      }
-      var scope = angular.element(document.querySelector('.container')).scope();
-      const saleType = scope.saleType || "";
-      let fghName = "";
-      let edrpou  = "";
-      let region  = "";
-      let district= "";
-      let city    = "";
-      if (saleType === "FCA") {
-        fghName = document.getElementById("fghNameFca").value.trim();
-        edrpou  = document.getElementById("edrpouFca").value.trim();
-        region  = scope.selectedRegionFca;
-        district= scope.selectedDistrictFca;
-        city    = scope.selectedCityFca;
-      } else {
-        fghName = document.getElementById("fghNameCpt").value.trim();
-        edrpou  = document.getElementById("edrpouCpt").value.trim();
-        region  = "Одеса";
-        district= "-";
-        city    = document.getElementById("portSelectCpt").value;
-      }
-      var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
-      const group    = step2Scope.selectedGroup;
-      const culture  = step2Scope.selectedCulture;
-      const quantity = document.getElementById("quantity").value.trim();
-      const extraFields = step2Scope.extraFields;
-      const price = document.getElementById("price").value.trim();
-      let userId = Telegram.WebApp.initDataUnsafe.user
-        ? Telegram.WebApp.initDataUnsafe.user.id
-        : 1124775269;
-      const payload = {
-        user_id: userId,
-        sale_type: saleType,
-        fgh_name: fghName,
-        edrpou: edrpou,
-        region: region,
-        district: district,
-        city: city,
-        group: group,
-        culture: culture,
-        quantity: quantity,
-        price: price,
-        currency: currency,
-        payment_form: paymentForm,
-        extra_fields: extraFields
-      };
-      console.log("Готовий payload:", payload);
-      Telegram.WebApp.sendData(JSON.stringify(payload));
-      fetch("https://agro-api-url.onrender.com/api/webapp_data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log("Відповідь від API:", data);
-        if(data.status === "ok" || data.status === "preview") {
-          setTimeout(() => {
-            Telegram.WebApp.close();
-          }, 1000);
-        } else {
-          showCustomAlert("Сталася помилка при відправленні даних. Спробуйте ще раз.");
-        }
-      })
-      .catch(error => {
-        console.error("Помилка при відправленні даних:", error);
-        showCustomAlert("Помилка при відправленні даних. Спробуйте ще раз.");
-      });
-    });
+	document.getElementById("submitBtn").addEventListener("click", function() {
+	  const currency = document.getElementById("currency").value;
+	  const paymentForm = document.getElementById("paymentForm").value;
+	  if(!currency || !paymentForm) {
+		showCustomAlert("Будь ласка, оберіть валюту та форму оплати!");
+		return;
+	  }
+	  var scope = angular.element(document.querySelector('.container')).scope();
+	  const saleType = scope.saleType || "";
+	  let fghName = "";
+	  let edrpou  = "";
+	  let region  = "";
+	  let district= "";
+	  let city    = "";
+	  let phone = "";
+	  if (saleType === "FCA") {
+		fghName = document.getElementById("fghNameFca").value.trim();
+		edrpou  = document.getElementById("edrpouFca").value.trim();
+		region  = scope.selectedRegionFca;
+		district= scope.selectedDistrictFca;
+		city    = scope.selectedCityFca;
+		phone = document.getElementById("phoneFca").value.trim();
+	  } else {
+		fghName = document.getElementById("fghNameCpt").value.trim();
+		edrpou  = document.getElementById("edrpouCpt").value.trim();
+		region  = "Одеса";
+		district= "-";
+		city    = document.getElementById("portSelectCpt").value;
+		phone = document.getElementById("phoneCpt").value.trim();
+	  }
+	  if (phone && phone !== "+380") {
+		const phoneRegex = /^\+380\d{9}$/;
+		if (!phoneRegex.test(phone)) {
+		  showCustomAlert("Невірний формат номеру телефону. Повинен бути у форматі +380XXXXXXXXX");
+		  return;
+		}
+	  } else {
+		// Якщо нічого введено або лише +380 – не включаємо поле
+		phone = "";
+	  } // <--- Додана закриваюча дужка
+
+	  var step2Scope = angular.element(document.querySelector('[ng-controller="step2Ctrl"]')).scope();
+	  const group    = step2Scope.selectedGroup;
+	  const culture  = step2Scope.selectedCulture;
+	  const quantity = document.getElementById("quantity").value.trim();
+	  const extraFields = step2Scope.extraFields;
+	  const price = document.getElementById("price").value.trim();
+	  let userId = Telegram.WebApp.initDataUnsafe.user
+		? Telegram.WebApp.initDataUnsafe.user.id
+		: 1124775269;
+	  const payload = {
+		user_id: userId,
+		sale_type: saleType,
+		fgh_name: fghName,
+		edrpou: edrpou,
+		region: region,
+		district: district,
+		city: city,
+		group: group,
+		culture: culture,
+		quantity: quantity,
+		price: price,
+		currency: currency,
+		payment_form: paymentForm,
+		extra_fields: extraFields,
+		phone: phone
+	  };
+	  console.log("Готовий payload:", payload);
+	  Telegram.WebApp.sendData(JSON.stringify(payload));
+	  fetch("https://agro-api-url.onrender.com/api/webapp_data", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(payload)
+	  })
+	  .then(response => response.json())
+	  .then(data => {
+		console.log("Відповідь від API:", data);
+		if(data.status === "ok" || data.status === "preview") {
+		  setTimeout(() => {
+			Telegram.WebApp.close();
+		  }, 1000);
+		} else {
+		  showCustomAlert("Сталася помилка при відправленні даних. Спробуйте ще раз.");
+		}
+	  })
+	  .catch(error => {
+		console.error("Помилка при відправленні даних:", error);
+		showCustomAlert("Помилка при відправленні даних. Спробуйте ще раз.");
+	  });
+	});
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => {
