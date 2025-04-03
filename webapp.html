@@ -275,10 +275,10 @@
         <input type="text" id="fghNameFca" placeholder="Введіть назву ФГ">
         <label for="edrpouFca">Код ЄДРПОУ (8 або 10 цифр, не обов’язково):</label>
         <input type="text" id="edrpouFca" placeholder="Введіть код ЄДРПОУ" pattern="^(\d{8}|\d{10})?$" inputmode="numeric">
-        <label>Область:</label>
 		<label for="phoneFca">Номер телефону ФГ (не обов’язково):</label>
 		<input type="text" id="phoneFca" placeholder="+380XXXXXXXXX" pattern="^\+380\d{9}$" inputmode="tel">
-        <select ng-model="selectedRegionFca">
+		<label>Область:</label>
+		<select ng-model="selectedRegionFca">
           <option value="">Оберіть область</option>
           <option ng-repeat="region in regions" value="{{region}}">{{region}}</option>
         </select>
